@@ -13,7 +13,7 @@ class LogisticRegression:
     """
 
 
-    def __init__(self, dataset = None, attributes = None, labels = None, test_size = None, penalty='l2', dual=False, \
+    def __init__(self, attributes=None, labels=None, test_size=0.25, penalty='l2', dual=False, \
                     tol=0.0001, C=1.0, fit_intercept=True, intercept_scaling=1, class_weight=None, random_state=None, \
                         solver='lbfgs', max_iter=100, multi_class='auto', verbose=0, warm_start=False, n_jobs=None, l1_ratio=None):
         
@@ -23,9 +23,8 @@ class LogisticRegression:
 
         The following parameters are needed to create a logistic regression model:
 
-            - dataset: a populated pandas DataFrame object
-            - attributes: a list of the column headers for the desired independent variables
-            - labels: a list of the column headers for the desired dependent variables
+            - attributes: a numpy array of the desired independent variables
+            - labels: a numpy array of the desired dependent variables
             - test_size: the proportion of the dataset to be used for testing the model (defaults to 0.25);
             the proportion of the dataset to be used for training will be the complement of test_size
             - fit_intercept: specifies if a constant (a.k.a. bias or intercept) should be added to the decision function. (defaults to True)
@@ -54,9 +53,6 @@ class LogisticRegression:
             - roc_auc: the area under the receiver operating characteristic curve from the prediction scores
         """
 
-
-
-        self.dataset = dataset
         self.attributes = attributes
         self.labels = labels
 
@@ -92,21 +88,12 @@ class LogisticRegression:
 
     # Accessor methods
 
-    def get_dataset(self):
-        """
-        Accessor method for dataset.
-
-        If a LogisticRegression object is constructed without specifying dataset, dataset will be None.
-        logistic_regression() cannot be called until dataset is a populated pandas DataFrame; call set_dataset(new_dataset)
-        """
-        return self.dataset
-
     def get_attributes(self):
         """
         Accessor method for attributes.
 
         If a LogisticRegression object is constructed without specifying attributes, attributes will be None.
-        logistic_regression() cannot be called until attributes is a list of your attributes' names; call
+        logistic_regression() cannot be called until attributes is a populated numpy array; call
         set_attributes(new_attributes) to fix this.
         """
         return self.attributes
@@ -116,7 +103,7 @@ class LogisticRegression:
         Accessor method for labels.
 
         If a LogisticRegression object is constructed without specifying labels, labels will be None.
-        logistic_regression() cannot be called until labels is a list of your labels' names; call set_labels(new_labels)
+        logistic_regression() cannot be called until labels is a populated numpy array; call set_labels(new_labels)
         to fix this.
         """
         return self.labels
@@ -163,20 +150,11 @@ class LogisticRegression:
         """
         return self.roc_auc
 
-
-    def set_dataset(self, new_dataset = None):
-        """
-        Modifier method for dataset.
-
-        Input should be a populated DataFrame object.
-        """
-        self.dataset = new_dataset
-
     def set_attributes(self, new_attributes = None):
         """
         Modifier method for attributes.
 
-        Input should be a list of strings, where each string is the name of an independent variable.
+        Input should be a populated numpy array of the desired independent variables.
         """
         self.attributes = new_attributes
 
@@ -184,7 +162,7 @@ class LogisticRegression:
         """
         Modifier method for labels.
 
-        Input should be a list of strings, where each string is the name of a dependent variable.
+        Input should be a populated numpy array of the desired dependent variables.
         """
         self.labels = new_labels
 
@@ -211,14 +189,9 @@ class LogisticRegression:
                     random_state=self.random_state, solver=self.solver, max_iter=self.max_iter, multi_class=self.multi_class, \
                         verbose=self.verbose, warm_start=self.warm_start, n_jobs=self.n_jobs, l1_ratio=self.l1_ratio)
 
-            # Extract attributes and labels from dataset
-            dataset_X = self.dataset[self.attributes]
-            dataset_y = self.dataset[self.labels]
-
-
             # Split into training and testing set
             dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = \
-                train_test_split(dataset_X,dataset_y,test_size=self.test_size)
+                train_test_split(self.attributes,self.labels,test_size=self.test_size)
 
             # Train the model and get resultant coefficients
             regression.fit(dataset_X_train, np.ravel(dataset_y_train))
@@ -243,41 +216,30 @@ class LogisticRegression:
 
     def _check_inputs(self):
         """
-        Verifies if dataset, attributes, and labels are ready for use in logistic regression model.
+        Verifies if the instance data is ready for use in logistic regression model.
         """
-
-        # Check if dataset exists
-        if self.dataset is None:
-            print("dataset is missing; call set_dataset(new_dataset) to fix this!")
-            return False
 
         # Check if attributes exists
         if not self.attributes:
             print("attributes is missing; call set_attributes(new_attributes) to fix this! new_attributes should be a",
-            "list of the names of your attributes.")
+            "populated numpy array of your independent variables.")
             return False
 
         # Check if labels exists
         if not self.labels:
-            print("labels is missing; call set_labels(new_labels) to fix this! new_labels should be a list of the names",
-            "of your labels.")
+            print("labels is missing; call set_labels(new_labels) to fix this! new_labels should be a populated numpy",
+            "array of your dependent variables.")
             return False
 
-        if not self.test_size:
-            print("test_size is missing; call set_test_size(new_test_size) to fix this! ")
+        # Check if attributes and labels have same number of rows (samples)
+        if self.attributes.shape[0] != self.labels.shape[0]:
+            print("attributes and labels don't have the same number of rows. Make sure the number of samples in each",
+                  "dataset matches!")
             return False
 
-        # Check if attributes consists of valid column headers This is done by checking if attributes is a subset of
-        # dataset's column headers
-        if not all(att in self.dataset.columns.values for att in self.attributes):
-            print("attributes contains one or more attribute that isn't in dataset; call set_attributes(new_attributes)",
-            "to fix this, where new_attributes only contains valid independent variables.")
-            return False
-
-        # Check if labels consists of valid column headers
-        if not all(label in self.dataset.columns.values for label in self.labels):
-            print("labels contains one or more label that isn't in dataset; call set_labels(new_label) to fix this,",
-            "where new_labels contains only valid dependent variables.")
+        # Check if test_size is a float or None
+        if self.test_size is not None and not isinstance(self.test_size, (int, float)):
+            print("test_size must be None or a number; call set_test_size(new_test_size) to fix this!")
             return False
 
         return True
