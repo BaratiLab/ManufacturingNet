@@ -220,13 +220,13 @@ class LogisticRegression:
         """
 
         # Check if attributes exists
-        if self.attributes is None:
+        if self.attributes is None or type(self.attributes) is not np.ndarray:
             print("attributes is missing; call set_attributes(new_attributes) to fix this! new_attributes should be a",
             "populated numpy array of your independent variables.")
             return False
 
         # Check if labels exists
-        if self.labels is None:
+        if self.labels is None or type(self.labels) is not np.ndarray:
             print("labels is missing; call set_labels(new_labels) to fix this! new_labels should be a populated numpy",
             "array of your dependent variables.")
             return False
