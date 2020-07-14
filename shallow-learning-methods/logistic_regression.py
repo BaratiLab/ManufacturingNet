@@ -1,5 +1,5 @@
 from sklearn import linear_model
-from sklearn.metrics import accuracy_score, roc_auc_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.model_selection import train_test_split
 import numpy as np
 
@@ -82,12 +82,9 @@ class LogisticRegression:
         self.n_iter_ = None
 
         self.accuracy = None
-        self.roc_auc = None
-        self.precision_scores = []
         self.precision = None
-        self.recall_scores = []
         self.recall = None
-
+        self.roc_auc = None
 
     # Accessor methods
 
@@ -111,12 +108,11 @@ class LogisticRegression:
         """
         return self.labels
 
-    
     def get_classes(self):
         """
         Accessor method for classes.
 
-        Will return None if linear_regression() hasn't been called, yet.
+        Will return None if logistic_regression() hasn't been called, yet.
         """
         return self.classes
 
@@ -125,7 +121,7 @@ class LogisticRegression:
         """
         Accessor method for coefficients.
 
-        Will return None if linear_regression() hasn't been called, yet.
+        Will return None if logistic_regression() hasn't been called, yet.
         """
         return self.coef_
 
@@ -133,7 +129,7 @@ class LogisticRegression:
         """
         Accessor method for number of iterations for all classes.
 
-        Will return None if linear_regression() hasn't been called, yet.
+        Will return None if logistic_regression() hasn't been called, yet.
         """
         return self.n_iter_
 
@@ -141,7 +137,7 @@ class LogisticRegression:
         """
         Accessor method for accuracy.
 
-        Will return None if linear_regression() hasn't been called, yet.
+        Will return None if logistic_regression() hasn't been called, yet.
         """
         return self.accuracy
 
@@ -149,27 +145,11 @@ class LogisticRegression:
         """
         Accessor method for roc-auc score.
 
-        Will return None if linear_regression() hasn't been called, yet.
+        Will return None if logistic_regression() hasn't been called, yet.
         """
         return self.roc_auc
 
-    def get_precision(self, label):
-        """
-        Accessor method for precision.
-
-        Will return None if linear_regression() hasn't been called, yet.
-        """
-        self.precision = self.precision_scores.get(label)
-        return self.precision
-    
-    def get_recall(self, label):
-        """
-        Accessor method for precision.
-
-        Will return None if linear_regression() hasn't been called, yet.
-        """
-        self.recall = self.recall_scores.get(label)
-        return self.recall
+    # Modifier methods
 
     def set_attributes(self, new_attributes = None):
         """
@@ -189,9 +169,9 @@ class LogisticRegression:
 
     def set_test_size(self, new_test_size = None):
         """
-        Modifier method for train_test_split.
+        Modifier method for test_size.
 
-        Input should be a list of strings, where each string is the name of a dependent variable.
+        Input should be a number or None.
         """
         self.test_size  = new_test_size
 
@@ -214,8 +194,15 @@ class LogisticRegression:
             dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = \
                 train_test_split(self.attributes,self.labels,test_size=self.test_size)
 
-            # Train the model and get resultant coefficients
-            regression.fit(dataset_X_train, np.ravel(dataset_y_train))
+            # Train the model and get resultant coefficients; handle exception if arguments are incorrect
+            try:
+                regression.fit(dataset_X_train, np.ravel(dataset_y_train))
+            except Exception as e:
+                print("An exception occurred while training the logistic regression model. Check your inputs and try again.")
+                print("Here is the exception message:")
+                print(e)
+                self.regression = None
+                return
 
             # Get resultant coefficients and intercept of regression line
             self.classes_ = regression.classes_
@@ -232,11 +219,6 @@ class LogisticRegression:
             self.accuracy = accuracy_score(y_prediction, dataset_y_test)
             self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
 
-            self.precision_scores = { each : precision_score(dataset_y_test, y_prediction, pos_label=each) \
-                                                                    for each in self.classes_}
-            self.recall_scores = { each : recall_score(dataset_y_test, y_prediction, pos_label=each) \
-                                                                    for each in self.classes_}
-
 
     # Helper method for checking inputs
 
@@ -246,13 +228,13 @@ class LogisticRegression:
         """
 
         # Check if attributes exists
-        if self.attributes is None or type(self.attributes) is not np.ndarray:
+        if self.attributes is None:
             print("attributes is missing; call set_attributes(new_attributes) to fix this! new_attributes should be a",
             "populated numpy array of your independent variables.")
             return False
 
         # Check if labels exists
-        if self.labels is None or type(self.labels) is not np.ndarray:
+        if self.labels is None:
             print("labels is missing; call set_labels(new_labels) to fix this! new_labels should be a populated numpy",
             "array of your dependent variables.")
             return False
