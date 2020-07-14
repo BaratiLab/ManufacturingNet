@@ -1,8 +1,9 @@
 from contextlib import redirect_stderr, redirect_stdout
 import io
-from linear_regression import LinearRegression
-from random_forest import RandomForest
-from svm import SVM
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVR, NuSVR, LinearSVR
 import time
 
 class AllRegressionModels:
@@ -28,9 +29,11 @@ class AllRegressionModels:
 
         The following instance data is found after running all_regression_models() successfully:
 
-            – linear_regression: a reference to the LinearRegression object
-            – random_forest: a reference to the RandomForest object
-            – SVM: a reference to the SVM object
+            – linear_regression: a reference to the LinearRegression model
+            – random_forest: a reference to the RandomForest model
+            – SVR: a reference to the SVR model
+            – nu_SVR: a reference to the NuSVR model
+            – linear_SVR: a reference to the LinearSVR model
         
         After running all_regression_models(), the coefficient of determination and execution time for each model that
         ran successfully will be displayed in tabular form. Any models that failed to run will be listed.
@@ -40,9 +43,11 @@ class AllRegressionModels:
         self.test_size = test_size
         self.verbose = verbose
 
-        self.linear_regression = None
-        self.random_forest = None
-        self.SVM = None
+        self.linear_regression = LinearRegression()
+        self.random_forest = RandomForestRegressor(verbose=self.verbose)
+        self.SVR = SVR(verbose=self.verbose)
+        self.nu_SVR = NuSVR(verbose=self.verbose)
+        self.linear_SVR = LinearSVR(verbose=self.verbose)
 
         self._regression_models = {"Model": ["R2 Score", "Time"]}
         self._failures = []
@@ -91,7 +96,7 @@ class AllRegressionModels:
 
         All models within the list will be None if all_regression_models() hasn't been called, yet.
         """
-        return [self.linear_regression, self.random_forest, self.SVM]
+        return [self.linear_regression, self.random_forest, self.SVR, self.nu_SVR, self.linear_SVR]
 
     def get_linear_regression(self):
         """
@@ -109,13 +114,29 @@ class AllRegressionModels:
         """
         return self.random_forest
 
-    def get_SVM(self):
+    def get_SVR(self):
         """
-        Accessor method for SVM.
+        Accessor method for SVR.
 
         Will return None if all_regression_models() hasn't been called, yet.
         """
-        return self.SVM
+        return self.SVR
+
+    def get_nu_SVR(self):
+        """
+        Accessor method for nu_SVR.
+
+        Will return None if all_regression_models() hasn't been called, yet.
+        """
+        return self.nu_SVR
+
+    def get_linear_SVR(self):
+        """
+        Accessor method for linear_SVR.
+
+        Will return None if all_regression_models() hasn't been called, yet.
+        """
+        return self.linear_SVR
 
     # Modifier methods
 
@@ -187,59 +208,53 @@ class AllRegressionModels:
         _all_regression_models_runner() may only be called by all_regression_models().
         """
 
-        # Instantiate all models
-        self.linear_regression = LinearRegression(self.attributes, self.labels, self.test_size)
-        self.random_forest = RandomForest(self.attributes, self.labels, self.test_size)
-        self.SVM = SVM(self.attributes, self.labels, self.test_size)
+        # Split dataset
+        dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test =\
+            train_test_split(self.attributes, self.labels, test_size=self.test_size)
 
         # Run and time all models; identify each as success or failure
-        start_time = time.time()
-        self.linear_regression.linear_regression()
-        end_time = time.time()
-
-        if not self.linear_regression.get_regression():
-            self._failures.append("LinearRegression")
-        else:
+        try:
+            start_time = time.time()
+            self.linear_regression.fit(dataset_X_train, dataset_y_train)
+            end_time = time.time()
             self._regression_models["LinearRegression"] =\
-                [self.linear_regression.get_r2_score(), end_time - start_time]
+                [self.linear_regression.score(dataset_X_test, dataset_y_test), end_time - start_time]
+        except:
+            self._failures.append("LinearRegression")
 
-        start_time = time.time()
-        self.random_forest.random_forest_regressor(verbose=self.verbose)
-        end_time = time.time()
-
-        if not self.random_forest.get_regressor_RF():
-            self._failures.append("RandomForest")
-        else:
+        try:
+            start_time = time.time()
+            self.random_forest.fit(dataset_X_train, dataset_y_train)
+            end_time = time.time()
             self._regression_models["RandomForest"] =\
-                [self.random_forest.get_regressor_r2_score(), end_time - start_time]
-        
-        start_time = time.time()
-        self.SVM.SVR(verbose=self.verbose)
-        end_time = time.time()
+                [self.random_forest.score(dataset_X_test, dataset_y_test), end_time - start_time]
+        except:
+            self._failures.append("RandomForest")
 
-        if not self.SVM.get_regression_SVR():
+        try:        
+            start_time = time.time()
+            self.SVR.fit(dataset_X_train, dataset_y_train)
+            end_time = time.time()
+            self._regression_models["SVR"] = [self.SVR.score(dataset_X_test, dataset_y_test), end_time - start_time]
+        except:
             self._failures.append("SVR")
-        else:
-            self._regression_models["SVR"] = [self.SVM.get_r2_score_SVR(), end_time - start_time]
         
-        start_time = time.time()
-        self.SVM.nu_SVR(verbose=self.verbose)
-        end_time = time.time()
-
-        if not self.SVM.get_regression_nu_SVR():
+        try:
+            start_time = time.time()
+            self.nu_SVR.fit(dataset_X_train, dataset_y_train)
+            end_time = time.time()
+            self._regression_models["NuSVR"] = [self.nu_SVR.score(dataset_X_test, dataset_y_test), end_time - start_time]
+        except:
             self._failures.append("NuSVR")
-        else:
-            self._regression_models["NuSVR"] = [self.SVM.get_r2_score_nu_SVR(), end_time - start_time]
 
-        start_time = time.time()
-        self.SVM.linear_SVR(verbose=self.verbose)
-        end_time = time.time()
-
-        if not self.SVM.get_regression_linear_SVR():
+        try:
+            start_time = time.time()
+            self.linear_SVR.fit(dataset_X_train, dataset_y_train)
+            end_time = time.time()
+            self._regression_models["LinearSVR"] = [self.linear_SVR.score(dataset_X_test, dataset_y_test), end_time - start_time]
+        except:
             self._failures.append("LinearSVR")
-        else:
-            self._regression_models["LinearSVR"] = [self.SVM.get_r2_score_linear_SVR(), end_time - start_time]
-    
+        
     def _print_results(self):
         """
         Helper method that prints results of _all_regression_models_runner() in tabular form.
