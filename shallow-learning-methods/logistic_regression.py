@@ -1,5 +1,5 @@
 from sklearn import linear_model
-from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.metrics import accuracy_score, roc_auc_score, precision_score, recall_score
 from sklearn.model_selection import train_test_split
 import numpy as np
 
@@ -82,9 +82,12 @@ class LogisticRegression:
         self.n_iter_ = None
 
         self.accuracy = None
-        self.precision = None
-        self.recall = None
         self.roc_auc = None
+        self.precision_scores = []
+        self.precision = None
+        self.recall_scores = []
+        self.recall = None
+
 
     # Accessor methods
 
@@ -150,6 +153,24 @@ class LogisticRegression:
         """
         return self.roc_auc
 
+    def get_precision(self, label):
+        """
+        Accessor method for precision.
+
+        Will return None if linear_regression() hasn't been called, yet.
+        """
+        self.precision = self.precision_scores.get(label)
+        return self.precision
+    
+    def get_recall(self, label):
+        """
+        Accessor method for precision.
+
+        Will return None if linear_regression() hasn't been called, yet.
+        """
+        self.recall = self.recall_scores.get(label)
+        return self.recall
+
     def set_attributes(self, new_attributes = None):
         """
         Modifier method for attributes.
@@ -210,6 +231,11 @@ class LogisticRegression:
             #Metrics
             self.accuracy = accuracy_score(y_prediction, dataset_y_test)
             self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
+
+            self.precision_scores = { each : precision_score(dataset_y_test, y_prediction, pos_label=each) \
+                                                                    for each in self.classes_}
+            self.recall_scores = { each : recall_score(dataset_y_test, y_prediction, pos_label=each) \
+                                                                    for each in self.classes_}
 
 
     # Helper method for checking inputs
