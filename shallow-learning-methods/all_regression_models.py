@@ -69,6 +69,14 @@ class AllRegressionModels:
         """
         return self.labels
 
+    def get_test_size(self):
+        """
+        Accessor method for test_size.
+
+        Should return a number or None.
+        """
+        return self.test_size
+
     def get_verbose(self):
         """
         Accessor method for verbose.
@@ -126,6 +134,14 @@ class AllRegressionModels:
         Input should be a numpy array of dependent variables. Defaults to None.
         """
         self.labels = new_labels
+
+    def set_test_size(self, new_test_size=0.25):
+        """
+        Modifier method for test_size.
+
+        Input should be a number or None. Defaults to 0.25.
+        """
+        self.test_size = new_test_size
 
     def set_verbose(self, new_verbose=False):
         """
