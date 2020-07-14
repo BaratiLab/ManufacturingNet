@@ -1,6 +1,6 @@
 from math import sqrt
 import matplotlib.pyplot as plt
-from sklearn import linear_model
+from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.model_selection import train_test_split
 
@@ -227,14 +227,14 @@ class LinearRegression:
 
     def linear_regression(self, graph_results=False):
         """
-        Performs linear regression on dataset using scikit-learn's linear_model and updates coefficients, intercept,
+        Performs linear regression on dataset using scikit-learn's LinearRegression and updates coefficients, intercept,
         mean_squared_error, r2_score, and r_score instance data.
 
         To graph results, pass in graph_results=True. Note: graphing is only supported for univariate regression.
         """
         if self._check_inputs():
             # Instantiate LinearRegression() object
-            self.regression = linear_model.LinearRegression(fit_intercept=self.fit_intercept, normalize=self.normalize,
+            self.regression = LinearRegression(fit_intercept=self.fit_intercept, normalize=self.normalize,
                                                        copy_X=self.copy_X, n_jobs=self.n_jobs)
 
             # Split into training and testing sets
