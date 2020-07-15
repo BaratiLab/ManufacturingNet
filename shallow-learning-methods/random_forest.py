@@ -1,5 +1,6 @@
 from math import sqrt
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
 class RandomForest:
@@ -34,6 +35,7 @@ class RandomForest:
 
             – classifier_RF: the classification model trained using scikit-learn's random forest implementation
             – classifier_accuracy: the mean accuracy of the model on the given test data
+            – classifier_roc_auc: the area under the ROC curve for the model
 
         After successfully running random_forest_regressor(), the following instance data will be available:
 
@@ -47,6 +49,7 @@ class RandomForest:
 
         self.classifier_RF = None
         self.classifier_accuracy = None
+        self.classifier_roc_auc = None
         self.regressor_RF = None
         self.regressor_r2_score = None
         self.regressor_r_score = None
@@ -96,6 +99,14 @@ class RandomForest:
         Will return None if random_forest_classifier() hasn't successfully run, yet.
         """
         return self.classifier_accuracy
+
+    def get_classifier_roc_auc(self):
+        """
+        Accessor method for classifier_roc_auc.
+
+        Will return None if random_forest_classifier() hasn't successfully run, yet.
+        """
+        return self.classifier_roc_auc
 
     def get_regressor_RF(self):
         """
@@ -272,8 +283,10 @@ class RandomForest:
                 self.classifier_RF = None
                 return
 
-            # Evaluate accuracy of model using testing set and actual classification
+            # Evaluate accuracy and ROC AUC of model using testing set and actual classification
             self.classifier_accuracy = self.classifier_RF.score(dataset_X_test, dataset_y_test)
+            self.classifier_roc_auc = roc_auc_score(self.classifier_RF.predict(dataset_X_test),
+                                                    self.classifier_RF.predict_proba(dataset_X_test)[::, 1])
 
     def random_forest_regressor(self, n_estimators=100, criterion='mse', max_depth=None, min_samples_split=2,
                                 min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features='auto',
