@@ -5,10 +5,12 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVR, NuSVR, LinearSVR
 import time
+from xgboost import XGBRegressor
 
 class AllRegressionModels:
     """
-    Wrapper class around all supported regression models: LinearRegression, RandomForest, SVR, NuSVR, and LinearSVR.
+    Wrapper class around all supported regression models: LinearRegression, RandomForest, SVR, NuSVR, LinearSVR, and
+    XGBRegressor.
     AllRegressionModels runs every available regression algorithm on the given dataset and outputs the coefficient of
     determination and execution time of each successful model when all_regression_models() is run.
     """
@@ -34,6 +36,7 @@ class AllRegressionModels:
             – SVR: a reference to the SVR model
             – nu_SVR: a reference to the NuSVR model
             – linear_SVR: a reference to the LinearSVR model
+            – XGB_regressor: a reference to the XGBRegressor model
         
         After running all_regression_models(), the coefficient of determination and execution time for each model that
         ran successfully will be displayed in tabular form. Any models that failed to run will be listed.
@@ -48,6 +51,7 @@ class AllRegressionModels:
         self.SVR = SVR(verbose=self.verbose)
         self.nu_SVR = NuSVR(verbose=self.verbose)
         self.linear_SVR = LinearSVR(verbose=self.verbose)
+        self.XGB_regressor = XGBRegressor(verbosity=int(self.verbose))
 
         self._regression_models = {"Model": ["R2 Score", "Time"]}
         self._failures = []
@@ -96,7 +100,7 @@ class AllRegressionModels:
 
         All models within the list will be None if all_regression_models() hasn't been called, yet.
         """
-        return [self.linear_regression, self.random_forest, self.SVR, self.nu_SVR, self.linear_SVR]
+        return [self.linear_regression, self.random_forest, self.SVR, self.nu_SVR, self.linear_SVR, self.XGB_regressor]
 
     def get_linear_regression(self):
         """
@@ -137,6 +141,14 @@ class AllRegressionModels:
         Will return None if all_regression_models() hasn't been called, yet.
         """
         return self.linear_SVR
+
+    def get_XGB_regressor(self):
+        """
+        Accessor method for XGB_regressor.
+
+        Will return None if all_regression_models() hasn't been called, yet.
+        """
+        return self.XGB_regressor
 
     # Modifier methods
 
@@ -250,9 +262,19 @@ class AllRegressionModels:
             start_time = time.time()
             self.linear_SVR.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
-            self._regression_models["LinearSVR"] = [self.linear_SVR.score(dataset_X_test, dataset_y_test), end_time - start_time]
+            self._regression_models["LinearSVR"] =\
+                [self.linear_SVR.score(dataset_X_test, dataset_y_test), end_time - start_time]
         except:
             self._failures.append("LinearSVR")
+
+        try:
+            start_time = time.time()
+            self.XGB_regressor.fit(dataset_X_train, dataset_y_train)
+            end_time = time.time()
+            self._regression_models["XGBRegressor"] =\
+                [self.XGB_regressor.score(dataset_X_test, dataset_y_test), end_time - start_time]
+        except:
+            self._failures.append("XGBRegressor")
         
     def _print_results(self):
         """

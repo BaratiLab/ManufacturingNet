@@ -7,11 +7,12 @@ from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC, NuSVC, LinearSVC
 import time
+from xgboost import XGBClassifier
 
 class AllClassificationModels:
     """
     Wrapper class around all supported classification models: LogisticRegression, MLPClassifier, RandomForest, SVC,
-    NuSVC, and LinearSVC.
+    NuSVC, LinearSVC, and XGBClassifier.
     AllClassificationModels runs every available classification algorithm on the given dataset and outputs the mean
     accuracy, ROC-AUC, and execution time of each successful model when all_classification_models() is run.
     """
@@ -38,6 +39,7 @@ class AllClassificationModels:
             – SVC: a reference to the SVC model
             – nu_SVC: a reference to the NuSVC model
             – linear_SVC: a reference to the LinearSVC model
+            – XGB_classifier: a reference to the XGBClassifier model
 
         After running all_classification_models(), the mean accuracy, ROC-AUC (if available), and execution time for
         each model that ran successfully will be displayed in tabular form. Any models that failed to run will be listed.
@@ -53,6 +55,7 @@ class AllClassificationModels:
         self.SVC = SVC(verbose=self.verbose, probability=True)
         self.nu_SVC = NuSVC(verbose=self.verbose, probability=True)
         self.linear_SVC = LinearSVC(verbose=self.verbose)
+        self.XGB_classifier = XGBClassifier(verbosity=int(self.verbose))
 
         self._classification_models = {"Model": ["Accuracy", "ROC-AUC", "Time"]}
         self._failures = []
@@ -101,7 +104,8 @@ class AllClassificationModels:
 
         All models within the list will be None if all_classification_models() hasn't been called, yet.
         """
-        return [self.logistic_regression, self.MLP, self.random_forest, self.SVC, self.nu_SVC, self.linear_SVC]
+        return [self.logistic_regression, self.MLP, self.random_forest, self.SVC, self.nu_SVC, self.linear_SVC,
+                self.XGB_classifier]
 
     def get_logistic_regression(self):
         """
@@ -150,6 +154,14 @@ class AllClassificationModels:
         Will return None if all_classification_models() hasn't been called, yet.
         """
         return self.linear_SVC
+
+    def get_XGB_classifier(self):
+        """
+        Accessor method for XGB_classifier.
+
+        Will return None if all_classification_models() hasn't been called, yet.
+        """
+        return self.XGB_classifier
 
     # Modifier methods
 
@@ -290,6 +302,18 @@ class AllClassificationModels:
                 [self.linear_SVC.score(dataset_X_test, dataset_y_test), "Not Available", end_time - start_time]
         except:
             self._failures.append("LinearSVC")
+
+        try:
+            start_time = time.time()
+            self.XGB_classifier.fit(dataset_X_train, dataset_y_train)
+            end_time = time.time()
+            self._classification_models["XGBClassifier"] =\
+                [self.XGB_classifier.score(dataset_X_test, dataset_y_test),
+                    roc_auc_score(self.XGB_classifier.predict(dataset_X_test),
+                                  self.XGB_classifier.predict_proba(dataset_X_test)[::, 1]),
+                    end_time - start_time]
+        except:
+            self._failures.append("XGBClassifier")
     
     def _print_results(self):
         """
