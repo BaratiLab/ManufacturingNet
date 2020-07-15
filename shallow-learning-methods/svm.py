@@ -1,4 +1,5 @@
 from math import sqrt
+from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC, NuSVC, LinearSVC, SVR, NuSVR, LinearSVR
 
@@ -45,8 +46,10 @@ class SVM:
 
             – classifier_SVC: a classifier trained using scikit-learn's SVC implementation
             – accuracy_SVC: the accuracy of the SVC model, based on its predictions for dataset_X_test
+            – roc_auc_SVC: the area under the ROC curve for the SVC model
             – classifier_nu_SVC: a classifier trained using scikit-learn's NuSVC implementation
             – accuracy_nu_SVC: the accuracy of the NuSVC model, based on its predictions for dataset_X_test
+            – roc_auc_nu_SVC: the area under the ROC curve for the NuSVC model
             – classifier_linear_SVC: a classifier trained using scikit-learn's LinearSVC implementation
             – accuracy_linear_SVC: the accuracy of the LinearSVC model, based on its predictions for dataset_X_test
 
@@ -69,8 +72,10 @@ class SVM:
 
         self.classifier_SVC = None
         self.accuracy_SVC = None
+        self.roc_auc_SVC = None
         self.classifier_nu_SVC = None
         self.accuracy_nu_SVC = None
+        self.roc_auc_nu_SVC = None
         self.classifier_linear_SVC = None
         self.accuracy_linear_SVC = None
 
@@ -134,6 +139,14 @@ class SVM:
         """
         return self.accuracy_SVC
 
+    def get_roc_auc_SVC(self):
+        """
+        Accessor method for roc_auc_SVC.
+
+        Will return None if SVC() hasn't successfully run, yet.
+        """
+        return self.roc_auc_SVC
+
     def get_classifier_nu_SVC(self):
         """
         Accessor method for classifier_nu_SVC.
@@ -149,6 +162,14 @@ class SVM:
         Will return None if nu_SVC() hasn't successfully run, yet.
         """
         return self.accuracy_nu_SVC
+
+    def get_roc_auc_nu_SVC(self):
+        """
+        Accessor method for roc_auc_nu_SVC.
+
+        Will return None if nu_SVC() hasn't successfully run, yet.
+        """
+        return self.roc_auc_nu_SVC
 
     def get_classifier_linear_SVC(self):
         """
@@ -349,8 +370,12 @@ class SVM:
                 self.classifier_SVC = None
                 return
 
-            # Evaluate accuracy of model using testing set and actual classification
+            # Evaluate accuracy and ROC-AUC of model using testing set and actual classification
             self.accuracy_SVC = self.classifier_SVC.score(self.dataset_X_test, self.dataset_y_test)
+
+            if probability:
+                self.roc_auc_SVC = roc_auc_score(self.classifier_SVC.predict(self.dataset_X_test),
+                                                 self.classifier_SVC.predict_proba(self.dataset_X_test)[::, 1])
 
     def nu_SVC(self, nu=0.5, kernel="rbf", degree=3, gamma="scale", coef0=0.0, shrinking=True, probability=False,
                tol=0.001, cache_size=200, class_weight=None, verbose=False, max_iter=-1, decision_function_shape="ovr",
@@ -438,8 +463,12 @@ class SVM:
                 self.classifier_nu_SVC = None
                 return
 
-            # Evaluate accuracy of model using testing set and actual classification
+            # Evaluate accuracy and ROC-AUC of model using testing set and actual classification
             self.accuracy_nu_SVC = self.classifier_nu_SVC.score(self.dataset_X_test, self.dataset_y_test)
+
+            if probability:
+                self.roc_auc_nu_SVC = roc_auc_score(self.classifier_nu_SVC.predict(self.dataset_X_test),
+                                                    self.classifier_nu_SVC.predict_proba(self.dataset_X_test)[::, 1])
 
     def linear_SVC(self, penalty="l2", loss="squared_hinge", dual=True, tol=0.0001, C=1.0, multi_class='ovr',
                    fit_intercept=True, intercept_scaling=1, class_weight=None, verbose=0, random_state=None,
