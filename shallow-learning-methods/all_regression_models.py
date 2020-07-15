@@ -179,8 +179,7 @@ class AllRegressionModels:
         Driver method for running all regression models with given attributes and labels.
         all_regression_models() first trains the models and determines their coefficients of determination and
         execution time via _all_regression_models_runner(). Then, all_regression_models() calls _print_results() to
-        format and print each successful model's coefficient of determination and execution time, while also listing
-        any failed models.
+        format and print each successful model's measurements, while also listing any failed models.
 
         If verbose is True, all verbose logging for each model will be enabled.
         If verbose is False, all logging to stdout and stderr will be suppressed.
@@ -201,7 +200,7 @@ class AllRegressionModels:
 
     def _all_regression_models_runner(self):
         """
-        Helper method that instantiates and runs all models using the given dataset and all default parameters.
+        Helper method that runs all models using the given dataset and all default parameters.
         After running all models, each model is determined to be either a success or failure, and relevant data
         (R2 score, execution time) is recorded.
 
