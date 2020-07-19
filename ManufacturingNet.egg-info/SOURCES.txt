@@ -1,8 +1,0 @@
-README.md
-setup.cfg
-setup.py
-ManufacturingNet.egg-info/PKG-INFO
-ManufacturingNet.egg-info/SOURCES.txt
-ManufacturingNet.egg-info/dependency_links.txt
-ManufacturingNet.egg-info/not-zip-safe
-ManufacturingNet.egg-info/top_level.txt
