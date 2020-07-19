@@ -1,0 +1,13 @@
+Metadata-Version: 1.1
+Name: ManufacturingNet
+Version: 0.0.1
+Summary: AI and Machine Learning for manufacturing related datasets
+Home-page: UNKNOWN
+Author: Ruchti Doshi
+Author-email: ruchitsd@andrew.cmu.edu
+License: MIT
+Description: # Visit manufacturingnet.io for more information.
+        
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Intended Audience :: Education
