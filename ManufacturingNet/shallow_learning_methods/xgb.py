@@ -7,8 +7,11 @@ import numpy as np
 
 class XGBoost: 
     """
-    XGBoost Documentation
+    Wrapper class around XGBoost's classification and regression functionality. Per XGBoost's documentation:
 
+    XGBoost is an optimized distributed gradient boosting library designed to be highly efficient, flexible and portable.
+    It implements machine learning algorithms under the Gradient Boosting framework. XGBoost provides a parallel tree
+    boosting (also known as GBDT, GBM) that solve many data science problems in a fast and accurate way.
     """
 
     def __init__(self, attributes=None, labels=None, test_size=0.25):
@@ -21,28 +24,40 @@ class XGBoost:
             - labels: a numpy array of the desired dependent variables
             - test_size: the proportion of the dataset to be used for testing the model (defaults to 0.25);
             the proportion of the dataset to be used for training will be the complement of test_size
+        
+        After successfully running run_regressor(), the following instance data will be available:
+
+            - regressor: a reference to the XGBRegressor model
+            - mean_squared_error: the mean squared error for the regression model
+            - r2_score: the coefficient of determination for the regression model
+            - r_score: the correlation coefficient for the regression model
+        
+        After successfully running run_classifier(), the following instance data will be available:
+
+            - classifier: a reference to the XGBClassifier model
+            - precision_scores: a list of the precision for each label
+            - recall_scores: a list of the recall scores for each label
+            - accuracy: the mean accuracy of the classification model
+            - confusion_matrix: a 2x2 matrix of true negatives, false negatives, true positives, and false positives
+            of the model
+            - roc_auc: the area under the ROC curve for the classification model
+            - classes_: the classes for each label
         """
         self.attributes = attributes
         self.labels = labels
         self.test_size = test_size
 
         self.regressor = None
-        self.classifier = None
-
-        self.precision_scores = []
-        self.precision = None
-        self.recall_scores = []
-        self.recall = None
-
         self.mean_squared_error = None
         self.r2_score = None
         self.r_score = None
-        
 
+        self.classifier = None
+        self.precision_scores = []
+        self.recall_scores = []
         self.accuracy = None
         self.confusion_matrix = None
         self.roc_auc = None
-
         self.classes_ = None
 
         self.dataset_X_train = None
@@ -90,7 +105,7 @@ class XGBoost:
 
     def get_classes(self):
         """
-        Accessor method for classes.
+        Accessor method for classes of the XGBoost classification model.
 
         Will return None if run_classifier() hasn't been called, yet.
         """
@@ -98,7 +113,7 @@ class XGBoost:
 
     def get_accuracy(self):
         """
-        Accessor method for accuracy.
+        Accessor method for accuracy of the XGBoost classification model.
 
         Will return None if run_classifier() hasn't been called, yet.
         """
@@ -115,6 +130,7 @@ class XGBoost:
     def get_r2_score(self):
         """
         Accessor method for coefficient of determination of the XGBoost regression model.
+
         Will return None if run_regressor() hasn't been called, yet.
         """
         return self.r2_score
@@ -143,23 +159,37 @@ class XGBoost:
         """
         return self.roc_auc
 
-    def get_precision(self, label):
+    def get_precision(self, label=None):
         """
-        Accessor method for precision.
+        Accessor method for precision of the given label.
 
         Will return None if run_classifier() hasn't been called, yet.
         """
-        self.precision = self.precision_scores.get(label)
-        return self.precision
-
-    def get_recall(self, label):
+        return self.precision_scores.get(label)
+    
+    def get_precision_scores(self):
         """
-        Accessor method for precision.
+        Accessor method for precision_scores.
 
         Will return None if run_classifier() hasn't been called, yet.
         """
-        self.recall = self.recall_scores.get(label)
-        return self.recall
+        return self.precision_scores
+
+    def get_recall(self, label=None):
+        """
+        Accessor method for recall score of the given label.
+
+        Will return None if run_classifier() hasn't been called, yet.
+        """
+        return self.recall_scores.get(label)
+
+    def get_recall_scores(self):
+        """
+        Accessor method for recall_scores.
+
+        Will return None if run_classifier() hasn't been called, yet.
+        """
+        return self.recall_scores
 
     # Modifier methods
 
@@ -181,25 +211,75 @@ class XGBoost:
 
     def set_test_size(self, new_test_size=None):
         """
-        Modifier method for train_test_split.
+        Modifier method for test_size.
 
-        Input should be a list of strings, where each string is the name of a dependent variable.
+        Input should be a number or None.
         """
         self.test_size = new_test_size
     
     # Wrapper for regression functionality
 
-    def run_regressor(self, base_score=0.5, booster='gbtree', colsample_bylevel=1, colsample_bytree=1, gamma=0, learning_rate=0.1, \
-            max_delta_step=0, max_depth=3, min_child_weight=1, missing=None, n_estimators=100, n_jobs=1, nthread=None, objective='reg:squarederror', \
-                random_state=42, reg_alpha=0, reg_lambda=1, scale_pos_weight=1, seed=None, subsample=1):
+    def run_regressor(self, base_score=0.5, booster='gbtree', colsample_bylevel=1, colsample_bytree=1, gamma=0, learning_rate=0.1,
+                      max_delta_step=0, max_depth=3, min_child_weight=1, missing=None, n_estimators=100, n_jobs=1,
+                      nthread=None, objective='reg:squarederror', random_state=42, reg_alpha=0, reg_lambda=1,
+                      scale_pos_weight=1, seed=None, subsample=1):
         """
-        """
+        Wrapper for XGBRegressor's functionality.
+        Parameters per XGBRegressor's documentation:
 
+            - base_score: The initial prediction score of all instances, global bias. (Default is 0.5)
+            
+            - booster: Specify which booster to use: gbtree, gblinear or dart. (Default is "gbtree")
+            
+            - colsample_bylevel: Subsample ratio of columns for each level. (Default is 1)
+            
+            - colsample_bytree: Subsample ratio of columns when constructing each tree. (Default is 1)
+            
+            - gamma: Minimum loss reduction required to make a further partition on a leaf node of the tree. (Default is 0)
+            
+            - learning_rate: Boosting learning rate. (Default is 0.1)
+            
+            - max_delta_step: Maximum delta step we allow each tree’s weight estimation to be. (Default is 0)
+            
+            - max_depth: Maximum tree depth for base learners. (Default is 3)
+            
+            - min_child_weight: Minimum sum of instance weight (hessian) needed in a child. (Default is 1)
+            
+            - missing: Value in the data which needs to be present as a missing value. (Default is None)
+            
+            - n_estimators: Number of gradient boosted trees. Equivalent to number of boosting rounds. (Default is 100)
+            
+            - n_jobs: Number of parallel threads used to run xgboost. (Default is 1)
+            
+            - nthread: Number of threads to use for loading data when parallelization is applicable. If -1, uses maximum
+            threads available on the system. (Default is None)
+            
+            - objective: Specify the learning task and the corresponding learning objective or a custom objective
+            function to be used. (Default is "reg:squarederror")
+            
+            - random_state: Random number seed. (Default is 42)
+            
+            - reg_alpha: L1 regularization term on weights. (Default is 0)
+            
+            - reg_lambda: L2 regularization term on weights. (Default is 1)
+            
+            - scale_pos_weight: Balancing of positive and negative weights. (Default is 1)
+            
+            - seed: Used to generate the folds. (Default is None)
+            
+            - subsample: Subsample ratio of the training instance. (Default is 1)
+        """
         if self._check_inputs():
-            self.regressor = XGBRegressor(base_score=base_score, booster=booster, colsample_bylevel=colsample_bylevel, colsample_bytree=colsample_bytree, gamma=gamma, learning_rate=learning_rate, \
-                max_delta_step=max_delta_step, max_depth=max_depth, min_child_weight=min_child_weight, missing=missing, n_estimators=n_estimators, n_jobs=n_jobs, nthread=nthread, objective=objective, \
-                    random_state=random_state, reg_alpha=reg_alpha, reg_lambda=reg_lambda, scale_pos_weight=scale_pos_weight, seed=seed, subsample=subsample)
+            # Initialize regressor
+            self.regressor =\
+                XGBRegressor(base_score=base_score, booster=booster, colsample_bylevel=colsample_bylevel,
+                             colsample_bytree=colsample_bytree, gamma=gamma, learning_rate=learning_rate,
+                             max_delta_step=max_delta_step, max_depth=max_depth, min_child_weight=min_child_weight,
+                             missing=missing, n_estimators=n_estimators, n_jobs=n_jobs, nthread=nthread,
+                             objective=objective, random_state=random_state, reg_alpha=reg_alpha, reg_lambda=reg_lambda,
+                             scale_pos_weight=scale_pos_weight, seed=seed, subsample=subsample)
 
+            # If dataset hasn't been split into training/testing sets yet, do so now
             if self.dataset_X_test is None:
                 self._split_data()
 
@@ -229,13 +309,63 @@ class XGBoost:
                        subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0, reg_lambda=1,
                        scale_pos_weight=1, base_score=0.5, random_state=0, seed=None, missing=None):
         """
+        Wrapper for XGBClassifier's functionality.
+        Parameters per XGBClassifier's documentation:
+
+            - max_depth: Maximum tree depth for base learners. (Default is 3)
+
+            - learning_rate: Boosting learning rate. (Default is 0.1)
+
+            - n_estimators: Number of gradient boosted trees. Equivalent to number of boosting rounds. (Default is 100)
+
+            - objective: Specify the learning task and the corresponding learning objective or a custom objective
+            function to be used. (Default is "binary:logistic")
+
+            - booster: Specify which booster to use: gbtree, gblinear, or dart. (Default is "gbtree")
+
+            - n_jobs: Number of parallel threads used to run xgboost. (Default is 1)
+
+            - nthread: Number of threads to use for loading data when parallelization is applicable. If -1, uses
+            maximum threads available on the system. (Default is None)
+
+            - gamma: Minimum loss reduction required to make a further partition on a leaf node of the tree.
+            (Default is 0)
+
+            - min_child_weight: Minimum sum of instance weight(hessian) needed in a child. (Default is 1)
+
+            - max_delta_step: Maximum delta step we allow each tree's weight estimation to be. (Default is 0)
+
+            - subsample: Subsample ratio of the training instance. (Default is 1)
+
+            - colsample_bylevel: Subsample ratio of columns for each level. (Default is 1)
+            
+            - colsample_bytree: Subsample ratio of columns when constructing each tree. (Default is 1)
+
+            - reg_alpha: L1 regularization term on weights. (Default is 0)
+            
+            - reg_lambda: L2 regularization term on weights. (Default is 1)
+
+            - scale_pos_weight: Balancing of positive and negative weights. (Default is 1)
+
+            - base_score: The initial prediction score of all instances, global bias. (Default is 0.5)
+
+            - random_state: Random number seed. (Default is 0)
+
+            - seed: Used to generate the folds. (Default is None)
+
+            - missing: Value in the data which needs to be present as a missing value. (Default is None)
         """
         if self._check_inputs():
-            self.classifier = XGBClassifier(max_depth=max_depth, learning_rate=learning_rate, n_estimators=n_estimators, \
-                objective=objective, booster=booster, n_jobs=n_jobs, nthread=nthread, gamma=gamma, min_child_weight=min_child_weight, \
-                    max_delta_step=max_delta_step, subsample=subsample, colsample_bytree=colsample_bytree, colsample_bylevel=colsample_bylevel, reg_alpha=reg_alpha, \
-                        reg_lambda=reg_lambda, scale_pos_weight=scale_pos_weight, base_score=base_score, random_state=random_state, seed=seed, missing=missing)
+            # Initialize classifier
+            self.classifier =\
+                XGBClassifier(max_depth=max_depth, learning_rate=learning_rate, n_estimators=n_estimators,
+                              objective=objective, booster=booster, n_jobs=n_jobs, nthread=nthread, gamma=gamma,
+                              min_child_weight=min_child_weight, max_delta_step=max_delta_step, subsample=subsample,
+                              colsample_bytree=colsample_bytree, colsample_bylevel=colsample_bylevel,
+                              reg_alpha=reg_alpha, reg_lambda=reg_lambda, scale_pos_weight=scale_pos_weight,
+                              base_score=base_score, random_state=random_state, seed=seed, missing=missing)
 
+            # If dataset hasn't been split into training/testing sets yet, do so now
             if self.dataset_X_test is None:
                 self._split_data()
 
@@ -269,6 +399,7 @@ class XGBoost:
     def _split_data(self):
         """
         Helper method for splitting attributes and labels into training and testing sets.
+        
         This method runs under the assumption that all relevant instance data has been checked for correctness.
         """
 
