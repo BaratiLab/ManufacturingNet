@@ -95,7 +95,7 @@ class LogRegression:
         Accessor method for attributes.
 
         If a LogisticRegression object is constructed without specifying attributes, attributes will be None.
-        logistic_regression() cannot be called until attributes is a populated numpy array; call
+        run() cannot be called until attributes is a populated numpy array; call
         set_attributes(new_attributes) to fix this.
         """
         return self.attributes
@@ -105,7 +105,7 @@ class LogRegression:
         Accessor method for labels.
 
         If a LogisticRegression object is constructed without specifying labels, labels will be None.
-        logistic_regression() cannot be called until labels is a populated numpy array; call set_labels(new_labels)
+        run() cannot be called until labels is a populated numpy array; call set_labels(new_labels)
         to fix this.
         """
         return self.labels
@@ -114,7 +114,7 @@ class LogRegression:
         """
         Accessor method for classes.
 
-        Will return None if logistic_regression() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.classes
 
@@ -122,7 +122,7 @@ class LogRegression:
         """
         Accessor method for regression.
 
-        Will return None if logistic_regression() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.regression
 
@@ -130,7 +130,7 @@ class LogRegression:
         """
         Accessor method for coefficients.
 
-        Will return None if logistic_regression() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.coef_
 
@@ -138,7 +138,7 @@ class LogRegression:
         """
         Accessor method for number of iterations for all classes.
 
-        Will return None if logistic_regression() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.n_iter_
 
@@ -146,7 +146,7 @@ class LogRegression:
         """
         Accessor method for accuracy.
 
-        Will return None if logistic_regression() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.accuracy
 
@@ -154,7 +154,7 @@ class LogRegression:
         """
         Accessor method for roc-auc score.
 
-        Will return None if logistic_regression() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.roc_auc
 
@@ -187,7 +187,7 @@ class LogRegression:
 
     # Wrapper for logistic regression model
 
-    def logistic_regression(self):
+    def run(self):
         """
         Performs logistic regression on dataset using scikit-learn's logistic_model and returns the resultant array of
         coefficients.

@@ -7,7 +7,7 @@ class RandomForest:
     """
     Wrapper class around scikit-learn's random forest classification and regression functionality.
     Initialized RandomForest objects provide classification and regression functionality via the methods
-    random_forest_classifier() and random_forest_regressor(), respectively.
+    run_classifier() and run_regressor(), respectively.
     Per scikit-learn's documentation:
 
     In random forests, each tree in the ensemble is built from a sample drawn with replacement
@@ -31,13 +31,13 @@ class RandomForest:
             – test_size: the proportion of the dataset to be used for testing the model (defaults to 0.25);
             the proportion of the dataset to be used for training will be the complement of test_size
 
-        After successfully running random_forest_classifier(), the following instance data will be available:
+        After successfully running run_classifier(), the following instance data will be available:
 
             – classifier_RF: the classification model trained using scikit-learn's random forest implementation
             – classifier_accuracy: the mean accuracy of the model on the given test data
             – classifier_roc_auc: the area under the ROC curve for the model
 
-        After successfully running random_forest_regressor(), the following instance data will be available:
+        After successfully running run_regressor(), the following instance data will be available:
 
             – regressor_RF: the regression model trained using scikit-learn's random forest implementation
             – regressor_r2_score: the coefficient of determination for the regression model
@@ -88,7 +88,7 @@ class RandomForest:
         """
         Accessor method for classifier_RF.
 
-        Will return None if random_forest_classifier() hasn't successfully run, yet.
+        Will return None if run_classifier() hasn't successfully run, yet.
         """
         return self.classifier_RF
 
@@ -96,7 +96,7 @@ class RandomForest:
         """
         Accessor method for classifier_accuracy.
 
-        Will return None if random_forest_classifier() hasn't successfully run, yet.
+        Will return None if run_classifier() hasn't successfully run, yet.
         """
         return self.classifier_accuracy
 
@@ -104,7 +104,7 @@ class RandomForest:
         """
         Accessor method for classifier_roc_auc.
 
-        Will return None if random_forest_classifier() hasn't successfully run, yet.
+        Will return None if run_classifier() hasn't successfully run, yet.
         """
         return self.classifier_roc_auc
 
@@ -112,7 +112,7 @@ class RandomForest:
         """
         Accessor method for regressor_RF.
 
-        Will return None if random_forest_regressor() hasn't successfully run, yet.
+        Will return None if run_regressor() hasn't successfully run, yet.
         """
         return self.regressor_RF
 
@@ -120,7 +120,7 @@ class RandomForest:
         """
         Accessor method for regressor_r2_score.
 
-        Will return None if random_forest_regressor() hasn't successfully run, yet.
+        Will return None if run_regressor() hasn't successfully run, yet.
         """
         return self.regressor_r2_score
 
@@ -128,7 +128,7 @@ class RandomForest:
         """
         Accessor method for regressor_r_score.
 
-        Will return None if random_forest_regressor() hasn't successfully run, yet.
+        Will return None if run_regressor() hasn't successfully run, yet.
         """
         return self.regressor_r_score
 
@@ -161,7 +161,7 @@ class RandomForest:
 
     # Wrappers for RandomForest classes
 
-    def random_forest_classifier(self, n_estimators=100, criterion='gini', max_depth=None, min_samples_split=2,
+    def run_classifier(self, n_estimators=100, criterion='gini', max_depth=None, min_samples_split=2,
                                  min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features='auto',
                                  max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None,
                                  bootstrap=True, oob_score=False, n_jobs=None, random_state=None, verbose=0,
@@ -288,7 +288,7 @@ class RandomForest:
             self.classifier_roc_auc = roc_auc_score(self.classifier_RF.predict(dataset_X_test),
                                                     self.classifier_RF.predict_proba(dataset_X_test)[::, 1])
 
-    def random_forest_regressor(self, n_estimators=100, criterion='mse', max_depth=None, min_samples_split=2,
+    def run_regressor(self, n_estimators=100, criterion='mse', max_depth=None, min_samples_split=2,
                                 min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features='auto',
                                 max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None, bootstrap=True,
                                 oob_score=False, n_jobs=None, random_state=None, verbose=0, warm_start=False,
