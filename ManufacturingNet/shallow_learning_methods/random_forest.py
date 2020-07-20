@@ -1,6 +1,6 @@
 from math import sqrt
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import roc_auc_score
+from sklearn.metrics import mean_squared_error roc_auc_score
 from sklearn.model_selection import train_test_split
 
 class RandomForest:
@@ -42,6 +42,7 @@ class RandomForest:
             – regressor_RF: the regression model trained using scikit-learn's random forest implementation
             – regressor_r2_score: the coefficient of determination for the regression model
             – regressor_r_score: the correlation coefficient for the regression model
+            – regressor_mean_squared_error: the mean squared error of the regression model
         """
         self.attributes = attributes
         self.labels = labels
@@ -53,6 +54,7 @@ class RandomForest:
         self.regressor_RF = None
         self.regressor_r2_score = None
         self.regressor_r_score = None
+        self.regressor_mean_squared_error = None
     
     # Accessor methods
 
@@ -131,6 +133,14 @@ class RandomForest:
         Will return None if run_regressor() hasn't successfully run, yet.
         """
         return self.regressor_r_score
+
+    def get_regressor_mean_squared_error(self):
+        """
+        Accessor method for regressor_mean_squared_error.
+
+        Will return None if run_regressor() hasn't successfully run, yet.
+        """
+        return self.regressor_mean_squared_error
 
     # Modifier methods
 
@@ -403,9 +413,11 @@ class RandomForest:
                 self.regressor_RF = None
                 return
             
-            # Evaluate coefficient of determination and correlation coefficient for model using testing data
+            # Evaluate accuracy measurements for model using testing data
             self.regressor_r2_score = self.regressor_RF.score(dataset_X_test, dataset_y_test)
             self.regressor_r_score = sqrt(self.regressor_r2_score)
+            self.regressor_mean_squared_error =\
+                mean_squared_error(dataset_y_test, self.regressor_RF.predict(dataset_X_test))
 
     # Helper methods
 
