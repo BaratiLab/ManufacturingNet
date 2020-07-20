@@ -29,7 +29,7 @@ class LinRegression:
             – copy_X: will copy the dataset's features if True (defaults to True)
             – n_jobs: the number of jobs to use for the computation (defaults to None)
 
-        The following instance data is found after successfully running linear_regression():
+        The following instance data is found after successfully running run():
 
             – regression: The linear regression model object
             – coefficients: an array of coefficients that most closely satisfy the linear relationship between the
@@ -61,7 +61,7 @@ class LinRegression:
         Accessor method for attributes.
 
         If a LinearRegression object is initialized without specifying attributes, attributes will be None.
-        linear_regression() cannot be called until attributes is a numpy array of independent variables; call
+        run() cannot be called until attributes is a numpy array of independent variables; call
         set_attributes(new_attributes) to fix this.
         """
         return self.attributes
@@ -71,7 +71,7 @@ class LinRegression:
         Accessor method for labels.
 
         If a LinearRegression object is initialized without specifying labels, labels will be None.
-        linear_regression() cannot be called until labels is a numpy array of dependent variables;
+        run() cannot be called until labels is a numpy array of dependent variables;
         call set_labels(new_labels) to fix this.
         """
         return self.labels
@@ -120,7 +120,7 @@ class LinRegression:
         """
         Accessor method for regression.
 
-        Will return None if linear_regression() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.regression
 
@@ -128,7 +128,7 @@ class LinRegression:
         """
         Accessor method for coefficients that satisfy regression model.
 
-        Will return None if linear_regression() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.coefficients
 
@@ -136,7 +136,7 @@ class LinRegression:
         """
         Accessor method for intercept of regression line.
 
-        Will return None if linear_regression() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.intercept
 
@@ -144,7 +144,7 @@ class LinRegression:
         """
         Accessor method for mean squared error of linear regression model.
 
-        Will return None if linear_regression() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.mean_squared_error
 
@@ -152,7 +152,7 @@ class LinRegression:
         """
         Accessor method for coefficient of determination of linear regression model.
 
-        Will return None if linear_regression() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.r2_score
 
@@ -160,7 +160,7 @@ class LinRegression:
         """
         Accessor method for correlation coefficient of linear regression model.
 
-        Will return None if linear_regression() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.r_score
 
@@ -225,7 +225,7 @@ class LinRegression:
 
     # Wrapper for linear regression model
 
-    def linear_regression(self, graph_results=False):
+    def run(self, graph_results=False):
         """
         Performs linear regression on dataset using scikit-learn's LinearRegression and updates coefficients, intercept,
         mean_squared_error, r2_score, and r_score instance data.
@@ -275,10 +275,10 @@ class LinRegression:
         Graphs results of linear regression with one feature. This method only graphs two-dimensional results; thus,
         only univariate regression is supported.
 
-        graph_results() may only run after linear_regression() has successfully run.
+        graph_results() may only run after run() has successfully run.
         """
         if self.regression is None:
-            print("Regression results aren't available. Have you run linear_regression() yet?")
+            print("Regression results aren't available. Have you run run() yet?")
             return
 
         if self.attributes.shape[1] > 1:

@@ -41,7 +41,7 @@ class SVM:
             – test_size: the proportion of the dataset to be used for testing the model (defaults to 0.25);
             the proportion of the dataset to be used for training will be the complement of test_size
 
-        After successfully running one of the classifier methods (SVC(), nu_SVC(), or linear_SVC()), the corresponding
+        After successfully running one of the classifier methods (run_SVC(), run_nu_SVC(), or run_linear_SVC()), the corresponding
         classifier below will be trained:
 
             – classifier_SVC: a classifier trained using scikit-learn's SVC implementation
@@ -127,7 +127,7 @@ class SVM:
         """
         Accessor method for classifier_SVC.
 
-        Will return None if SVC() hasn't successfully run, yet.
+        Will return None if run_SVC() hasn't successfully run, yet.
         """
         return self.classifier_SVC
 
@@ -135,7 +135,7 @@ class SVM:
         """
         Accessor method for accuracy_SVC.
 
-        Will return None if SVC() hasn't successfully run, yet.
+        Will return None if run_SVC() hasn't successfully run, yet.
         """
         return self.accuracy_SVC
 
@@ -143,7 +143,7 @@ class SVM:
         """
         Accessor method for roc_auc_SVC.
 
-        Will return None if SVC() hasn't successfully run, yet.
+        Will return None if run_SVC() hasn't successfully run, yet.
         """
         return self.roc_auc_SVC
 
@@ -151,7 +151,7 @@ class SVM:
         """
         Accessor method for classifier_nu_SVC.
 
-        Will return None if nu_SVC() hasn't successfully run, yet.
+        Will return None if run_nu_SVC() hasn't successfully run, yet.
         """
         return self.classifier_nu_SVC
 
@@ -159,7 +159,7 @@ class SVM:
         """
         Accessor method for accuracy_nu_SVC.
 
-        Will return None if nu_SVC() hasn't successfully run, yet.
+        Will return None if run_nu_SVC() hasn't successfully run, yet.
         """
         return self.accuracy_nu_SVC
 
@@ -167,7 +167,7 @@ class SVM:
         """
         Accessor method for roc_auc_nu_SVC.
 
-        Will return None if nu_SVC() hasn't successfully run, yet.
+        Will return None if run_nu_SVC() hasn't successfully run, yet.
         """
         return self.roc_auc_nu_SVC
 
@@ -175,7 +175,7 @@ class SVM:
         """
         Accessor method for classifier_linear_SVC.
 
-        Will return None if linear_SVC() hasn't successfully run, yet.
+        Will return None if run_linear_SVC() hasn't successfully run, yet.
         """
         return self.classifier_linear_SVC
 
@@ -183,7 +183,7 @@ class SVM:
         """
         Accessor method for accuracy_linear_SVC.
 
-        Will return None if linear_SVC() hasn't successfully run, yet.
+        Will return None if run_linear_SVC() hasn't successfully run, yet.
         """
         return self.accuracy_linear_SVC
 
@@ -191,7 +191,7 @@ class SVM:
         """
         Accessor method for regression_SVR.
 
-        Will return None if SVR() hasn't successfully run, yet.
+        Will return None if run_SVR() hasn't successfully run, yet.
         """
         return self.regression_SVR
 
@@ -199,7 +199,7 @@ class SVM:
         """
         Accessor method for r2_score_SVR.
 
-        Will return None if SVR() hasn't successfully run, yet.
+        Will return None if run_SVR() hasn't successfully run, yet.
         """
         return self.r2_score_SVR
 
@@ -207,7 +207,7 @@ class SVM:
         """
         Accessor method for r_score_SVR.
 
-        Will return None if SVR() hasn't successfully run, yet.
+        Will return None if run_SVR() hasn't successfully run, yet.
         """
         return self.r_score_SVR
 
@@ -215,7 +215,7 @@ class SVM:
         """
         Accessor method for regression_nu_SVR.
 
-        Will return None if nu_SVR() hasn't successfully run, yet.
+        Will return None if run_nu_SVR() hasn't successfully run, yet.
         """
         return self.regression_nu_SVR
 
@@ -223,7 +223,7 @@ class SVM:
         """
         Accessor method for r2_score_nu_SVR.
 
-        Will return None if nu_SVR() hasn't successfully run, yet.
+        Will return None if run_nu_SVR() hasn't successfully run, yet.
         """
         return self.r2_score_nu_SVR
 
@@ -231,7 +231,7 @@ class SVM:
         """
         Accessor method for r_score_nu_SVR.
 
-        Will return None if nu_SVR() hasn't successfully run, yet.
+        Will return None if run_nu_SVR() hasn't successfully run, yet.
         """
         return self.r_score_nu_SVR
 
@@ -239,7 +239,7 @@ class SVM:
         """
         Accessor method for regression_linear_SVR.
 
-        Will return None if linear_SVR() hasn't successfully run, yet.
+        Will return None if run_linear_SVR() hasn't successfully run, yet.
         """
         return self.regression_linear_SVR
 
@@ -247,7 +247,7 @@ class SVM:
         """
         Accessor method for r2_score_linear_SVR.
 
-        Will return None if linear_SVR() hasn't successfully run, yet.
+        Will return None if run_linear_SVR() hasn't successfully run, yet.
         """
         return self.r2_score_linear_SVR
 
@@ -255,7 +255,7 @@ class SVM:
         """
         Accessor method for r_score_linear_SVR.
 
-        Will return None if linear_SVR() hasn't successfully run, yet.
+        Will return None if run_linear_SVR() hasn't successfully run, yet.
         """
         return self.r_score_linear_SVR
 
@@ -288,7 +288,7 @@ class SVM:
 
     # Wrappers for SVM classification classes
 
-    def SVC(self, C=1.0, kernel="rbf", degree=3, gamma="scale", coef0=0.0, shrinking=True, probability=False, tol=0.001,
+    def run_SVC(self, C=1.0, kernel="rbf", degree=3, gamma="scale", coef0=0.0, shrinking=True, probability=False, tol=0.001,
             cache_size=200, class_weight=None, verbose=False, max_iter=-1, decision_function_shape="ovr",
             break_ties=False, random_state=None):
         """
@@ -377,7 +377,7 @@ class SVM:
                 self.roc_auc_SVC = roc_auc_score(self.classifier_SVC.predict(self.dataset_X_test),
                                                  self.classifier_SVC.predict_proba(self.dataset_X_test)[::, 1])
 
-    def nu_SVC(self, nu=0.5, kernel="rbf", degree=3, gamma="scale", coef0=0.0, shrinking=True, probability=False,
+    def run_nu_SVC(self, nu=0.5, kernel="rbf", degree=3, gamma="scale", coef0=0.0, shrinking=True, probability=False,
                tol=0.001, cache_size=200, class_weight=None, verbose=False, max_iter=-1, decision_function_shape="ovr",
                break_ties=False, random_state=None):
         """
@@ -470,7 +470,7 @@ class SVM:
                 self.roc_auc_nu_SVC = roc_auc_score(self.classifier_nu_SVC.predict(self.dataset_X_test),
                                                     self.classifier_nu_SVC.predict_proba(self.dataset_X_test)[::, 1])
 
-    def linear_SVC(self, penalty="l2", loss="squared_hinge", dual=True, tol=0.0001, C=1.0, multi_class='ovr',
+    def run_linear_SVC(self, penalty="l2", loss="squared_hinge", dual=True, tol=0.0001, C=1.0, multi_class='ovr',
                    fit_intercept=True, intercept_scaling=1, class_weight=None, verbose=0, random_state=None,
                    max_iter=1000):
         """
@@ -552,7 +552,7 @@ class SVM:
 
     # Wrappers for SVM regression classes
 
-    def SVR(self, kernel='rbf', degree=3, gamma='scale', coef0=0.0, tol=0.001, C=1.0, epsilon=0.1, shrinking=True,
+    def run_SVR(self, kernel='rbf', degree=3, gamma='scale', coef0=0.0, tol=0.001, C=1.0, epsilon=0.1, shrinking=True,
             cache_size=200, verbose=False, max_iter=-1):
         """
         Wrapper for scikit-learn's Epsilon-Support Vector Regression implementation. Per scikit-learn's documentation,
@@ -618,7 +618,7 @@ class SVM:
             self.r2_score_SVR = self.regression_SVR.score(self.dataset_X_test, self.dataset_y_test)
             self.r_score_SVR = sqrt(self.r2_score_SVR)
 
-    def nu_SVR(self, nu=0.5, C=1.0, kernel='rbf', degree=3, gamma='scale', coef0=0.0, shrinking=True, tol=0.001,
+    def run_nu_SVR(self, nu=0.5, C=1.0, kernel='rbf', degree=3, gamma='scale', coef0=0.0, shrinking=True, tol=0.001,
                cache_size=200, verbose=False, max_iter=-1):
         """
         Wrapper for scikit-learn's Nu Support Vector Regression implementation. Per scikit-learn's documentation,
@@ -682,7 +682,7 @@ class SVM:
             self.r2_score_nu_SVR = self.regression_nu_SVR.score(self.dataset_X_test, self.dataset_y_test)
             self.r_score_nu_SVR = sqrt(self.r2_score_nu_SVR)
 
-    def linear_SVR(self, epsilon=0.0, tol=0.0001, C=1.0, loss='epsilon_insensitive', fit_intercept=True,
+    def run_linear_SVR(self, epsilon=0.0, tol=0.0001, C=1.0, loss='epsilon_insensitive', fit_intercept=True,
                    intercept_scaling=1.0, dual=True, verbose=0, random_state=None, max_iter=1000):
         """
         Wrapper for scikit-learn's Linear Support Vector Regression implementation. Per scikit-learn's documentation,

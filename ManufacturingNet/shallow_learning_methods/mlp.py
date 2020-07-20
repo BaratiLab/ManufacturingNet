@@ -81,7 +81,7 @@ class MLP:
             calls. Note that number of loss function calls will be greater than or equal to the number of iterations for
             the MLPClassifier. (Defaults to 15000)
 
-        The following instance data is found after successfully running MLP():
+        The following instance data is found after successfully running run():
 
             - MLP_classifier: A reference to the MLPClassifier model.
             - classes: Class labels for each output.
@@ -147,7 +147,7 @@ class MLP:
         Accessor method for attributes.
 
         If a MLP object is constructed without specifying attributes, attributes will be None.
-        MLP() cannot be called until attributes is a populated numpy array; call set_attributes(new_attributes) to fix
+        run() cannot be called until attributes is a populated numpy array; call set_attributes(new_attributes) to fix
         this.
         """
         return self.attributes
@@ -157,7 +157,7 @@ class MLP:
         Accessor method for labels.
 
         If a MLP object is constructed without specifying labels, labels will be None.
-        MLP() cannot be called until labels is a populated numpy array; call set_labels(new_labels) to fix this.
+        run() cannot be called until labels is a populated numpy array; call set_labels(new_labels) to fix this.
         """
         return self.labels
 
@@ -165,7 +165,7 @@ class MLP:
         """
         Accessor method for MLP_classifier.
 
-        Will return None if MLP() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.MLP_classifier
     
@@ -173,7 +173,7 @@ class MLP:
         """
         Accessor method for classes.
 
-        Will return None if MLP() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.classes
 
@@ -181,7 +181,7 @@ class MLP:
         """
         Accessor method for coefs.
 
-        Will return None if MLP() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.coefs
 
@@ -189,7 +189,7 @@ class MLP:
         """
         Accessor method for number of iterations for all classes.
 
-        Will return None if MLP() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.n_iter
 
@@ -197,7 +197,7 @@ class MLP:
         """
         Accessor method for accuracy.
 
-        Will return None if MLP() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.accuracy
 
@@ -205,7 +205,7 @@ class MLP:
         """
         Accessor method for roc-auc score.
 
-        Will return None if MLP() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.roc_auc
 
@@ -213,7 +213,7 @@ class MLP:
         """
         Accessor method for precision of the given label.
 
-        Will return None if MLP() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         precision = self.precision_scores.get(label)
         return precision
@@ -222,7 +222,7 @@ class MLP:
         """
         Accessor method for all precision scores.
 
-        Will return None if MLP() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.precision_scores
     
@@ -230,7 +230,7 @@ class MLP:
         """
         Accessor method for recall of the given label.
 
-        Will return None if MLP() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         recall = self.recall_scores.get(label)
         return recall
@@ -239,7 +239,7 @@ class MLP:
         """
         Accessor method for all recall scores.
 
-        Will return None if MLP() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.recall_scores
 
@@ -271,13 +271,13 @@ class MLP:
 
     # Wrapper for logistic regression model
 
-    def MLP(self):
+    def run(self):
         """
         Performs logistic regression on dataset using scikit-learn's logistic_model and returns the resultant array of
         coefficients.
         """
         if self._check_inputs():
-            # Instantiate MLP() object
+            # Instantiate MLP object
             self.MLP_classifier =\
                 MLPClassifier(hidden_layer_sizes=self.hidden_layer_sizes, activation=self.activation, solver=self.solver,
                               alpha=self.alpha, batch_size=self.batch_size, learning_rate=self.learning_rate,
