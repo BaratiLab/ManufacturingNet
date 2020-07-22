@@ -5,9 +5,8 @@ from sklearn.svm import SVC, NuSVC, LinearSVC, SVR, NuSVR, LinearSVR
 
 class SVM:
     """
-    Wrapper class around scikit-learn's support vector machine functionality.
-    This class supports binary and multi-class classification on a dataset, along with regression via Support Vector
-    Regression (SVR).
+    Class model for support vector machine (SVM) model.
+    This class supports binary and multi-class classification and regression.
     Per scikit-learn's documentation:
 
     Support vector machines (SVMs) are a set of supervised learning methods used for classification, regression and
@@ -41,8 +40,8 @@ class SVM:
             – test_size: the proportion of the dataset to be used for testing the model (defaults to 0.25);
             the proportion of the dataset to be used for training will be the complement of test_size
 
-        After successfully running one of the classifier methods (run_SVC(), run_nu_SVC(), or run_linear_SVC()), the corresponding
-        classifier below will be trained:
+        After successfully running one of the classifier methods (run_SVC(), run_nu_SVC(), or run_linear_SVC()), the
+        corresponding classifier below will be trained:
 
             – classifier_SVC: a classifier trained using scikit-learn's SVC implementation
             – accuracy_SVC: the accuracy of the SVC model, based on its predictions for dataset_X_test
@@ -292,7 +291,7 @@ class SVM:
             cache_size=200, class_weight=None, verbose=False, max_iter=-1, decision_function_shape="ovr",
             break_ties=False, random_state=None):
         """
-        Wrapper for scikit-learn's C-Support Vector Classification implementation.
+        Runs SVC model.
         Parameters per scikit-learn's documentation:
 
             – C: Regularization parameter. The strength of the regularization is inversely proportional to C.
@@ -381,7 +380,7 @@ class SVM:
                tol=0.001, cache_size=200, class_weight=None, verbose=False, max_iter=-1, decision_function_shape="ovr",
                break_ties=False, random_state=None):
         """
-        Wrapper for scikit-learn's Nu-Support Vector Classification implementation.
+        Runs NuSVC model.
         Per scikit-learn's documentation, NuSVC is similar to SVC, but uses a parameter, nu, to set the number of
         support vectors.
         Parameters per scikit-learn's documentation:
@@ -474,11 +473,7 @@ class SVM:
                    fit_intercept=True, intercept_scaling=1, class_weight=None, verbose=0, random_state=None,
                    max_iter=1000):
         """
-        Wrapper for scikit-learn's Linear Support Vector Classification implementation. Per scikit-learn's documentation,
-        LinearSVC is similar to SVC with a linear kernel, but implemented with liblinear instead of libsvm, providing
-        more flexibility in choice of penalties and loss functions. LinearSVC should also scale better to large sample
-        sizes. LinearSVC supports both dense and sparse input, and the multiclass support is handled according to a
-        one-vs-the-rest scheme.
+        Runs LinearSVC model.
         Parameters per scikit-learn's documentation:
 
             – penalty: Specifies the norm used in the penalization. The ‘l2’ penalty is the standard used in SVC. The
@@ -555,10 +550,7 @@ class SVM:
     def run_SVR(self, kernel='rbf', degree=3, gamma='scale', coef0=0.0, tol=0.001, C=1.0, epsilon=0.1, shrinking=True,
             cache_size=200, verbose=False, max_iter=-1):
         """
-        Wrapper for scikit-learn's Epsilon-Support Vector Regression implementation. Per scikit-learn's documentation,
-        this implementation is based on libsvm. Scaling to tens of thousands of samples is difficult, as the fit time
-        complexity is more than quadratic with the number of samples. For large datasets, consider using LinearSVR by
-        calling linear_SVR().
+        Runs SVR model.
         Parameters per scikit-learn's documentation:
 
             – kernel: Specifies the kernel type to be used in the algorithm. It must be one of ‘linear’, ‘poly’, ‘rbf’,
@@ -621,9 +613,7 @@ class SVM:
     def run_nu_SVR(self, nu=0.5, C=1.0, kernel='rbf', degree=3, gamma='scale', coef0=0.0, shrinking=True, tol=0.001,
                cache_size=200, verbose=False, max_iter=-1):
         """
-        Wrapper for scikit-learn's Nu Support Vector Regression implementation. Per scikit-learn's documentation,
-        NuSVR uses the parameter nu to control the number of support vectors, similar to NuSVC. Yet unlike NuSVC,
-        nu replaces the parameter epsilon of epsilon-SVR, not C. This implementation is based on libsvm.
+        Runs NuSVR model.
         Parameters per scikit-learn's documentation:
 
             – nu: An upper bound on the fraction of margin errors and a lower bound of the fraction of support vectors.
@@ -685,10 +675,7 @@ class SVM:
     def run_linear_SVR(self, epsilon=0.0, tol=0.0001, C=1.0, loss='epsilon_insensitive', fit_intercept=True,
                    intercept_scaling=1.0, dual=True, verbose=0, random_state=None, max_iter=1000):
         """
-        Wrapper for scikit-learn's Linear Support Vector Regression implementation. Per scikit-learn's documentation,
-        LinearSVR is similar to SVR with a linear kernel, but is implemented with liblinear instead of libsvm. This
-        provides greater flexibility in choice of penalties and loss functions, and should scale better to large sample
-        sizes. LinearSVM supports both dense and sparse input.
+        Runs LinearSVR model.
         Parameters per scikit-learn's documentation:
 
             – epsilon: Epsilon in the epsilon-SVR model. It specifies the epsilon-tube within which no penalty is

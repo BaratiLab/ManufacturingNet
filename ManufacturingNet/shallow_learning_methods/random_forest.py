@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 
 class RandomForest:
     """
-    Wrapper class around scikit-learn's random forest classification and regression functionality.
+    Class framework for random forest classification and regression models.
     Initialized RandomForest objects provide classification and regression functionality via the methods
     run_classifier() and run_regressor(), respectively.
     Per scikit-learn's documentation:
@@ -34,7 +34,7 @@ class RandomForest:
         After successfully running run_classifier(), the following instance data will be available:
 
             – classifier: the classification model trained using scikit-learn's random forest implementation
-            – mean_accuracy: the mean accuracy of the model on the given test data
+            – accuracy: the mean accuracy of the model on the given test data
             – roc_auc: the area under the ROC curve for the model
 
         After successfully running run_regressor(), the following instance data will be available:
@@ -49,7 +49,7 @@ class RandomForest:
         self.test_size = test_size
 
         self.classifier = None
-        self.mean_accuracy = None
+        self.accuracy = None
         self.roc_auc = None
         self.regressor = Non = None
         self.r_score = None
@@ -93,13 +93,13 @@ class RandomForest:
         """
         return self.classifier
 
-    def get_mean_accuracy(self):
+    def get_accuracy(self):
         """
-        Accessor method for mean_accuracy.
+        Accessor method for accuracy.
 
         Will return None if run_classifier() hasn't successfully run, yet.
         """
-        return self.mean_accuracy
+        return self.accuracy
 
     def get_roc_auc(self):
         """
@@ -176,7 +176,7 @@ class RandomForest:
                                  bootstrap=True, oob_score=False, n_jobs=None, random_state=None, verbose=0,
                                  warm_start=False, class_weight=None, ccp_alpha=0.0, max_samples=None):
         """
-        Wrapper for scikit-learn's random forest classifier functionality.
+        Provides random forest's classifier functionality.
         Per scikit-learn's documentation:
             A random forest is a meta estimator that fits a number of decision tree classifiers on various sub-samples
             of the dataset and uses averaging to improve the predictive accuracy and control over-fitting. The
@@ -293,7 +293,7 @@ class RandomForest:
                 return
 
             # Evaluate accuracy and ROC AUC of model using testing set and actual classification
-            self.mean_accuracy = self.classifier.score(dataset_X_test, dataset_y_test)
+            self.accuracy = self.classifier.score(dataset_X_test, dataset_y_test)
             self.roc_auc = roc_auc_score(self.classifier.predict(dataset_X_test),
                                                     self.classifier.predict_proba(dataset_X_test)[::, 1])
 
@@ -303,7 +303,7 @@ class RandomForest:
                                 oob_score=False, n_jobs=None, random_state=None, verbose=0, warm_start=False,
                                 ccp_alpha=0.0, max_samples=None):
         """
-        Wrapper for scikit-learn's random forest regressor functionality.
+        Provides random forest's regressor functionality.
         Per scikit-learn's documentation:
             A random forest is a meta estimator that fits a number of classifying decision trees on various sub-samples
             of the dataset and uses averaging to improve the predictive accuracy and control over-fitting. The
