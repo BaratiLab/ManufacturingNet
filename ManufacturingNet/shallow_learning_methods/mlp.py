@@ -6,7 +6,7 @@ import numpy as np
 
 class MLP:
     """
-    Wrapper class around scikit-learn's multi-layer perceptron (MLP) classifier functionality.
+    Class framework for multi-layer perceptron (MLP) classifier model.
 
     MLPClassifier provides multi-label classification on non-linear datasets using an underlying neural network.
     """
@@ -19,21 +19,29 @@ class MLP:
         """
         Initializes an MLP object.
 
-        The following parameters are needed to create a logistic regression model:
+        The following parameters are needed to create a MLP model:
 
             - attributes: A numpy array of the desired independent variables (Defaults to None).
+            
             - labels: A numpy array of the desired dependent variables (Defaults to None).
+            
             - test_size: The proportion of the dataset to be used for testing the model;
             the proportion of the dataset to be used for training will be the complement of test_size (Defaults to 0.25).
+            
             - hidden_layer_sizes: The ith element represents the number of neurons in the ith hidden layer. (Defaults to (100,))
+            
             - activation: Activation function for the hidden layer. (Defaults to "relu")
+            
             - solver: The solver for weight optimization. "lbfgs" is an optimizer in the family of quasi-Newton methods.
             "sgd" refers to stochastic gradient descent. "adam" refers to a stochastic gradient-based optimizer proposed
             by Kingma, Diederik, and Jimmy Ba. Note: "adam" works pretty well for large datasets, but "lbfgs" can
             converge faster and perform better for small datasets. (Defaults to "adam")
+            
             - alpha: L2 penalty (regularization term) parameter. (Defaults to 0.0001)
+            
             - batch_size: Size of minibatches for stochastic optimizers. If the solver is "lbfgs", the classifier will
             not use minibatch. When set to "auto", batch_size=min(200, n_samples). (Default is "auto")
+            
             - learning_rate: Learning rate schedule for weight updates. "constant" is a constant learning rate given by
             learning_rate_init. "invscaling" gradually decreases the learning rate at each time step ‘t’ using an
             inverse scaling exponent of ‘power_t’. effective_learning_rate = learning_rate_init / pow(t, power_t).
@@ -41,41 +49,58 @@ class MLP:
             decreasing. Each time two consecutive epochs fail to decrease training loss by at least tol, or fail to
             increase validation score by at least tol if ‘early_stopping’ is on, the current learning rate is divided by
             5. "learning_rate" is used only when solver="sgd". (Defaults to "constant")
+            
             - learning_rate_init: The initial learning rate used. It controls the step-size in updating the weights.
             Only used when solver=’sgd’ or ‘adam’. (Defaults to 0.001)
+            
             - power_t: The exponent for inverse scaling learning rate. It is used in updating effective learning rate
             when the learning_rate is set to ‘invscaling’. Only used when solver=’sgd’. (Defaults to 0.5)
+            
             - max_iter: Maximum number of iterations. The solver iterates until convergence (determined by ‘tol’) or
             this number of iterations. For stochastic solvers (‘sgd’, ‘adam’), note that this determines the number of
             epochs (how many times each data point will be used), not the number of gradient steps. (Defaults to 200)
+            
             - shuffle: Whether to shuffle samples in each iteration. Only used when solver='sgd' or 'adam'.
             (Defaults to True)
+            
             - random_state: Determines random number generation for weights and bias initialization, train-test split
             if early stopping is used, and batch sampling when solver=’sgd’ or ‘adam’. Pass an int for reproducible
             results across multiple function calls. (Defaults to None)
+            
             - tol: Tolerance for the optimization. When the loss or score is not improving by at least tol for
             n_iter_no_change consecutive iterations, unless learning_rate is set to ‘adaptive’, convergence is
             considered to be reached and training stops. (Defaults to 1e-4, or 0.0001)
+            
             - verbose: Whether to print progress messages to stdout. (Defaults to False)
+            
             - warm_start: When True, reuse the solution of the previous call to fit as initialization, otherwise, just
             erase the previous solution. (Defaults to False)
+            
             - momentum: Momentum for gradient descent update. Should be between 0 and 1. Only used when solver='sgd'.
             (Defaults to 0.9)
+            
             - nesterovs_momentum: Whether to use Nesterov's momentum. Only used when solver='sgd' and momentum > 0.
             (Defaults to True)
+            
             - early_stopping: Whether to use early stopping to terminate training when validation score is not improving.
             If set to true, it will automatically set aside 10% of training data as validation and terminate training
             when validation score is not improving by at least tol for n_iter_no_change consecutive epochs. The split is
             stratified, except in a multilabel setting. Only effective when solver=’sgd’ or ‘adam’. (Defaults to False)
+            
             - validation_fraction: The proportion of training data to set aside as validation set for early stopping.
             Must be between 0 and 1. Only used if early_stopping is True. (Defaults to 0.1)
+            
             - beta_1: Exponential decay rate for estimates of first moment vector in adam, should be in [0, 1). Only
             used when solver='adam'. (Defaults to 0.9)
+            
             - beta_2: Exponential decay rate for estimates of second moment vector in adam, should be in [0, 1). Only
             used when solver=’adam’. (Defaults to 0.999)
+            
             - epsilon: Value for numerical stability in adam. Only used when solver='adam'. (Defaults to 1e-8)
+            
             - n_iter_no_change: Maximum number of epochs to not meet tol improvement. Only effective when solver='sgd' or
             'adam'. (Defaults to 10)
+            
             - max_fun: Only used when solver=’lbfgs’. Maximum number of loss function calls. The solver iterates until
             convergence (determined by ‘tol’), number of iterations reaches max_iter, or this number of loss function
             calls. Note that number of loss function calls will be greater than or equal to the number of iterations for
@@ -273,8 +298,7 @@ class MLP:
 
     def run(self):
         """
-        Performs logistic regression on dataset using scikit-learn's logistic_model and returns the resultant array of
-        coefficients.
+        Performs MLP classification on dataset and returns the resultant array of coefficients.
         """
         if self._check_inputs():
             # Instantiate MLP object
@@ -327,7 +351,7 @@ class MLP:
 
     def _check_inputs(self):
         """
-        Verifies if the instance data is ready for use in logistic regression model.
+        Verifies if the instance data is ready for use in MLP model.
         """
 
         # Check if attributes exists

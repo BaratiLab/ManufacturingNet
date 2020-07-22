@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split
 
 class LinRegression:
     """
-    Wrapper class around scikit-learn's linear regression functionality. Per scikit-learn's documentation:
+    Class framework for linear regression model. Per scikit-learn's documentation:
 
     LinearRegression fits a linear model with coefficients to minimize the residual sum of squares between the observed
     targets in the dataset, and the targets predicted by the linear approximation.
@@ -227,8 +227,8 @@ class LinRegression:
 
     def run(self, graph_results=False):
         """
-        Performs linear regression on dataset using scikit-learn's LinearRegression and updates coefficients, intercept,
-        mean_squared_error, r2_score, and r_score instance data.
+        Performs linear regression on dataset and updates coefficients, intercept, mean_squared_error, r2_score, and
+        r_score instance data.
 
         To graph results, pass in graph_results=True. Note: graphing is only supported for univariate regression.
         """

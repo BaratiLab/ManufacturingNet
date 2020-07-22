@@ -4,20 +4,16 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 
 class LogRegression: 
-    
     """
-    Wrapper class around scikit-learn's logistic regression functionality.
+    Class framework for logistic regression model. Per scikit-learn's documentation:
 
     Logistic Regression is a type of Generalized Linear Model (GLM) that uses a logistic function to model a binary 
     variable based on any kind of independent variables.
     """
 
-
     def __init__(self, attributes=None, labels=None, test_size=0.25, penalty='l2', dual=False, \
                     tol=0.0001, C=1.0, fit_intercept=True, intercept_scaling=1, class_weight=None, random_state=None, \
                         solver='lbfgs', max_iter=100, multi_class='auto', verbose=0, warm_start=False, n_jobs=None, l1_ratio=None):
-        
-
         """
         Initializes a LogisticRegression object.
 
@@ -184,13 +180,11 @@ class LogRegression:
         """
         self.test_size  = new_test_size
 
-
     # Wrapper for logistic regression model
 
     def run(self):
         """
-        Performs logistic regression on dataset using scikit-learn's logistic_model and returns the resultant array of
-        coefficients.
+        Performs logistic regression on dataset and updates relevant instance data.
         """
         if self._check_inputs():
             # Instantiate LogisticRegression() object
@@ -224,10 +218,9 @@ class LogRegression:
             y_prediction = self.regression.predict(dataset_X_test)
             y_pred_probas = self.regression.predict_proba(dataset_X_test)[::, 1]
 
-            #Metrics
+            # Metrics
             self.accuracy = accuracy_score(y_prediction, dataset_y_test)
             self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
-
 
     # Helper method for checking inputs
 

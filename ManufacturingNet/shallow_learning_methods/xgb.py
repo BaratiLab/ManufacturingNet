@@ -7,7 +7,7 @@ import numpy as np
 
 class XGBoost: 
     """
-    Wrapper class around XGBoost's classification and regression functionality. Per XGBoost's documentation:
+    Class framework for XGBoost's classification and regression functionality. Per XGBoost's documentation:
 
     XGBoost is an optimized distributed gradient boosting library designed to be highly efficient, flexible and portable.
     It implements machine learning algorithms under the Gradient Boosting framework. XGBoost provides a parallel tree
@@ -224,7 +224,7 @@ class XGBoost:
                       nthread=None, objective='reg:squarederror', random_state=42, reg_alpha=0, reg_lambda=1,
                       scale_pos_weight=1, seed=None, subsample=1):
         """
-        Wrapper for XGBRegressor's functionality.
+        Runs XGBRegressor model.
         Parameters per XGBRegressor's documentation:
 
             - base_score: The initial prediction score of all instances, global bias. (Default is 0.5)
@@ -309,7 +309,7 @@ class XGBoost:
                        subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0, reg_lambda=1,
                        scale_pos_weight=1, base_score=0.5, random_state=0, seed=None, missing=None):
         """
-        Wrapper for XGBClassifier's functionality.
+        Runs XGBClassifier model.
         Parameters per XGBClassifier's documentation:
 
             - max_depth: Maximum tree depth for base learners. (Default is 3)
