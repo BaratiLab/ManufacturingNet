@@ -1,6 +1,6 @@
 from math import sqrt
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import mean_squared_error roc_auc_score
+from sklearn.metrics import mean_squared_error, roc_auc_score
 from sklearn.model_selection import train_test_split
 
 class RandomForest:
@@ -33,28 +33,27 @@ class RandomForest:
 
         After successfully running run_classifier(), the following instance data will be available:
 
-            – classifier_RF: the classification model trained using scikit-learn's random forest implementation
-            – classifier_accuracy: the mean accuracy of the model on the given test data
-            – classifier_roc_auc: the area under the ROC curve for the model
+            – classifier: the classification model trained using scikit-learn's random forest implementation
+            – mean_accuracy: the mean accuracy of the model on the given test data
+            – roc_auc: the area under the ROC curve for the model
 
         After successfully running run_regressor(), the following instance data will be available:
 
-            – regressor_RF: the regression model trained using scikit-learn's random forest implementation
-            – regressor_r2_score: the coefficient of determination for the regression model
-            – regressor_r_score: the correlation coefficient for the regression model
-            – regressor_mean_squared_error: the mean squared error of the regression model
+            – regressor: the regression model trained using scikit-learn's random forest implementation
+            – r2_score: the coefficient of determination for the regression model
+            – r_score: the correlation coefficient for the regression model
+            – mean_squared_error: the mean squared error of the regression model
         """
         self.attributes = attributes
         self.labels = labels
         self.test_size = test_size
 
-        self.classifier_RF = None
-        self.classifier_accuracy = None
-        self.classifier_roc_auc = None
-        self.regressor_RF = None
-        self.regressor_r2_score = None
-        self.regressor_r_score = None
-        self.regressor_mean_squared_error = None
+        self.classifier = None
+        self.mean_accuracy = None
+        self.roc_auc = None
+        self.regressor = Non = None
+        self.r_score = None
+        self.mean_squared_error = None
     
     # Accessor methods
 
@@ -86,61 +85,61 @@ class RandomForest:
         """
         return self.test_size
 
-    def get_classifier_RF(self):
+    def get_classifier(self):
         """
-        Accessor method for classifier_RF.
+        Accessor method for classifier.
 
         Will return None if run_classifier() hasn't successfully run, yet.
         """
-        return self.classifier_RF
+        return self.classifier
 
-    def get_classifier_accuracy(self):
+    def get_mean_accuracy(self):
         """
-        Accessor method for classifier_accuracy.
-
-        Will return None if run_classifier() hasn't successfully run, yet.
-        """
-        return self.classifier_accuracy
-
-    def get_classifier_roc_auc(self):
-        """
-        Accessor method for classifier_roc_auc.
+        Accessor method for mean_accuracy.
 
         Will return None if run_classifier() hasn't successfully run, yet.
         """
-        return self.classifier_roc_auc
+        return self.mean_accuracy
 
-    def get_regressor_RF(self):
+    def get_roc_auc(self):
         """
-        Accessor method for regressor_RF.
+        Accessor method for roc_auc.
 
-        Will return None if run_regressor() hasn't successfully run, yet.
+        Will return None if run_classifier() hasn't successfully run, yet.
         """
-        return self.regressor_RF
+        return self.roc_auc
 
-    def get_regressor_r2_score(self):
+    def get_regressor(self):
         """
-        Accessor method for regressor_r2_score.
-
-        Will return None if run_regressor() hasn't successfully run, yet.
-        """
-        return self.regressor_r2_score
-
-    def get_regressor_r_score(self):
-        """
-        Accessor method for regressor_r_score.
+        Accessor method for regressor.
 
         Will return None if run_regressor() hasn't successfully run, yet.
         """
-        return self.regressor_r_score
+        return self.regressor
 
-    def get_regressor_mean_squared_error(self):
+    def get_r2_score(self):
         """
-        Accessor method for regressor_mean_squared_error.
+        Accessor me.
 
         Will return None if run_regressor() hasn't successfully run, yet.
         """
-        return self.regressor_mean_squared_error
+        return self.r2_score
+
+    def get_r_score(self):
+        """
+        Accessor method for r_score.
+
+        Will return None if run_regressor() hasn't successfully run, yet.
+        """
+        return self.r_score
+
+    def get_mean_squared_error(self):
+        """
+        Accessor method for mean_squared_error.
+
+        Will return None if run_regressor() hasn't successfully run, yet.
+        """
+        return self.mean_squared_error
 
     # Modifier methods
 
@@ -269,7 +268,7 @@ class RandomForest:
         """
         if self._check_inputs():
             # Initialize classifier
-            self.classifier_RF =\
+            self.classifier =\
                 RandomForestClassifier(n_estimators=n_estimators, criterion=criterion, max_depth=max_depth,
                                        min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
                                        min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features,
@@ -284,19 +283,19 @@ class RandomForest:
 
             # Train classifier; handle exception if arguments are incorrect
             try:
-                self.classifier_RF.fit(dataset_X_train, dataset_y_train)
+                self.classifier.fit(dataset_X_train, dataset_y_train)
             except Exception as e:
                 print("An exception occurred while training the random forest classification model.",
                       "Check your arguments and try again.")
                 print("Here is the exception message:")
                 print(e)
-                self.classifier_RF = None
+                self.classifier = None
                 return
 
             # Evaluate accuracy and ROC AUC of model using testing set and actual classification
-            self.classifier_accuracy = self.classifier_RF.score(dataset_X_test, dataset_y_test)
-            self.classifier_roc_auc = roc_auc_score(self.classifier_RF.predict(dataset_X_test),
-                                                    self.classifier_RF.predict_proba(dataset_X_test)[::, 1])
+            self.mean_accuracy = self.classifier.score(dataset_X_test, dataset_y_test)
+            self.roc_auc = roc_auc_score(self.classifier.predict(dataset_X_test),
+                                                    self.classifier.predict_proba(dataset_X_test)[::, 1])
 
     def run_regressor(self, n_estimators=100, criterion='mse', max_depth=None, min_samples_split=2,
                                 min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features='auto',
@@ -388,7 +387,7 @@ class RandomForest:
         """
         if self._check_inputs():
             # Initialize regressor
-            self.regressor_RF =\
+            self.regressor =\
                 RandomForestRegressor(n_estimators=n_estimators, criterion=criterion, max_depth=max_depth,
                                       min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
                                       min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features,
@@ -403,21 +402,21 @@ class RandomForest:
 
             # Train regressor; handle exception if arguments are incorrect and/or labels isn't quantitative
             try:
-                self.regressor_RF.fit(dataset_X_train, dataset_y_train)
+                self.regressor.fit(dataset_X_train, dataset_y_train)
             except Exception as e:
                 print("An exception occurred while training the random forest regressor model.",
                       "Check your arguments and try again.")
                 print("Does labels contain only quantitative data?")
                 print("Here is the exception message:")
                 print(e)
-                self.regressor_RF = None
+                self.regressor = None
                 return
             
-            # Evaluate accuracy measurements for model using testing data
-            self.regressor_r2_score = self.regressor_RF.score(dataset_X_test, dataset_y_test)
-            self.regressor_r_score = sqrt(self.regressor_r2_score)
-            self.regressor_mean_squared_error =\
-                mean_squared_error(dataset_y_test, self.regressor_RF.predict(dataset_X_test))
+            # Evaluate accuracy measurements for model using testing data = self.regressor.score(dataset_X_test, dataset_y_test)
+            self.r2_score = self.regressor.score(dataset_X_test, dataset_y_test)
+            self.r_score = sqrt(self.r2_score)
+            self.mean_squared_error =\
+                mean_squared_error(dataset_y_test, self.regressor.predict(dataset_X_test))
 
     # Helper methods
 
