@@ -2,7 +2,7 @@ from math import sqrt
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 
 class LinRegression:
     """
@@ -13,7 +13,7 @@ class LinRegression:
     """
 
     def __init__(self, attributes=None, labels=None, test_size=0.25, fit_intercept=True,
-                 normalize=False, copy_X=True, n_jobs=None):
+                 normalize=False, copy_X=True, n_jobs=None, cv=None):
         """
         Initializes a LinearRegression object.
 
@@ -28,6 +28,7 @@ class LinRegression:
             is False)
             – copy_X: will copy the dataset's features if True (defaults to True)
             – n_jobs: the number of jobs to use for the computation (defaults to None)
+            – cv: the number of folds to use for cross validation of model (defaults to None)
 
         The following instance data is found after successfully running run():
 
@@ -38,6 +39,7 @@ class LinRegression:
             – mean_squared_error: the average squared difference between the estimated and actual values
             – r2_score: the coefficient of determination for this linear model
             – r_score: the correlation coefficient for this linear model
+            – cross_val_scores: the cross validation score(s) for this linear model
         """
         self.attributes = attributes
         self.labels = labels
@@ -46,6 +48,7 @@ class LinRegression:
         self.normalize = normalize
         self.copy_X = copy_X
         self.n_jobs = n_jobs
+        self.cv = cv
 
         self.regression = None
         self.coefficients = None
@@ -53,6 +56,7 @@ class LinRegression:
         self.mean_squared_error = None
         self.r2_score = None
         self.r_score = None
+        self.cross_val_scores = None
 
     # Accessor methods
 
@@ -115,6 +119,14 @@ class LinRegression:
         Should return an integer or None.
         """
         return self.n_jobs
+    
+    def get_cv(self):
+        """
+        Accessor method for cv.
+
+        Should return an integer or None.
+        """
+        return self.cv
 
     def get_regression(self):
         """
@@ -163,6 +175,14 @@ class LinRegression:
         Will return None if run() hasn't been called, yet.
         """
         return self.r_score
+    
+    def get_cross_val_scores(self):
+        """
+        Accessor method for cross validation score of linear regression model.
+
+        Will return None if run() hasn't been called, yet.
+        """
+        return self.cross_val_scores
 
     # Modifier methods
 
@@ -222,6 +242,14 @@ class LinRegression:
         Input should be an integer or None. Defaults to None.
         """
         self.n_jobs = new_n_jobs
+    
+    def set_cv(self, new_cv=None):
+        """
+        Modifier method for cv.
+
+        Input should be an integer or None. Defaults to None.
+        """
+        self.cv = new_cv
 
     # Wrapper for linear regression model
 
@@ -258,15 +286,15 @@ class LinRegression:
             # Make predictions using testing set
             y_prediction = self.regression.predict(dataset_X_test)
 
-            # Get mean squared error, coefficient of determination, and correlation coefficient
+            # Get mean squared error, coefficient of determination, correlation coefficient, and cross validation score
             self.mean_squared_error = mean_squared_error(dataset_y_test, y_prediction)
             self.r2_score = r2_score(dataset_y_test, y_prediction)
             self.r_score = sqrt(self.r2_score)
+            self.cross_val_scores = cross_val_score(self.regression, self.attributes, self.labels, cv=self.cv)
 
             # Plot results, if desired
             if graph_results:
                 self._graph_results(dataset_X_test, dataset_y_test, y_prediction)
-
 
     # Helper methods
 

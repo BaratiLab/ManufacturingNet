@@ -1,6 +1,6 @@
 from math import sqrt
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.svm import SVC, NuSVC, LinearSVC, SVR, NuSVR, LinearSVR
 
 class SVM:
@@ -46,11 +46,14 @@ class SVM:
             – classifier_SVC: a classifier trained using scikit-learn's SVC implementation
             – accuracy_SVC: the accuracy of the SVC model, based on its predictions for dataset_X_test
             – roc_auc_SVC: the area under the ROC curve for the SVC model
+            – cross_val_scores_SVC: the cross validation score(s) for the SVC model
             – classifier_nu_SVC: a classifier trained using scikit-learn's NuSVC implementation
             – accuracy_nu_SVC: the accuracy of the NuSVC model, based on its predictions for dataset_X_test
             – roc_auc_nu_SVC: the area under the ROC curve for the NuSVC model
+            – cross_val_scores_nu_SVC: the cross validation score(s) for the NuSVC model
             – classifier_linear_SVC: a classifier trained using scikit-learn's LinearSVC implementation
             – accuracy_linear_SVC: the accuracy of the LinearSVC model, based on its predictions for dataset_X_test
+            – cross_val_scores_linear_SVC: the cross validation score(s) for the LinearSVC model
 
         After successfully running one of the regression methods (SVR(), nu_SVR(), or linear_SVR()), the corresponding
         regression model below will be trained:
@@ -58,12 +61,15 @@ class SVM:
             – regression_SVR: a regression model trained using scikit-learn's SVR implementation
             – r2_score_SVR: the coefficient of determination for the SVR model
             – r_score_SVR: the correlation coefficient for the SVR model
+            – cross_val_scores_SVR: the cross validation score(s) for the SVR model
             – regression_nu_SVR: a regression model trained using scikit-learn's NuSVR implementation
             – r2_score_nu_SVR: the coefficient of determination for the NuSVR model
             – r_score_nu_SVR: the correlation coefficient for the NuSVR model
+            – cross_val_scores_nu_SVR: the cross validation score(s) for the NuSVR model
             – regression_linear_SVR: a regression model trained using scikit-learn's LinearSVR implementation
             – r2_score_linear_SVR: the coefficient of determination for the LinearSVR model
             – r_score_linear_SVR: the correlation coefficient for the LinearSVR model
+            – cross_val_scores_linear_SVR: the cross validation score(s) for the LinearSVR model
         """
         self.attributes = attributes
         self.labels = labels
@@ -72,21 +78,27 @@ class SVM:
         self.classifier_SVC = None
         self.accuracy_SVC = None
         self.roc_auc_SVC = None
+        self.cross_val_scores_SVC = None
         self.classifier_nu_SVC = None
         self.accuracy_nu_SVC = None
         self.roc_auc_nu_SVC = None
+        self.cross_val_scores_nu_SVC = None
         self.classifier_linear_SVC = None
         self.accuracy_linear_SVC = None
+        self.cross_val_scores_linear_SVC = None
 
         self.regression_SVR = None
         self.r2_score_SVR = None
         self.r_score_SVR = None
+        self.cross_val_scores_SVR = None
         self.regression_nu_SVR = None
         self.r2_score_nu_SVR = None
         self.r_score_nu_SVR = None
+        self.cross_val_scores_nu_SVR = None
         self.regression_linear_SVR = None
         self.r2_score_linear_SVR = None
         self.r_score_linear_SVR = None
+        self.cross_val_scores_linear_SVR = None
 
         # References to training and testing subsets of dataset; instance data for re-use purposes
         self.dataset_X_train = None
@@ -145,6 +157,14 @@ class SVM:
         Will return None if run_SVC() hasn't successfully run, yet.
         """
         return self.roc_auc_SVC
+    
+    def get_cross_val_scores_SVC(self):
+        """
+        Accessor method for cross_val_scores_SVC.
+
+        Will return None if run_SVC() hasn't successfully run, yet.
+        """
+        return self.cross_val_scores_SVC
 
     def get_classifier_nu_SVC(self):
         """
@@ -169,6 +189,14 @@ class SVM:
         Will return None if run_nu_SVC() hasn't successfully run, yet.
         """
         return self.roc_auc_nu_SVC
+    
+    def get_cross_val_scores_nu_SVC(self):
+        """
+        Accessor method for cross_val_scores_nu_SVC.
+
+        Will return None if run_nu_SVC() hasn't successfully run, yet.
+        """
+        return self.cross_val_scores_nu_SVC
 
     def get_classifier_linear_SVC(self):
         """
@@ -185,6 +213,14 @@ class SVM:
         Will return None if run_linear_SVC() hasn't successfully run, yet.
         """
         return self.accuracy_linear_SVC
+    
+    def get_cross_val_scores_linear_SVC(self):
+        """
+        Accessor method for cross_val_scores_linear_SVC.
+
+        Will return None if run_linear_SVC() hasn't successfully run, yet.
+        """
+        return self.cross_val_scores_linear_SVC
 
     def get_regression_SVR(self):
         """
@@ -209,6 +245,14 @@ class SVM:
         Will return None if run_SVR() hasn't successfully run, yet.
         """
         return self.r_score_SVR
+    
+    def get_cross_val_scores_SVR(self):
+        """
+        Accessor method for cross_val_scores_SVR.
+
+        Will return None if run_SVR() hasn't successfully run, yet.
+        """
+        return self.cross_val_scores_SVR
 
     def get_regression_nu_SVR(self):
         """
@@ -233,6 +277,14 @@ class SVM:
         Will return None if run_nu_SVR() hasn't successfully run, yet.
         """
         return self.r_score_nu_SVR
+    
+    def get_cross_val_scores_nu_SVR(self):
+        """
+        Accessor method for cross_val_scores_nu_SVR.
+
+        Will return None if run_nu_SVR() hasn't successfully run, yet.
+        """
+        return self.cross_val_scores_nu_SVR
 
     def get_regression_linear_SVR(self):
         """
@@ -257,6 +309,14 @@ class SVM:
         Will return None if run_linear_SVR() hasn't successfully run, yet.
         """
         return self.r_score_linear_SVR
+    
+    def get_cross_val_scores_linear_SVR(self):
+        """
+        Accessor method for cross_val_scores_linear_SVR.
+
+        Will return None if run_linear_SVR() hasn't successfully run, yet.
+        """
+        return self.cross_val_scores_linear_SVR
 
     # Modifier Methods
 
@@ -289,7 +349,7 @@ class SVM:
 
     def run_SVC(self, C=1.0, kernel="rbf", degree=3, gamma="scale", coef0=0.0, shrinking=True, probability=False, tol=0.001,
             cache_size=200, class_weight=None, verbose=False, max_iter=-1, decision_function_shape="ovr",
-            break_ties=False, random_state=None):
+            break_ties=False, random_state=None, cv=None):
         """
         Runs SVC model.
         Parameters per scikit-learn's documentation:
@@ -344,6 +404,8 @@ class SVM:
             estimates. Ignored when probability is False. Pass an int for reproducible output across multiple function
             calls. (Default is None)
 
+            – cv: the number of folds to use for cross validation of model (defaults to None)
+
         The implementation is based on libsvm. The fit time scales at least quadratically with the number of samples
         and may be impractical beyond tens of thousands of samples.
         """
@@ -369,8 +431,9 @@ class SVM:
                 self.classifier_SVC = None
                 return
 
-            # Evaluate accuracy and ROC-AUC of model using testing set and actual classification
+            # Evaluate metrics of model
             self.accuracy_SVC = self.classifier_SVC.score(self.dataset_X_test, self.dataset_y_test)
+            self.cross_val_scores_SVC = cross_val_score(self.classifier_SVC, self.attributes, self.labels, cv=cv)
 
             if probability:
                 self.roc_auc_SVC = roc_auc_score(self.classifier_SVC.predict(self.dataset_X_test),
@@ -378,7 +441,7 @@ class SVM:
 
     def run_nu_SVC(self, nu=0.5, kernel="rbf", degree=3, gamma="scale", coef0=0.0, shrinking=True, probability=False,
                tol=0.001, cache_size=200, class_weight=None, verbose=False, max_iter=-1, decision_function_shape="ovr",
-               break_ties=False, random_state=None):
+               break_ties=False, random_state=None, cv=None):
         """
         Runs NuSVC model.
         Per scikit-learn's documentation, NuSVC is similar to SVC, but uses a parameter, nu, to set the number of
@@ -438,6 +501,8 @@ class SVM:
             estimates. Ignored when probability is False. Pass an int for reproducible output across multiple function
             calls. (Default is None)
 
+            – cv: the number of folds to use for cross validation of model (defaults to None)
+
         The implementation is based on libsvm.
         """
         if self._check_inputs():
@@ -462,8 +527,9 @@ class SVM:
                 self.classifier_nu_SVC = None
                 return
 
-            # Evaluate accuracy and ROC-AUC of model using testing set and actual classification
+            # Evaluate metrics of model
             self.accuracy_nu_SVC = self.classifier_nu_SVC.score(self.dataset_X_test, self.dataset_y_test)
+            self.cross_val_scores_nu_SVC = cross_val_score(self.classifier_nu_SVC, self.attributes, self.labels, cv=cv)
 
             if probability:
                 self.roc_auc_nu_SVC = roc_auc_score(self.classifier_nu_SVC.predict(self.dataset_X_test),
@@ -471,7 +537,7 @@ class SVM:
 
     def run_linear_SVC(self, penalty="l2", loss="squared_hinge", dual=True, tol=0.0001, C=1.0, multi_class='ovr',
                    fit_intercept=True, intercept_scaling=1, class_weight=None, verbose=0, random_state=None,
-                   max_iter=1000):
+                   max_iter=1000, cv=None):
         """
         Runs LinearSVC model.
         Parameters per scikit-learn's documentation:
@@ -520,6 +586,8 @@ class SVM:
             calls. (Default is None)
             
             – max_iter: The maximum number of iterations to be run. (Default is 1000)
+
+            – cv: the number of folds to use for cross validation of model (defaults to None)
         """
         if self._check_inputs():
             # Initialize classifier
@@ -542,13 +610,15 @@ class SVM:
                 self.classifier_linear_SVC = None
                 return
 
-            # Evaluate accuracy of model using testing set and actual classification
+            # Evaluate metrics of model
             self.accuracy_linear_SVC = self.classifier_linear_SVC.score(self.dataset_X_test, self.dataset_y_test)
+            self.cross_val_scores_linear_SVC =\
+                cross_val_score(self.classifier_linear_SVC, self.attributes, self.labels, cv=cv)
 
     # Wrappers for SVM regression classes
 
     def run_SVR(self, kernel='rbf', degree=3, gamma='scale', coef0=0.0, tol=0.001, C=1.0, epsilon=0.1, shrinking=True,
-            cache_size=200, verbose=False, max_iter=-1):
+            cache_size=200, verbose=False, max_iter=-1, cv=None):
         """
         Runs SVR model.
         Parameters per scikit-learn's documentation:
@@ -583,6 +653,8 @@ class SVM:
             libsvm that, if enabled, may not work properly in a multithreaded context. (Default is False)
 
             – max_iter: Hard limit on iterations within solver, or -1 for no limit. (Default is -1)
+
+            – cv: the number of folds to use for cross validation of model (defaults to None)
         """
         if self._check_inputs():
             # Initialize regression model
@@ -606,12 +678,13 @@ class SVM:
                 self.regression_SVR = None
                 return
 
-            # Get coefficient of determination for model
+            # Evaluate metrics of model
             self.r2_score_SVR = self.regression_SVR.score(self.dataset_X_test, self.dataset_y_test)
             self.r_score_SVR = sqrt(self.r2_score_SVR)
+            self.cross_val_scores_SVR = cross_val_score(self.regression_SVR, self.attributes, self.labels, cv=cv)
 
     def run_nu_SVR(self, nu=0.5, C=1.0, kernel='rbf', degree=3, gamma='scale', coef0=0.0, shrinking=True, tol=0.001,
-               cache_size=200, verbose=False, max_iter=-1):
+               cache_size=200, verbose=False, max_iter=-1, cv=None):
         """
         Runs NuSVR model.
         Parameters per scikit-learn's documentation:
@@ -645,6 +718,8 @@ class SVM:
             libsvm that, if enabled, may not work properly in a multithreaded context. (Default is False)
             
             – max_iter: Hard limit on iterations within solver, or -1 for no limit. (Default is -1)
+
+            – cv: the number of folds to use for cross validation of model (defaults to None)
         """
         if self._check_inputs():
             # Initialize regression model
@@ -668,12 +743,13 @@ class SVM:
                 self.regression_nu_SVR = None
                 return
 
-            # Get coefficient of determination for model
+            # Evaluate metrics of model
             self.r2_score_nu_SVR = self.regression_nu_SVR.score(self.dataset_X_test, self.dataset_y_test)
             self.r_score_nu_SVR = sqrt(self.r2_score_nu_SVR)
+            self.cross_val_scores_nu_SVR = cross_val_score(self.regression_nu_SVR, self.attributes, self.labels, cv=cv)
 
     def run_linear_SVR(self, epsilon=0.0, tol=0.0001, C=1.0, loss='epsilon_insensitive', fit_intercept=True,
-                   intercept_scaling=1.0, dual=True, verbose=0, random_state=None, max_iter=1000):
+                   intercept_scaling=1.0, dual=True, verbose=0, random_state=None, max_iter=1000, cv=None):
         """
         Runs LinearSVR model.
         Parameters per scikit-learn's documentation:
@@ -713,6 +789,8 @@ class SVM:
             calls. (Default is None)
             
             – max_iter: The maximum number of iterations to be run. (Default is 1000)
+
+            – cv: the number of folds to use for cross validation of model (defaults to None)
         """
         if self._check_inputs():
             # Initialize regression model
@@ -737,9 +815,11 @@ class SVM:
                 self.regression_linear_SVR = None
                 return
             
-            # Get coefficient of determination and correlation coefficient for model
+            # Evaluate metrics of model
             self.r2_score_linear_SVR = self.regression_linear_SVR.score(self.dataset_X_test, self.dataset_y_test)
             self.r_score_linear_SVR = sqrt(self.r2_score_linear_SVR)
+            self.cross_val_scores_linear_SVR =\
+                cross_val_score(self.regression_linear_SVR, self.attributes, self.labels, cv=cv)
 
     # Helper methods
 
