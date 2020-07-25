@@ -1,6 +1,6 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, roc_auc_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 import numpy as np
 
 class LogRegression: 
@@ -11,9 +11,10 @@ class LogRegression:
     variable based on any kind of independent variables.
     """
 
-    def __init__(self, attributes=None, labels=None, test_size=0.25, penalty='l2', dual=False, \
-                    tol=0.0001, C=1.0, fit_intercept=True, intercept_scaling=1, class_weight=None, random_state=None, \
-                        solver='lbfgs', max_iter=100, multi_class='auto', verbose=0, warm_start=False, n_jobs=None, l1_ratio=None):
+    def __init__(self, attributes=None, labels=None, test_size=0.25, penalty='l2', dual=False,
+                tol=0.0001, C=1.0, fit_intercept=True, intercept_scaling=1, class_weight=None, random_state=None,
+                solver='lbfgs', max_iter=100, multi_class='auto', verbose=0, warm_start=False, n_jobs=None,
+                l1_ratio=None, cv=None):
         """
         Initializes a LogisticRegression object.
 
@@ -37,6 +38,7 @@ class LogRegression:
             - n_jobs: the number of jobs to use for the computation (defaults to None)
             - l1_ratio: this is the Elastic-Net mixing parameter. Setting this to 0 is using l2 penalty, setting this to
             1 is using l1_penalty and a value between 0 and 1 is a combination of l1 and l2. 
+            - cv: the number of folds to use for cross validation of model (defaults to None)
 
         The following instance data is found after successfully running linear_regression():
 
@@ -48,6 +50,7 @@ class LogRegression:
             - n_iter : Actual number of iterations for all classes
             - accuracy: the classification accuracy score
             - roc_auc: the area under the receiver operating characteristic curve from the prediction scores
+            - cross_val_scores: the cross validation score(s) for the model
         """
 
         self.attributes = attributes
@@ -72,6 +75,7 @@ class LogRegression:
         self.warm_start = warm_start
         self.n_jobs = n_jobs
         self.l1_ratio = l1_ratio
+        self.cv = cv
 
         self.regression = None
         self.classes_ = None
@@ -83,6 +87,7 @@ class LogRegression:
         self.precision = None
         self.recall = None
         self.roc_auc = None
+        self.cross_val_scores = None
 
     # Accessor methods
 
@@ -153,6 +158,14 @@ class LogRegression:
         Will return None if run() hasn't been called, yet.
         """
         return self.roc_auc
+    
+    def get_cross_val_scores(self):
+        """
+        Accessor method for cross validation score of linear regression model.
+
+        Will return None if run() hasn't been called, yet.
+        """
+        return self.cross_val_scores
 
     # Modifier methods
 
@@ -188,14 +201,16 @@ class LogRegression:
         """
         if self._check_inputs():
             # Instantiate LogisticRegression() object
-            self.regression = LogisticRegression(penalty=self.penalty, dual=self.dual, tol=self.tol, \
-                C=self.C, fit_intercept=self.fit_intercept, intercept_scaling=self.intercept_scaling, class_weight=self.class_weight, \
-                    random_state=self.random_state, solver=self.solver, max_iter=self.max_iter, multi_class=self.multi_class, \
-                        verbose=self.verbose, warm_start=self.warm_start, n_jobs=self.n_jobs, l1_ratio=self.l1_ratio)
+            self.regression =\
+                LogisticRegression(penalty=self.penalty, dual=self.dual, tol=self.tol, C=self.C,
+                                   fit_intercept=self.fit_intercept, intercept_scaling=self.intercept_scaling,
+                                   class_weight=self.class_weight, random_state=self.random_state, solver=self.solver,
+                                   max_iter=self.max_iter, multi_class=self.multi_class, verbose=self.verbose,
+                                   warm_start=self.warm_start, n_jobs=self.n_jobs, l1_ratio=self.l1_ratio)
 
             # Split into training and testing set
-            dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = \
-                train_test_split(self.attributes,self.labels,test_size=self.test_size)
+            dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test =\
+                train_test_split(self.attributes, self.labels, test_size=self.test_size)
 
             # Train the model and get resultant coefficients; handle exception if arguments are incorrect
             try:
@@ -221,6 +236,7 @@ class LogRegression:
             # Metrics
             self.accuracy = accuracy_score(y_prediction, dataset_y_test)
             self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
+            self.cross_val_scores = cross_val_score(self.regression, self.attributes, self.labels, cv=self.cv)
 
     # Helper method for checking inputs
 

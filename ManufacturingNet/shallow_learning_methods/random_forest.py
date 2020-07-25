@@ -1,7 +1,7 @@
 from math import sqrt
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.metrics import mean_squared_error, roc_auc_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 
 class RandomForest:
     """
@@ -36,6 +36,7 @@ class RandomForest:
             – classifier: the classification model trained using scikit-learn's random forest implementation
             – accuracy: the mean accuracy of the model on the given test data
             – roc_auc: the area under the ROC curve for the model
+            – cross_val_scores_classifier: the cross validation score(s) for the classification model
 
         After successfully running run_regressor(), the following instance data will be available:
 
@@ -43,6 +44,7 @@ class RandomForest:
             – r2_score: the coefficient of determination for the regression model
             – r_score: the correlation coefficient for the regression model
             – mean_squared_error: the mean squared error of the regression model
+            – cross_val_scores_regressor: the cross validation score(s) for the regression model
         """
         self.attributes = attributes
         self.labels = labels
@@ -51,9 +53,11 @@ class RandomForest:
         self.classifier = None
         self.accuracy = None
         self.roc_auc = None
+        self.cross_val_scores_classifier = None
         self.regressor = Non = None
         self.r_score = None
         self.mean_squared_error = None
+        self.cross_val_scores_regressor = None
     
     # Accessor methods
 
@@ -108,6 +112,14 @@ class RandomForest:
         Will return None if run_classifier() hasn't successfully run, yet.
         """
         return self.roc_auc
+    
+    def get_cross_val_scores_classifier(self):
+        """
+        Accessor method for cross_val_scores_classifier.
+
+        Will return None if run_classifier() hasn't successfully run, yet.
+        """
+        return self.cross_val_scores_classifier
 
     def get_regressor(self):
         """
@@ -140,6 +152,14 @@ class RandomForest:
         Will return None if run_regressor() hasn't successfully run, yet.
         """
         return self.mean_squared_error
+    
+    def get_cross_val_scores_regressor(self):
+        """
+        Accessor method for cross_val_scores_regressor.
+
+        Will return None if run_regressor() hasn't successfully run, yet.
+        """
+        return self.cross_val_scores_regressor
 
     # Modifier methods
 
@@ -171,10 +191,10 @@ class RandomForest:
     # Wrappers for RandomForest classes
 
     def run_classifier(self, n_estimators=100, criterion='gini', max_depth=None, min_samples_split=2,
-                                 min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features='auto',
-                                 max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None,
-                                 bootstrap=True, oob_score=False, n_jobs=None, random_state=None, verbose=0,
-                                 warm_start=False, class_weight=None, ccp_alpha=0.0, max_samples=None):
+                       min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features='auto',
+                       max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None,
+                       bootstrap=True, oob_score=False, n_jobs=None, random_state=None, verbose=0,
+                       warm_start=False, class_weight=None, ccp_alpha=0.0, max_samples=None, cv=None):
         """
         Provides random forest's classifier functionality.
         Per scikit-learn's documentation:
@@ -265,6 +285,8 @@ class RandomForest:
             – max_samples: If bootstrap is True, the number of samples to draw from X to train each base estimator.
             If None, then draw X.shape[0] samples. If int, then draw max_samples samples. If float, then draw
             max_samples * X.shape[0] samples; thus, max_samples should be in the interval (0, 1). (Default is None)
+
+            – cv: the number of folds to use for cross validation of model (defaults to None)
         """
         if self._check_inputs():
             # Initialize classifier
@@ -295,13 +317,14 @@ class RandomForest:
             # Evaluate accuracy and ROC AUC of model using testing set and actual classification
             self.accuracy = self.classifier.score(dataset_X_test, dataset_y_test)
             self.roc_auc = roc_auc_score(self.classifier.predict(dataset_X_test),
-                                                    self.classifier.predict_proba(dataset_X_test)[::, 1])
+                                         self.classifier.predict_proba(dataset_X_test)[::, 1])
+            self.cross_val_scores_classifier = cross_val_score(self.classifier, self.attributes, self.labels, cv=cv)
 
     def run_regressor(self, n_estimators=100, criterion='mse', max_depth=None, min_samples_split=2,
-                                min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features='auto',
-                                max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None, bootstrap=True,
-                                oob_score=False, n_jobs=None, random_state=None, verbose=0, warm_start=False,
-                                ccp_alpha=0.0, max_samples=None):
+                      min_samples_leaf=1, min_weight_fraction_leaf=0.0, max_features='auto',
+                      max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None, bootstrap=True,
+                      oob_score=False, n_jobs=None, random_state=None, verbose=0, warm_start=False,
+                      ccp_alpha=0.0, max_samples=None, cv=None):
         """
         Provides random forest's regressor functionality.
         Per scikit-learn's documentation:
@@ -384,6 +407,8 @@ class RandomForest:
             – max_samples: If bootstrap is True, the number of samples to draw from X to train each base estimator.
             If None, then draw X.shape[0] samples. If int, then draw max_samples samples. If float, then draw
             max_samples * X.shape[0] samples; thus, max_samples should be in the interval (0, 1). (Default is None)
+
+            – cv: the number of folds to use for cross validation of model (defaults to None)
         """
         if self._check_inputs():
             # Initialize regressor
@@ -417,6 +442,7 @@ class RandomForest:
             self.r_score = sqrt(self.r2_score)
             self.mean_squared_error =\
                 mean_squared_error(dataset_y_test, self.regressor.predict(dataset_X_test))
+            self.cross_val_scores_regressor = cross_val_score(self.regressor, self.attributes, self.labels, cv=cv)
 
     # Helper methods
 

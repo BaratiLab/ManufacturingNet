@@ -1,5 +1,5 @@
-from .linear_regression import LinearRegression
-from .logistic_regression import LogisticRegression
+from .linear_regression import LinRegression
+from .logistic_regression import LogRegression
 from .mlp import MLP
 from .svm import SVM
 from .xgb import XGBoost

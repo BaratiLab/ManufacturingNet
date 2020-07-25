@@ -1,7 +1,7 @@
 from math import sqrt
 from scipy.stats import uniform, randint
 from sklearn.metrics import accuracy_score, confusion_matrix, mean_squared_error, r2_score, roc_auc_score, precision_score, recall_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 from xgboost import XGBClassifier, XGBRegressor
 import numpy as np
 
@@ -31,6 +31,7 @@ class XGBoost:
             - mean_squared_error: the mean squared error for the regression model
             - r2_score: the coefficient of determination for the regression model
             - r_score: the correlation coefficient for the regression model
+            - cross_val_scores_regressor: the cross validation score(s) for the model
         
         After successfully running run_classifier(), the following instance data will be available:
 
@@ -42,6 +43,7 @@ class XGBoost:
             of the model
             - roc_auc: the area under the ROC curve for the classification model
             - classes_: the classes for each label
+            - cross_val_scores_classifier: the cross validation score(s) for the model
         """
         self.attributes = attributes
         self.labels = labels
@@ -51,6 +53,7 @@ class XGBoost:
         self.mean_squared_error = None
         self.r2_score = None
         self.r_score = None
+        self.cross_val_scores_regressor = None
 
         self.classifier = None
         self.precision_scores = []
@@ -59,6 +62,7 @@ class XGBoost:
         self.confusion_matrix = None
         self.roc_auc = None
         self.classes_ = None
+        self.cross_val_scores_classifier = None
 
         self.dataset_X_train = None
         self.dataset_X_test = None
@@ -118,6 +122,22 @@ class XGBoost:
         Will return None if run_classifier() hasn't been called, yet.
         """
         return self.accuracy
+    
+    def get_cross_val_scores_classifier(self):
+        """
+        Accessor method for cross_val_scores_classifier.
+
+        Will return None if run_classifier() hasn't been called, yet.
+        """
+        return self.cross_val_scores_classifier
+    
+    def get_cross_val_scores_regressor(self):
+        """
+        Accessor method for cross_val_scores_regressor.
+
+        Will return None if run_regressor() hasn't been called, yet.
+        """
+        return self.cross_val_scores_regressor
 
     def get_mean_squared_error(self):
         """
@@ -222,7 +242,7 @@ class XGBoost:
     def run_regressor(self, base_score=0.5, booster='gbtree', colsample_bylevel=1, colsample_bytree=1, gamma=0, learning_rate=0.1,
                       max_delta_step=0, max_depth=3, min_child_weight=1, missing=None, n_estimators=100, n_jobs=1,
                       nthread=None, objective='reg:squarederror', random_state=42, reg_alpha=0, reg_lambda=1,
-                      scale_pos_weight=1, seed=None, subsample=1):
+                      scale_pos_weight=1, seed=None, subsample=1, cv=None):
         """
         Runs XGBRegressor model.
         Parameters per XGBRegressor's documentation:
@@ -268,6 +288,8 @@ class XGBoost:
             - seed: Used to generate the folds. (Default is None)
             
             - subsample: Subsample ratio of the training instance. (Default is 1)
+
+            – cv: the number of folds to use for cross validation of model (defaults to None)
         """
         if self._check_inputs():
             # Initialize regressor
@@ -301,13 +323,14 @@ class XGBoost:
             self.mean_squared_error = mean_squared_error(self.dataset_y_test, y_prediction)
             self.r2_score = r2_score(self.dataset_y_test, y_prediction)
             self.r_score = sqrt(self.r2_score)
+            self.cross_val_scores_regressor = cross_val_score(self.regressor, self.attributes, self.labels, cv=cv)
     
     # Wrapper for classification functionality
 
     def run_classifier(self, max_depth=3, learning_rate=0.1, n_estimators=100, objective='binary:logistic',
                        booster='gbtree', n_jobs=1, nthread=None, gamma=0, min_child_weight=1, max_delta_step=0,
                        subsample=1, colsample_bytree=1, colsample_bylevel=1, reg_alpha=0, reg_lambda=1,
-                       scale_pos_weight=1, base_score=0.5, random_state=0, seed=None, missing=None):
+                       scale_pos_weight=1, base_score=0.5, random_state=0, seed=None, missing=None, cv=None):
         """
         Runs XGBClassifier model.
         Parameters per XGBClassifier's documentation:
@@ -354,6 +377,8 @@ class XGBoost:
             - seed: Used to generate the folds. (Default is None)
 
             - missing: Value in the data which needs to be present as a missing value. (Default is None)
+
+            – cv: the number of folds to use for cross validation of model (defaults to None)
         """
         if self._check_inputs():
             # Initialize classifier
@@ -388,6 +413,7 @@ class XGBoost:
             self.accuracy = accuracy_score(self.dataset_y_test, y_prediction)
             self.confusion_matrix = confusion_matrix(self.dataset_y_test, y_prediction)
             self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
+            self.cross_val_scores_classifier = cross_val_score(self.classifier, self.attributes, self.labels, cv=cv)
 
             self.precision_scores = { each : precision_score(self.dataset_y_test, y_prediction, pos_label=each) \
                                                                     for each in self.classes_}

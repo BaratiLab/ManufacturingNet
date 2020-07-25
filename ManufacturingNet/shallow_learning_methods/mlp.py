@@ -1,6 +1,6 @@
 from sklearn.neural_network import MLPClassifier
 from sklearn.datasets import make_classification
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.metrics import accuracy_score, roc_auc_score, precision_score, recall_score
 import numpy as np  
 
@@ -15,7 +15,7 @@ class MLP:
                  solver='adam', alpha=0.0001, batch_size='auto', learning_rate='constant', learning_rate_init=0.001,
                  power_t=0.5, max_iter=200, shuffle=True, random_state=None, tol=0.0001, verbose=False, warm_start=False,
                  momentum=0.9, nesterovs_momentum=True, early_stopping=False, validation_fraction=0.1, beta_1=0.9,
-    			 beta_2=0.999, epsilon=1e-08, n_iter_no_change=10):
+    			 beta_2=0.999, epsilon=1e-08, n_iter_no_change=10, cv=None):
         """
         Initializes an MLP object.
 
@@ -105,6 +105,8 @@ class MLP:
             convergence (determined by ‘tol’), number of iterations reaches max_iter, or this number of loss function
             calls. Note that number of loss function calls will be greater than or equal to the number of iterations for
             the MLPClassifier. (Defaults to 15000)
+        
+            - cv: the number of folds to use for cross validation of model (defaults to None)
 
         The following instance data is found after successfully running run():
 
@@ -121,6 +123,7 @@ class MLP:
             - precision_scores: List of precision scores for all class labels.
             - accuracy: The mean accuracy of the model on the given dataset and labels.
             - recall_scores: List of recall scores for all class labels.
+            - cross_val_scores: the cross validation score(s) for this model
         """
 
         self.attributes = attributes
@@ -149,6 +152,7 @@ class MLP:
         self.beta_2 = beta_2
         self.epsilon = epsilon=1e-08
         self.n_iter_no_change = n_iter_no_change
+        self.cv = cv
 
         self.MLP_classifier = None
         self.classes = None
@@ -164,6 +168,7 @@ class MLP:
         self.precision_scores = []
         self.accuracy = None
         self.recall_scores = []
+        self.cross_val_scores = None
 
     # Accessor methods
 
@@ -267,6 +272,14 @@ class MLP:
         Will return None if run() hasn't been called, yet.
         """
         return self.recall_scores
+    
+    def get_cross_val_scores(self):
+        """
+        Accessor method for cross validation score of linear regression model.
+
+        Will return None if run() hasn't been called, yet.
+        """
+        return self.cross_val_scores
 
     # Modifier methods
 
@@ -313,8 +326,8 @@ class MLP:
                               epsilon=self.epsilon, n_iter_no_change=self.n_iter_no_change)
 
             # Split into training and testing set
-            dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = \
-                train_test_split(self.attributes,self.labels,test_size=self.test_size)
+            dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test =\
+                train_test_split(self.attributes, self.labels, test_size=self.test_size)
 
             # Train the model and get resultant coefficients; handle exception if arguments are incorrect
             try:
@@ -341,6 +354,7 @@ class MLP:
             # Metrics
             self.accuracy = accuracy_score(y_prediction, dataset_y_test)
             self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
+            self.cross_val_scores = cross_val_score(self.MLP_classifier, self.attributes, self.labels, cv=self.cv)
 
             self.precision_scores = { each : precision_score(dataset_y_test, y_prediction, pos_label=each) \
                                                                     for each in self.classes}
