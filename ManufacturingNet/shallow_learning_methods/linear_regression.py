@@ -12,8 +12,7 @@ class LinRegression:
     targets in the dataset, and the targets predicted by the linear approximation.
     """
 
-    def __init__(self, attributes=None, labels=None, test_size=0.25, fit_intercept=True,
-                 normalize=False, copy_X=True, n_jobs=None, cv=None):
+    def __init__(self, attributes=None, labels=None):
         """
         Initializes a LinearRegression object.
 
@@ -29,6 +28,7 @@ class LinRegression:
             – copy_X: will copy the dataset's features if True (defaults to True)
             – n_jobs: the number of jobs to use for the computation (defaults to None)
             – cv: the number of folds to use for cross validation of model (defaults to None)
+            – graph_results: determines if line of best fit will be graphed (defaults to False)
 
         The following instance data is found after successfully running run():
 
@@ -43,12 +43,10 @@ class LinRegression:
         """
         self.attributes = attributes
         self.labels = labels
-        self.test_size = test_size
-        self.fit_intercept = fit_intercept
-        self.normalize = normalize
-        self.copy_X = copy_X
-        self.n_jobs = n_jobs
-        self.cv = cv
+
+        self.test_size = None
+        self.cv = None
+        self.graph_results = None
 
         self.regression = None
         self.coefficients = None
@@ -87,46 +85,6 @@ class LinRegression:
         Should return a number or None.
         """
         return self.test_size
-
-    def get_fit_intercept(self):
-        """
-        Accessor method for fit_intercept.
-
-        Returns a truthy/falsy value.
-        """
-        return self.fit_intercept
-
-    def get_normalize(self):
-        """
-        Accessor method for normalize.
-
-        Returns a truthy/falsy value.
-        """
-        return self.normalize
-
-    def get_copy_X(self):
-        """
-        Accessor method for copy_X.
-
-        Returns a truthy/falsy value.
-        """
-        return self.copy_X
-
-    def get_n_jobs(self):
-        """
-        Accessor method for n_jobs.
-
-        Should return an integer or None.
-        """
-        return self.n_jobs
-    
-    def get_cv(self):
-        """
-        Accessor method for cv.
-
-        Should return an integer or None.
-        """
-        return self.cv
 
     def get_regression(self):
         """
@@ -202,68 +160,15 @@ class LinRegression:
         """
         self.labels = new_labels
 
-    def set_test_size(self, new_test_size=0.25):
-        """
-        Modifier method for test_size.
-
-        Input should be a float between 0.0 and 1.0 or None. Defaults to 0.25. The training size will be set to the
-        complement of test_size.
-        """
-        self.test_size = new_test_size
-
-    def set_fit_intercept(self, new_fit_intercept=True):
-        """
-        Modifier method for fit_intercept.
-
-        Input should be a truthy/falsy value. Defaults to True.
-        """
-        self.fit_intercept = new_fit_intercept
-
-    def set_normalize(self, new_normalize=False):
-        """
-        Modifier method for normalize.
-
-        Input should be a truthy/falsy value. Defaults to False.
-        """
-        self.normalize = new_normalize
-
-    def set_copy_X(self, new_copy_X=True):
-        """
-        Modifier method for copy_X.
-
-        Input should be a truthy/Falsy value. Defaults to True.
-        """
-        self.copy_X = new_copy_X
-
-    def set_n_jobs(self, new_n_jobs=None):
-        """
-        Modifier method for n_jobs.
-
-        Input should be an integer or None. Defaults to None.
-        """
-        self.n_jobs = new_n_jobs
-    
-    def set_cv(self, new_cv=None):
-        """
-        Modifier method for cv.
-
-        Input should be an integer or None. Defaults to None.
-        """
-        self.cv = new_cv
-
     # Wrapper for linear regression model
 
-    def run(self, graph_results=False):
+    def run(self):
         """
-        Performs linear regression on dataset and updates coefficients, intercept, mean_squared_error, r2_score, and
-        r_score instance data.
-
-        To graph results, pass in graph_results=True. Note: graphing is only supported for univariate regression.
+        Performs linear regression on dataset and updates relevant instance data.
         """
         if self._check_inputs():
-            # Instantiate LinearRegression() object
-            self.regression = LinearRegression(fit_intercept=self.fit_intercept, normalize=self.normalize,
-                                                       copy_X=self.copy_X, n_jobs=self.n_jobs)
+            # Instantiate LinearRegression() object using helper method
+            self.regression = self._create_model()
 
             # Split into training and testing sets
             dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test =\
@@ -292,11 +197,111 @@ class LinRegression:
             self.r_score = sqrt(self.r2_score)
             self.cross_val_scores = cross_val_score(self.regression, self.attributes, self.labels, cv=self.cv)
 
+            # Output results
+            self._output_results()
+
             # Plot results, if desired
-            if graph_results:
+            if self.graph_results:
                 self._graph_results(dataset_X_test, dataset_y_test, y_prediction)
+    
+    def predict(self, dataset_X=None):
+        """
+        Predicts the output of each datapoint in dataset_X using the regression model.
+
+        predict() can only run after run() has successfully trained the regresion model.
+        """
+        
+        # Check that run() has already been called
+        if self.regression is None:
+            print("The regression model seems to be missing. Have you called run() yet?")
+            return
+        
+        # Try to make the prediction; except if dataset_X isn't a valid input
+        try:
+            y_prediction = self.regression.predict(dataset_X)
+        except Exception as e:
+            print("The model failed to run. Check your inputs and try again.")
+            print("Here is the exception message:")
+            print(e)
+            return
+        
+        print()
+        print("Prediction:\n", y_prediction)
+        print()
 
     # Helper methods
+
+    def _create_model(self):
+        """
+        Runs UI for getting parameters and creating model.
+        """
+        print("Parameter inputs for LinRegression")
+
+        if input("Use default parameters (Y/n)? ").lower() != "n":
+            self.test_size = 0.25
+            self.cv = None
+            self.graph_results = False
+            return LinearRegression()
+        
+        print("If you are unsure about a parameter, press enter to use its default value.")
+        
+        if input("Include a y-intercept in the model (Y/n)? ").lower() == "n":
+            fit_intercept = False
+        else:
+            fit_intercept = True
+        
+        if input("Normalize the dataset (y/N)? ").lower() == "y":
+            normalize = True
+        else:
+            normalize = False
+        
+        if input("Copy the dataset's features (Y/n)? ").lower() == "n":
+            copy_X = False
+        else:
+            copy_X = True
+        
+        n_jobs = input("Input the number of jobs for computation: ")
+
+        try:
+            n_jobs = int(n_jobs)
+        except:
+            n_jobs = None
+        
+        self.test_size = input("What fraction of the dataset should be the testing set? Input a decimal: ")
+
+        try:
+           self.test_size = float(test_size)
+        except:
+            self.test_size = 0.25
+        
+        self.cv = input("Input the number of folds for cross validation: ")
+
+        try:
+            self.cv = int(cv)
+        except:
+            self.cv = None
+        
+        if input("Graph the results? Only univariate regression is supported (y/N): ").lower() == "y":
+            self.graph_results = True
+        else:
+            self.graph_results = False
+        
+        return LinearRegression(fit_intercept=fit_intercept, normalize=normalize, copy_X=copy_X, n_jobs=n_jobs)
+
+    def _output_results(self):
+        """
+        Outputs model metrics after run() finishes.
+        """
+        print()
+        print("LinRegression Results\n")
+        print("Coefficients:\n", self.coefficients)
+        print("{:<20} {:<20}".format("Intercept:", self.intercept))
+        print("{:<20} {:<20}".format("Mean Squared Error:", self.mean_squared_error))
+        print("{:<20} {:<20}".format("R2 Score:", self.r2_score))
+        print("{:<20} {:<20}".format("R Score:", self.r_score))
+        print("Cross Validation Scores:\n", self.cross_val_scores)
+        print("\nCall predict() to make predictions for new data.")
+        print()
 
     def _graph_results(self, X_test, y_test, y_pred):
         """
@@ -341,17 +346,5 @@ class LinRegression:
             print("attributes and labels don't have the same number of rows. Make sure the number of samples in each",
                   "dataset matches!")
             return False
-
-        # Type-checking for fit_intercept, normalize, and copy_X isn't needed; these can accept truthy/falsy values
-
-        # Check if n_jobs is an integer or None
-        if self.n_jobs is not None and not isinstance(self.n_jobs, int):
-            print("n_jobs must be None or an integer; call set_n_jobs(new_n_jobs) to fix this!")
-            return False
-
-        # Check if test_size is a float or None
-        if self.test_size is not None and not isinstance(self.test_size, (int, float)):
-            print("test_size must be None or a number; call set_test_size(new_test_size) to fix this!")
-            return False
-
+        
         return True
