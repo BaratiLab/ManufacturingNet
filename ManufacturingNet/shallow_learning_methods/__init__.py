@@ -7,4 +7,6 @@ from .random_forest import RandomForest
 from .all_regression_models import AllRegressionModels
 from .all_classification_models import AllClassificationModels
 
-__add__=['LinRegression','LogRegression','MLP','SVM','XGBoost','RandomForest','AllRegressionModels','AllClassificationModels']
+
+__add__=['LinRegression','LogticRegression','MLP','SVM','XGBoost','RandomForest','AllRegressionModels','AllClassificationModels']
+
