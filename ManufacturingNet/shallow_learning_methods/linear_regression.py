@@ -206,9 +206,9 @@ class LinRegression:
     
     def predict(self, dataset_X=None):
         """
-        Predicts the output of each datapoint in dataset_X using the regression model.
+        Predicts the output of each datapoint in dataset_X using the regression model. Returns the predictions.
 
-        predict() can only run after run() has successfully trained the regresion model.
+        predict() can only run after run() has successfully trained the regression model.
         """
         
         # Check that run() has already been called
@@ -216,7 +216,7 @@ class LinRegression:
             print("The regression model seems to be missing. Have you called run() yet?")
             return
         
-        # Try to make the prediction; except if dataset_X isn't a valid input
+        # Try to make the prediction; handle exception if dataset_X isn't a valid input
         try:
             y_prediction = self.regression.predict(dataset_X)
         except Exception as e:
@@ -225,9 +225,8 @@ class LinRegression:
             print(e)
             return
         
-        print()
-        print("Prediction:\n", y_prediction)
-        print()
+        print("\nPredictions:\n", y_prediction, "\n")
+        return y_prediction
 
     # Helper methods
 
@@ -235,12 +234,17 @@ class LinRegression:
         """
         Runs UI for getting parameters and creating model.
         """
-        print("Parameter inputs for LinRegression")
+        print("\n======================================")
+        print("= Parameter inputs for LinRegression =")
+        print("======================================\n")
 
         if input("Use default parameters (Y/n)? ").lower() != "n":
             self.test_size = 0.25
             self.cv = None
             self.graph_results = False
+            print("\n=======================================================")
+            print("= End of parameter inputs; press any key to continue. =")
+            input("=======================================================")
             return LinearRegression()
         
         print("If you are unsure about a parameter, press enter to use its default value.")
@@ -286,22 +290,31 @@ class LinRegression:
         else:
             self.graph_results = False
         
+        print("\n=======================================================")
+        print("= End of parameter inputs; press any key to continue. =")
+        input("=======================================================")
+        
         return LinearRegression(fit_intercept=fit_intercept, normalize=normalize, copy_X=copy_X, n_jobs=n_jobs)
 
     def _output_results(self):
         """
         Outputs model metrics after run() finishes.
         """
-        print()
-        print("LinRegression Results\n")
+        print("\n=========================")
+        print("= LinRegression Results =")
+        print("=========================\n")
+
         print("Coefficients:\n", self.coefficients)
-        print("{:<20} {:<20}".format("Intercept:", self.intercept))
-        print("{:<20} {:<20}".format("Mean Squared Error:", self.mean_squared_error))
-        print("{:<20} {:<20}".format("R2 Score:", self.r2_score))
-        print("{:<20} {:<20}".format("R Score:", self.r_score))
-        print("Cross Validation Scores:\n", self.cross_val_scores)
-        print("\nCall predict() to make predictions for new data.")
-        print()
+        print("\n{:<20} {:<20}".format("Intercept:", self.intercept))
+        print("\n{:<20} {:<20}".format("Mean Squared Error:", self.mean_squared_error))
+        print("\n{:<20} {:<20}".format("R2 Score:", self.r2_score))
+        print("\n{:<20} {:<20}".format("R Score:", self.r_score))
+        print("\nCross Validation Scores:\n", self.cross_val_scores)
+        print("\n\nCall predict() to make predictions for new data.")
+
+        print("\n===================")
+        print("= End of results. =")
+        print("===================\n")
 
     def _graph_results(self, X_test, y_test, y_pred):
         """
