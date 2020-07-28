@@ -11,10 +11,7 @@ class LogRegression:
     variable based on any kind of independent variables.
     """
 
-    def __init__(self, attributes=None, labels=None, test_size=0.25, penalty='l2', dual=False,
-                tol=0.0001, C=1.0, fit_intercept=True, intercept_scaling=1, class_weight=None, random_state=None,
-                solver='lbfgs', max_iter=100, multi_class='auto', verbose=0, warm_start=False, n_jobs=None,
-                l1_ratio=None, cv=None):
+    def __init__(self, attributes=None, labels=None):
         """
         Initializes a LogisticRegression object.
 
@@ -56,33 +53,14 @@ class LogRegression:
         self.attributes = attributes
         self.labels = labels
 
-        self.test_size = test_size
-        self.penalty = penalty
-        self.dual = dual
-        self.tol = tol
-        self.C = C
-
-        self.fit_intercept = fit_intercept
-        self.intercept_scaling = intercept_scaling
-        self.class_weight = class_weight
-
-        self.random_state = random_state
-        self.solver = solver
-        self.max_iter = max_iter
-        self.multi_class = multi_class
-
-        self.verbose = verbose
-        self.warm_start = warm_start
-        self.n_jobs = n_jobs
-        self.l1_ratio = l1_ratio
-        self.cv = cv
+        self.test_size = None
+        self.cv = None
 
         self.regression = None
         self.classes_ = None
         self.coef_ = None
         self.intercept_ = None
         self.n_iter_ = None
-
         self.accuracy = None
         self.precision = None
         self.recall = None
@@ -185,14 +163,6 @@ class LogRegression:
         """
         self.labels = new_labels
 
-    def set_test_size(self, new_test_size = None):
-        """
-        Modifier method for test_size.
-
-        Input should be a number or None.
-        """
-        self.test_size  = new_test_size
-
     # Wrapper for logistic regression model
 
     def run(self):
@@ -200,13 +170,8 @@ class LogRegression:
         Performs logistic regression on dataset and updates relevant instance data.
         """
         if self._check_inputs():
-            # Instantiate LogisticRegression() object
-            self.regression =\
-                LogisticRegression(penalty=self.penalty, dual=self.dual, tol=self.tol, C=self.C,
-                                   fit_intercept=self.fit_intercept, intercept_scaling=self.intercept_scaling,
-                                   class_weight=self.class_weight, random_state=self.random_state, solver=self.solver,
-                                   max_iter=self.max_iter, multi_class=self.multi_class, verbose=self.verbose,
-                                   warm_start=self.warm_start, n_jobs=self.n_jobs, l1_ratio=self.l1_ratio)
+            # Instantiate LogisticRegression() object using helper method
+            self.regression = self._create_model()
 
             # Split into training and testing set
             dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test =\
@@ -228,7 +193,6 @@ class LogRegression:
             self.intercept = self.regression.intercept_
             self.n_iter_ = self.regression.n_iter_
 
-
             # Make predictions using testing set
             y_prediction = self.regression.predict(dataset_X_test)
             y_pred_probas = self.regression.predict_proba(dataset_X_test)[::, 1]
@@ -238,7 +202,212 @@ class LogRegression:
             self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
             self.cross_val_scores = cross_val_score(self.regression, self.attributes, self.labels, cv=self.cv)
 
-    # Helper method for checking inputs
+            # Output results
+            self._output_results()
+
+    def predict(self, dataset_X=None):
+        """
+        Predicts the output of each datapoint in dataset_X using the regression model. Returns the predictions.
+
+        predict() can only run after run() has successfully trained the regression model.
+        """
+
+        # Check that run() has already been called
+        if self.regression is None:
+            print("The regression model seems to be missing. Have you called run() yet?")
+            return
+        
+        # Try to make the prediction; handle exception if dataset_X isn't a valid input
+        try:
+            y_prediction = self.regression.predict(dataset_X)
+        except Exception as e:
+            print("The model failed to run. Check your inputs and try again.")
+            print("Here is the exception message:")
+            print(e)
+            return
+        
+        print("\nPredictions:\n", y_prediction, "\n")
+        return y_prediction
+
+    # Helper methods
+
+    def _create_model(self):
+        """
+        Runs UI for getting parameters and creating model.
+        """
+        print("\n======================================")
+        print("= Parameter inputs for LogRegression =")
+        print("======================================\n")
+
+        if input("Use default parameters (Y/n)? ").lower() != "n":
+            self.test_size = 0.25
+            self.cv = None
+            print("\n=======================================================")
+            print("= End of parameter inputs; press any key to continue. =")
+            input("=======================================================")
+            return LogisticRegression()
+        
+        print("If you are unsure about a parameter, press enter to use its default value.")
+
+        print("Which norm should be used in penalization?")
+        penalty = input("Enter 1 for 'l1', 2 for 'l2', 3 for 'elasticnet', or 4 for 'none': ")
+        
+        if penalty == "1":
+            penalty = "l1"
+        elif penalty == "3":
+            penalty = "elasticnet"
+        elif penalty == "4":
+            penalty = "none"
+        else:
+            penalty = "l2"
+        
+        if input("Use dual formulation (y/N)? ").lower() == "y":
+            dual = True
+        else:
+            dual = False
+        
+        tol = input("Enter a number for the tolerance for stopping criteria: ")
+
+        try:
+            tol = float(tol)
+        except:
+            tol = 0.0001
+        
+        C = input("Enter a positive number for the inverse of regularization strength C: ")
+
+        try:
+            C = float(C)
+        except:
+            C = 1.0
+
+        if input("Include a y-intercept in the model (Y/n)? ").lower() == "n":
+            fit_intercept = False
+        else:
+            fit_intercept = True
+        
+        if fit_intercept:
+            intercept_scaling = input("Enter a number for the intercept scaling factor: ")
+            try:
+                intercept_scaling = float(intercept_scaling)
+            except:
+                intercept_scaling = 1
+        else:
+            intercept_scaling = 1
+        
+        if input("Automatically balance the class weights (y/N)? ").lower() == "y":
+            class_weight = "balanced"
+        else:
+            class_weight = None
+        
+        print("To set manual weights, call get_regression().set_params() to set the class_weight parameter.")
+
+        random_state = input("Input an integer for the random number seed: ")
+
+        try:
+            random_state = int(random_state)
+        except:
+            random_state = None
+        
+        print("Which algorithm should be used in the optimization problem?")
+        solver = input("Enter 1 for 'newton-cg', 2 for 'lbfgs', 3 for 'liblinear', 4 for 'sag', or 5 for 'saga': ")
+
+        if solver == "1":
+            solver = "newton-cg"
+        elif solver == "3":
+            solver = "liblinear"
+        elif solver == "4":
+            solver = "sag"
+        elif solver == "5":
+            solver = "saga"
+        else:
+            solver = "lbfgs"
+        
+        max_iter = input("Enter the max number of iterations: ")
+
+        try:
+            max_iter = int(max_iter)
+        except:
+            max_iter = 100
+        
+        print("Please choose a multiclass scheme.")
+        multi_class = input("Enter 1 for one-vs-rest, 2 for multinomial, or 3 to automatically choose: ")
+
+        if multi_class == "1":
+            multi_class = "ovr"
+        elif multi_class == "2":
+            multi_class = "multinomial"
+        else:
+            multi_class = "auto"
+        
+        if input("Enable verbose output during training (y/N)? ").lower() == "y":
+            verbose = 1
+        else:
+            verbose = 0
+        
+        if input("Enable warm start? This will use the previous solution for fitting (y/N): ").lower() == "y":
+            warm_start = True
+        else:
+            warm_start = False
+        
+        n_jobs = input("Input the number of jobs for computation: ")
+
+        try:
+            n_jobs = int(n_jobs)
+        except:
+            n_jobs = None
+        
+        if penalty == "elasticnet":
+            l1_ratio = input("Enter a number for the Elastic-Net mixing parameter: ")
+            try:
+                l1_ratio = float(l1_ratio)
+            except:
+                l1_ratio = None
+        else:
+            l1_ratio = None
+        
+        self.test_size = input("What fraction of the dataset should be the testing set? Input a decimal: ")
+
+        try:
+           self.test_size = float(test_size)
+        except:
+            self.test_size = 0.25
+        
+        self.cv = input("Input the number of folds for cross validation: ")
+
+        try:
+            self.cv = int(cv)
+        except:
+            self.cv = None
+        
+        print("\n=======================================================")
+        print("= End of parameter inputs; press any key to continue. =")
+        input("=======================================================")
+
+        return LogisticRegression(penalty=penalty, dual=dual, tol=tol, C=C, fit_intercept=fit_intercept,
+                                  intercept_scaling=intercept_scaling, class_weight=class_weight,
+                                  random_state=random_state, solver=solver, max_iter=max_iter, multi_class=multi_class,
+                                  verbose=verbose, warm_start=warm_start, n_jobs=n_jobs, l1_ratio=l1_ratio)        
+
+    def _output_results(self):
+        """
+        Outputs model metrics after run() finishes.
+        """
+        print("\n=========================")
+        print("= LogRegression Results =")
+        print("=========================\n")
+
+        print("Classes:\n", self.classes_)
+        print("\nCoefficients:\n", self.coefficients)
+        print("\nNumber of Iterations:\n", self.n_iter_)
+        print("\nIntercept:\n", self.intercept)
+        print("\n{:<20} {:<20}".format("Accuracy:", self.accuracy))
+        print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+        print("\nCross Validation Scores:\n", self.cross_val_scores)
+        print("\n\nCall predict() to make predictions for new data.")
+        
+        print("\n===================")
+        print("= End of results. =")
+        print("===================\n")
 
     def _check_inputs(self):
         """
@@ -262,10 +431,5 @@ class LogRegression:
             print("attributes and labels don't have the same number of rows. Make sure the number of samples in each",
                   "dataset matches!")
             return False
-
-        # Check if test_size is a float or None
-        if self.test_size is not None and not isinstance(self.test_size, (int, float)):
-            print("test_size must be None or a number; call set_test_size(new_test_size) to fix this!")
-            return False
-
+        
         return True
