@@ -1,3 +1,3 @@
 from .Featurization import Featurizer
-
-__all__=['FEATURIZER']
+from .SignalPreprocessing import MeanNormalizer, MinMaxNormalizer, QuantileNormalizer
+__all__=['Featurizer', 'MeanNormalizer', 'MinMaxNormalizer', 'QuantileNormalizer'  ]
