@@ -247,52 +247,75 @@ class LinRegression:
             input("=======================================================")
             return LinearRegression()
         
-        print("If you are unsure about a parameter, press enter to use its default value.")
-        
-        if input("Include a y-intercept in the model (Y/n)? ").lower() == "n":
-            fit_intercept = False
-        else:
-            fit_intercept = True
-        
-        if input("Normalize the dataset (y/N)? ").lower() == "y":
-            normalize = True
-        else:
-            normalize = False
-        
-        if input("Copy the dataset's features (Y/n)? ").lower() == "n":
-            copy_X = False
-        else:
-            copy_X = True
-        
-        n_jobs = input("Input the number of jobs for computation: ")
+        print("\nIf you are unsure about a parameter, press enter to use its default value.")
+        print("If you finish entering parameters early, enter 'q' to skip ahead.\n")
 
-        try:
-            n_jobs = int(n_jobs)
-        except:
-            n_jobs = None
-        
-        self.test_size = input("What fraction of the dataset should be the testing set? Input a decimal: ")
+        # Set defaults
+        self.test_size = 0.25
+        self.cv = None
+        self.graph_results = False
+        fit_intercept = True
+        normalize = False
+        copy_X = True
+        n_jobs = None
 
-        try:
-           self.test_size = float(test_size)
-        except:
-            self.test_size = 0.25
-        
-        self.cv = input("Input the number of folds for cross validation: ")
+        while True:
+            user_input = input("What fraction of the dataset should be the testing set? Input a decimal: ")
 
-        try:
-            self.cv = int(cv)
-        except:
-            self.cv = None
-        
-        if input("Graph the results? Only univariate regression is supported (y/N): ").lower() == "y":
-            self.graph_results = True
-        else:
-            self.graph_results = False
+            try:
+                self.test_size = float(user_input)
+            except:
+                if user_input.lower() == "q":
+                    break
+            
+            user_input = input("Input the number of folds for cross validation: ")
+
+            try:
+                self.cv = int(user_input)
+            except:
+                if user_input.lower() == "q":
+                    break
+            
+            user_input = input("Graph the results? Only univariate regression is supported (y/N): ").lower()
+            
+            if user_input == "y":
+                self.graph_results = True
+            if user_input == "q":
+                break
+            
+            user_input = input("Include a y-intercept in the model (Y/n)? ").lower()
+
+            if user_input == "n":
+                fit_intercept = False
+            if user_input == "q":
+                break
+            
+            user_input = input("Normalize the dataset (y/N)? ").lower()
+
+            if user_input == "y":
+                normalize = True
+            if user_input == "q":
+                break
+            
+            user_input = input("Copy the dataset's features (Y/n)? ").lower()
+            
+            if user_input == "n":
+                copy_X = False
+            if user_input == "q":
+                break
+            
+            user_input = input("Input the number of jobs for computation: ")
+
+            try:
+                n_jobs = int(user_input)
+            except:
+                break
+            
+            break
         
         print("\n=======================================================")
         print("= End of parameter inputs; press any key to continue. =")
-        input("=======================================================")
+        input("=======================================================\n")
         
         return LinearRegression(fit_intercept=fit_intercept, normalize=normalize, copy_X=copy_X, n_jobs=n_jobs)
 

@@ -247,141 +247,177 @@ class LogRegression:
             input("=======================================================")
             return LogisticRegression()
         
-        print("If you are unsure about a parameter, press enter to use its default value.")
+        print("\nIf you are unsure about a parameter, press enter to use its default value.")
+        print("If you finish entering parameters early, enter 'q' to skip ahead.\n")
 
-        print("Which norm should be used in penalization?")
-        penalty = input("Enter 1 for 'l1', 2 for 'l2', 3 for 'elasticnet', or 4 for 'none': ")
-        
-        if penalty == "1":
-            penalty = "l1"
-        elif penalty == "3":
-            penalty = "elasticnet"
-        elif penalty == "4":
-            penalty = "none"
-        else:
-            penalty = "l2"
-        
-        if input("Use dual formulation (y/N)? ").lower() == "y":
-            dual = True
-        else:
-            dual = False
-        
-        tol = input("Enter a number for the tolerance for stopping criteria: ")
+        # Set defaults
+        self.test_size = 0.25
+        self.cv = None
+        penalty = "l2"
+        dual = False
+        tol = 0.0001
+        C = 1.0
+        fit_intercept = True
+        intercept_scaling = 1
+        class_weight = None
+        random_state = None
+        solver = "lbfgs"
+        max_iter = 100
+        multi_class = "auto"
+        verbose = 0
+        warm_start = False
+        n_jobs = None
+        l1_ratio = None
 
-        try:
-            tol = float(tol)
-        except:
-            tol = 0.0001
-        
-        C = input("Enter a positive number for the inverse of regularization strength C: ")
+        while True:
+            user_input = input("What fraction of the dataset should be the testing set? Input a decimal: ")
 
-        try:
-            C = float(C)
-        except:
-            C = 1.0
-
-        if input("Include a y-intercept in the model (Y/n)? ").lower() == "n":
-            fit_intercept = False
-        else:
-            fit_intercept = True
-        
-        if fit_intercept:
-            intercept_scaling = input("Enter a number for the intercept scaling factor: ")
             try:
-                intercept_scaling = float(intercept_scaling)
+                self.test_size = float(user_input)
             except:
-                intercept_scaling = 1
-        else:
-            intercept_scaling = 1
-        
-        if input("Automatically balance the class weights (y/N)? ").lower() == "y":
-            class_weight = "balanced"
-        else:
-            class_weight = None
-        
-        print("To set manual weights, call get_regression().set_params() to set the class_weight parameter.")
+                if user_input.lower() == "q":
+                    break
+            
+            user_input = input("Input the number of folds for cross validation: ")
 
-        random_state = input("Input an integer for the random number seed: ")
-
-        try:
-            random_state = int(random_state)
-        except:
-            random_state = None
-        
-        print("Which algorithm should be used in the optimization problem?")
-        solver = input("Enter 1 for 'newton-cg', 2 for 'lbfgs', 3 for 'liblinear', 4 for 'sag', or 5 for 'saga': ")
-
-        if solver == "1":
-            solver = "newton-cg"
-        elif solver == "3":
-            solver = "liblinear"
-        elif solver == "4":
-            solver = "sag"
-        elif solver == "5":
-            solver = "saga"
-        else:
-            solver = "lbfgs"
-        
-        max_iter = input("Enter the max number of iterations: ")
-
-        try:
-            max_iter = int(max_iter)
-        except:
-            max_iter = 100
-        
-        print("Please choose a multiclass scheme.")
-        multi_class = input("Enter 1 for one-vs-rest, 2 for multinomial, or 3 to automatically choose: ")
-
-        if multi_class == "1":
-            multi_class = "ovr"
-        elif multi_class == "2":
-            multi_class = "multinomial"
-        else:
-            multi_class = "auto"
-        
-        if input("Enable verbose output during training (y/N)? ").lower() == "y":
-            verbose = 1
-        else:
-            verbose = 0
-        
-        if input("Enable warm start? This will use the previous solution for fitting (y/N): ").lower() == "y":
-            warm_start = True
-        else:
-            warm_start = False
-        
-        n_jobs = input("Input the number of jobs for computation: ")
-
-        try:
-            n_jobs = int(n_jobs)
-        except:
-            n_jobs = None
-        
-        if penalty == "elasticnet":
-            l1_ratio = input("Enter a number for the Elastic-Net mixing parameter: ")
             try:
-                l1_ratio = float(l1_ratio)
+                self.cv = int(user_input)
             except:
-                l1_ratio = None
-        else:
-            l1_ratio = None
-        
-        self.test_size = input("What fraction of the dataset should be the testing set? Input a decimal: ")
+                if user_input.lower() == "q":
+                    break
 
-        try:
-           self.test_size = float(test_size)
-        except:
-            self.test_size = 0.25
-        
-        self.cv = input("Input the number of folds for cross validation: ")
+            print("Which norm should be used in penalization?")
+            user_input = input("Enter 1 for 'l1', 2 for 'l2', 3 for 'elasticnet', or 4 for 'none': ")
+            
+            if user_input.lower() == "q":
+                break
+            elif user_input == "1":
+                penalty = "l1"
+            elif user_input == "3":
+                penalty = "elasticnet"
+            elif user_input == "4":
+                penalty = "none"
+            
+            user_input = input("Use dual formulation (y/N)? ").lower()
+            if user_input == "y":
+                dual = True
+            if user_input == "q":
+                break
+            
+            user_input = input("Enter a number for the tolerance for stopping criteria: ")
 
-        try:
-            self.cv = int(cv)
-        except:
-            self.cv = None
+            try:
+                tol = float(user_input)
+            except:
+                if user_input.lower() == "q":
+                    break
+            
+            user_input = input("Enter a positive number for the inverse of regularization strength C: ")
+
+            try:
+                C = float(user_input)
+            except:
+                if user_input.lower() == "q":
+                    break
+
+            user_input = input("Include a y-intercept in the model (Y/n)? ").lower()
+            if user_input == "n":
+                fit_intercept = False
+            if user_input == "q":
+                break
+            
+            if fit_intercept:
+                user_input = input("Enter a number for the intercept scaling factor: ")
+                try:
+                    intercept_scaling = float(user_input)
+                except:
+                    if user_input.lower() == "q":
+                        break
+            
+            user_input = input("Automatically balance the class weights (y/N)? ").lower()
+
+            if user_input == "y":
+                class_weight = "balanced"
+            if user_input == "q":
+                break
+            
+            print("To set manual weights, call get_regression().set_params() to set the class_weight parameter.")
+
+            user_input = input("Input an integer for the random number seed: ")
+
+            try:
+                random_state = int(user_input)
+            except:
+                if user_input.lower() == "q":
+                    break
+            
+            print("Which algorithm should be used in the optimization problem?")
+            user_input =\
+                input("Enter 1 for 'newton-cg', 2 for 'lbfgs', 3 for 'liblinear', 4 for 'sag', or 5 for 'saga': ")
+
+            if user_input.lower() == "q":
+                break
+            elif user_input == "1":
+                solver = "newton-cg"
+            elif user_input == "3":
+                solver = "liblinear"
+            elif user_input == "4":
+                solver = "sag"
+            elif user_input == "5":
+                solver = "saga"
+            
+            user_input = input("Enter the max number of iterations: ")
+
+            try:
+                max_iter = int(user_input)
+            except:
+                if user_input.lower() == "q":
+                    break
+            
+            print("Please choose a multiclass scheme.")
+            user_input = input("Enter 1 for one-vs-rest, 2 for multinomial, or 3 to automatically choose: ")
+
+            if user_input.lower() == "q":
+                break
+            elif user_input == "1":
+                multi_class = "ovr"
+            elif user_input == "2":
+                multi_class = "multinomial"
+
+            user_input = input("Enable verbose output during training (y/N)? ").lower()
+
+            if user_input == "y":
+                verbose = 1
+            if user_input == "q":
+                break
+            
+            user_input = input("Enable warm start? This will use the previous solution for fitting (y/N): ").lower()
+
+            if user_input == "y":
+                warm_start = True
+            if user_input == "q":
+                break
+            
+            user_input = input("Input the number of jobs for computation: ")
+
+            try:
+                n_jobs = int(user_input)
+            except:
+                if user_input.lower() == "q":
+                    break
+            
+            if penalty == "elasticnet":
+                user_input = input("Enter a number for the Elastic-Net mixing parameter: ")
+                try:
+                    l1_ratio = float(user_input)
+                except:
+                    break
+            
+            break
         
         print("\n=======================================================")
         print("= End of parameter inputs; press any key to continue. =")
-        input("=======================================================")
+        input("=======================================================\n")
 
         return LogisticRegression(penalty=penalty, dual=dual, tol=tol, C=C, fit_intercept=fit_intercept,
                                   intercept_scaling=intercept_scaling, class_weight=class_weight,
@@ -398,8 +434,8 @@ class LogRegression:
 
         print("Classes:\n", self.classes_)
         print("\nCoefficients:\n", self.coefficients)
-        print("\nNumber of Iterations:\n", self.n_iter_)
         print("\nIntercept:\n", self.intercept)
+        print("\nNumber of Iterations:\n", self.n_iter_)
         print("\n{:<20} {:<20}".format("Accuracy:", self.accuracy))
         print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
         print("\nCross Validation Scores:\n", self.cross_val_scores)
