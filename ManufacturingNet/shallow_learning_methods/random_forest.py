@@ -480,7 +480,7 @@ class RandomForest:
             self.cv = None
             print("\n=======================================================")
             print("= End of parameter inputs; press any key to continue. =")
-            input("=======================================================")
+            input("=======================================================\n")
             
             if classifier:
                 return RandomForestClassifier()
@@ -488,6 +488,7 @@ class RandomForest:
                 return RandomForestRegressor()
         
         print("\nIf you are unsure about a parameter, press enter to use its default value.")
+        print("Invalid parameter inputs will be replaced with their default values.")
         print("If you finish entering parameters early, enter 'q' to skip ahead.\n")
 
         # Set defaults

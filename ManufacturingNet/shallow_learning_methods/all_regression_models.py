@@ -12,7 +12,7 @@ class AllRegressionModels:
     Wrapper class around all supported regression models: LinearRegression, RandomForest, SVR, NuSVR, LinearSVR, and
     XGBRegressor.
     AllRegressionModels runs every available regression algorithm on the given dataset and outputs the coefficient of
-    determination and execution time of each successful model when all_regression_models() is run.
+    determination and execution time of each successful model when run() is run.
     """
     def __init__(self, attributes=None, labels=None, test_size=0.25, verbose=False):
         """
@@ -29,7 +29,7 @@ class AllRegressionModels:
             Note: These are the only parameters allowed. All other parameters for each model will use their default
             values. For more granular control, please instantiate each model individually.
 
-        The following instance data is found after running all_regression_models() successfully:
+        The following instance data is found after running run() successfully:
 
             – linear_regression: a reference to the LinearRegression model
             – random_forest: a reference to the RandomForest model
@@ -38,22 +38,22 @@ class AllRegressionModels:
             – linear_SVR: a reference to the LinearSVR model
             – XGB_regressor: a reference to the XGBRegressor model
         
-        After running all_regression_models(), the coefficient of determination and execution time for each model that
+        After running run(), the coefficient of determination and execution time for each model that
         ran successfully will be displayed in tabular form. Any models that failed to run will be listed.
         """
         self.attributes = attributes
         self.labels = labels
-        self.test_size = test_size
-        self.verbose = verbose
+        self.test_size = None
+        self.verbose = None
 
-        self.linear_regression = LinearRegression()
-        self.random_forest = RandomForestRegressor(verbose=self.verbose)
-        self.SVR = SVR(verbose=self.verbose)
-        self.nu_SVR = NuSVR(verbose=self.verbose)
-        self.linear_SVR = LinearSVR(verbose=self.verbose)
-        self.XGB_regressor = XGBRegressor(verbosity=int(self.verbose))
+        self.linear_regression = None
+        self.random_forest = None
+        self.SVR = None
+        self.nu_SVR = None
+        self.linear_SVR = None
+        self.XGB_regressor = None
 
-        self._regression_models = {"Model": ["R2 Score", "Time"]}
+        self._regression_models = {"Model": ["R2 Score", "Time (seconds)"]}
         self._failures = []
 
     # Accessor methods
@@ -63,7 +63,7 @@ class AllRegressionModels:
         Accessor method for attributes.
 
         If an AllRegressionModels object is initialized without specifying attributes, attributes will be None.
-        all_regression_models() cannot be called until attributes is a populated numpy array of independent variables;
+        run() cannot be called until attributes is a populated numpy array of independent variables;
         call set_attributes(new_attributes) to fix this.
         """
         return self.attributes
@@ -73,32 +73,16 @@ class AllRegressionModels:
         Accessor method for labels.
 
         If an AllRegressionModels object is initialized without specifying labels, labels will be None.
-        all_regression_models() cannot be called until labels is a populated numpy array of dependent variables;
+        run() cannot be called until labels is a populated numpy array of dependent variables;
         call set_labels(new_labels) to fix this.
         """
         return self.labels
-
-    def get_test_size(self):
-        """
-        Accessor method for test_size.
-
-        Should return a number or None.
-        """
-        return self.test_size
-
-    def get_verbose(self):
-        """
-        Accessor method for verbose.
-
-        Will default to False if not set by the user.
-        """
-        return self.verbose
 
     def get_all_regression_models(self):
         """
         Accessor method that returns a list of all models.
 
-        All models within the list will be None if all_regression_models() hasn't been called, yet.
+        All models within the list will be None if run() hasn't been called, yet.
         """
         return [self.linear_regression, self.random_forest, self.SVR, self.nu_SVR, self.linear_SVR, self.XGB_regressor]
 
@@ -106,7 +90,7 @@ class AllRegressionModels:
         """
         Accessor method for linear_regression.
 
-        Will return None if all_regression_models() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.linear_regression
 
@@ -114,7 +98,7 @@ class AllRegressionModels:
         """
         Accessor method for random_forest.
 
-        Will return None if all_regression_models() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.random_forest
 
@@ -122,7 +106,7 @@ class AllRegressionModels:
         """
         Accessor method for SVR.
 
-        Will return None if all_regression_models() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.SVR
 
@@ -130,7 +114,7 @@ class AllRegressionModels:
         """
         Accessor method for nu_SVR.
 
-        Will return None if all_regression_models() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.nu_SVR
 
@@ -138,7 +122,7 @@ class AllRegressionModels:
         """
         Accessor method for linear_SVR.
 
-        Will return None if all_regression_models() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.linear_SVR
 
@@ -146,7 +130,7 @@ class AllRegressionModels:
         """
         Accessor method for XGB_regressor.
 
-        Will return None if all_regression_models() hasn't been called, yet.
+        Will return None if run() hasn't been called, yet.
         """
         return self.XGB_regressor
 
@@ -168,34 +152,21 @@ class AllRegressionModels:
         """
         self.labels = new_labels
 
-    def set_test_size(self, new_test_size=0.25):
-        """
-        Modifier method for test_size.
-
-        Input should be a number or None. Defaults to 0.25.
-        """
-        self.test_size = new_test_size
-
-    def set_verbose(self, new_verbose=False):
-        """
-        Modifier method for verbose.
-
-        Input should be a truthy/falsy value. Defaults to False.
-        """
-        self.verbose = new_verbose
-
     # Regression functionality
 
-    def all_regression_models(self):
+    def run(self):
         """
         Driver method for running all regression models with given attributes and labels.
-        all_regression_models() first trains the models and determines their coefficients of determination and
-        execution time via _all_regression_models_runner(). Then, all_regression_models() calls _print_results() to
+        First, run() calls _create_models() to instantiate the models via user input.
+        run() then trains the models and determines their coefficients of determination and
+        execution time via _all_regression_models_runner(). Finally, run() calls _print_results() to
         format and print each successful model's measurements, while also listing any failed models.
 
         If verbose is True, all verbose logging for each model will be enabled.
         If verbose is False, all logging to stdout and stderr will be suppressed.
         """
+        # Get parameters; create models
+        self._create_models()
 
         # Call helper method for running all regression models; suppress output, if needed
         if not self.verbose:
@@ -210,13 +181,50 @@ class AllRegressionModels:
         
     # Helper methods
 
+    def _create_models(self):
+        """
+        Prompts user for parameter input and instantiates all the regressor models.
+
+        _create_models() can only be called by run().
+        """
+        print("\n==========================================")
+        print("= All Regression Models Parameter Inputs =")
+        print("==========================================\n")
+
+        # Get user input for verbose, test size
+        user_input = input("Enable verbose logging (y/N)? ").lower()
+
+        if user_input == "y":
+            self.verbose = True
+        else:
+            self.verbose = False
+        
+        user_input = input("What fraction of the dataset should be used for testing? Enter a decimal: ")
+
+        try:
+            self.test_size = float(user_input)
+        except:
+            self.test_size = 0.25
+        
+        print("\n=======================================================")
+        print("= End of parameter inputs; press any key to continue. =")
+        input("=======================================================\n")
+
+        # Create models
+        self.linear_regression = LinearRegression()
+        self.random_forest = RandomForestRegressor(verbose=self.verbose)
+        self.SVR = SVR(verbose=self.verbose)
+        self.nu_SVR = NuSVR(verbose=self.verbose)
+        self.linear_SVR = LinearSVR(verbose=self.verbose)
+        self.XGB_regressor = XGBRegressor(verbosity=int(self.verbose))
+
     def _all_regression_models_runner(self):
         """
         Helper method that runs all models using the given dataset and all default parameters.
         After running all models, each model is determined to be either a success or failure, and relevant data
         (R2 score, execution time) is recorded.
 
-        _all_regression_models_runner() may only be called by all_regression_models().
+        _all_regression_models_runner() may only be called by run().
         """
 
         # Split dataset
@@ -280,11 +288,13 @@ class AllRegressionModels:
         """
         Helper method that prints results of _all_regression_models_runner() in tabular form.
 
-        _print_results() may only be called by all_regression_models() after all models have attempted to run.
+        _print_results() may only be called by run() after all models have attempted to run.
         """
 
         # Print models that didn't fail
-        print("\nResults:\n")
+        print("\n===========")
+        print("= Results =")
+        print("===========\n")
 
         for model, data in self._regression_models.items():
             print("{:<20} {:<20} {:<20}".format(model, data[0], data[1]))
