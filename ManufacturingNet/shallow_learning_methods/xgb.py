@@ -7,44 +7,12 @@ import numpy as np
 
 class XGBoost: 
     """
-    Class framework for XGBoost's classification and regression functionality. Per XGBoost's documentation:
-
-    XGBoost is an optimized distributed gradient boosting library designed to be highly efficient, flexible and portable.
-    It implements machine learning algorithms under the Gradient Boosting framework. XGBoost provides a parallel tree
-    boosting (also known as GBDT, GBM) that solve many data science problems in a fast and accurate way.
+    Class framework for XGBoost's classification and regression functionality.
     """
 
     def __init__(self, attributes=None, labels=None):
         """
         Initializes an XGBoost object.
-
-        The following parameters are needed to create a XGBoost model:
-
-            - attributes: a numpy array of the desired independent variables
-            - labels: a numpy array of the desired dependent variables
-            - test_size: the proportion of the dataset to be used for testing the model (defaults to 0.25);
-            the proportion of the dataset to be used for training will be the complement of test_size
-            - cv: the number of cross validation folds
-        
-        After successfully running run_regressor(), the following instance data will be available:
-
-            - regressor: a reference to the XGBRegressor model
-            - mean_squared_error: the mean squared error for the regression model
-            - r2_score: the coefficient of determination for the regression model
-            - r_score: the correlation coefficient for the regression model
-            - cross_val_scores_regressor: the cross validation score(s) for the model
-        
-        After successfully running run_classifier(), the following instance data will be available:
-
-            - classifier: a reference to the XGBClassifier model
-            - precision_scores: a list of the precision for each label
-            - recall_scores: a list of the recall scores for each label
-            - accuracy: the mean accuracy of the classification model
-            - confusion_matrix: a 2x2 matrix of true negatives, false negatives, true positives, and false positives
-            of the model
-            - roc_auc: the area under the ROC curve for the classification model
-            - classes: the classes for each label
-            - cross_val_scores_classifier: the cross validation score(s) for the model
         """
         self.attributes = attributes
         self.labels = labels
@@ -71,140 +39,102 @@ class XGBoost:
     def get_attributes(self):
         """
         Accessor method for attributes.
-
-        If a XGBoost object is constructed without specifying attributes, attributes will be None.
-        run_regressor() cannot be called until attributes is a populated numpy array; call
-        set_attributes(new_attributes) to fix this.
         """
         return self.attributes
 
     def get_labels(self):
         """
         Accessor method for labels.
-
-        If a XGBoost object is constructed without specifying labels, labels will be None.
-        run_regressor() cannot be called until labels is a populated numpy array; call set_labels(new_labels)
-        to fix this.
         """
         return self.labels
 
     def get_regressor(self):
         """
         Accessor method for regressor.
-
-        Will return None if run_regressor() hasn't been called, yet.
         """
         return self.regressor
 
     def get_classifier(self):
         """
         Accessor method for classifier.
-
-        Will return None if run_classifier() hasn't been called, yet.
         """
         return self.classifier
 
     def get_classes(self):
         """
         Accessor method for classes of the XGBoost classification model.
-
-        Will return None if run_classifier() hasn't been called, yet.
         """
         return self.classes
 
     def get_accuracy(self):
         """
         Accessor method for accuracy of the XGBoost classification model.
-
-        Will return None if run_classifier() hasn't been called, yet.
         """
         return self.accuracy
     
     def get_cross_val_scores_classifier(self):
         """
         Accessor method for cross_val_scores_classifier.
-
-        Will return None if run_classifier() hasn't been called, yet.
         """
         return self.cross_val_scores_classifier
     
     def get_cross_val_scores_regressor(self):
         """
         Accessor method for cross_val_scores_regressor.
-
-        Will return None if run_regressor() hasn't been called, yet.
         """
         return self.cross_val_scores_regressor
 
     def get_mean_squared_error(self):
         """
         Accessor method for mean squared error of the XGBoost regression model.
-
-        Will return None if run_regressor() hasn't been called, yet.
         """
         return self.mean_squared_error
 
     def get_r2_score(self):
         """
         Accessor method for coefficient of determination of the XGBoost regression model.
-
-        Will return None if run_regressor() hasn't been called, yet.
         """
         return self.r2_score
 
     def get_r_score(self):
         """
         Accessor method for correlation coefficient of the XGBoost regression model.
-        
-        Will return None if run_regressor() hasn't been called, yet.
         """
         return self.r_score
 
     def get_confusion_matrix(self):
         """
         Accessor method for confusion matrix of the XGBoost classification model.
-        
-        Will return None if run_classifier() hasn't been called, yet.
         """
         return self.confusion_matrix
 
     def get_roc_auc(self):
         """
         Accessor method for roc-auc score.
-
-        Will return None if run_classifier() hasn't been called, yet.
         """
         return self.roc_auc
 
     def get_precision(self, label=None):
         """
         Accessor method for precision of the given label.
-
-        Will return None if run_classifier() hasn't been called, yet.
         """
         return self.precision_scores.get(label)
     
     def get_precision_scores(self):
         """
         Accessor method for precision_scores.
-
-        Will return None if run_classifier() hasn't been called, yet.
         """
         return self.precision_scores
 
     def get_recall(self, label=None):
         """
         Accessor method for recall score of the given label.
-
-        Will return None if run_classifier() hasn't been called, yet.
         """
         return self.recall_scores.get(label)
 
     def get_recall_scores(self):
         """
         Accessor method for recall_scores.
-
-        Will return None if run_classifier() hasn't been called, yet.
         """
         return self.recall_scores
 
@@ -213,16 +143,12 @@ class XGBoost:
     def set_attributes(self, new_attributes=None):
         """
         Modifier method for attributes.
-
-        Input should be a populated numpy array of the desired independent variables.
         """
         self.attributes = new_attributes
 
     def set_labels(self, new_labels=None):
         """
         Modifier method for labels.
-
-        Input should be a populated numpy array of the desired dependent variables.
         """
         self.labels = new_labels
     
@@ -231,49 +157,6 @@ class XGBoost:
     def run_regressor(self):
         """
         Runs XGBRegressor model.
-        Parameters per XGBRegressor's documentation:
-
-            - base_score: The initial prediction score of all instances, global bias. (Default is 0.5)
-            
-            - booster: Specify which booster to use: gbtree, gblinear or dart. (Default is "gbtree")
-            
-            - colsample_bylevel: Subsample ratio of columns for each level. (Default is 1)
-            
-            - colsample_bytree: Subsample ratio of columns when constructing each tree. (Default is 1)
-            
-            - gamma: Minimum loss reduction required to make a further partition on a leaf node of the tree. (Default is 0)
-            
-            - learning_rate: Boosting learning rate. (Default is 0.1)
-            
-            - max_delta_step: Maximum delta step we allow each tree’s weight estimation to be. (Default is 0)
-            
-            - max_depth: Maximum tree depth for base learners. (Default is 3)
-            
-            - min_child_weight: Minimum sum of instance weight (hessian) needed in a child. (Default is 1)
-            
-            - missing: Value in the data which needs to be present as a missing value. (Default is None)
-            
-            - n_estimators: Number of gradient boosted trees. Equivalent to number of boosting rounds. (Default is 100)
-            
-            - n_jobs: Number of parallel threads used to run xgboost. (Default is 1)
-            
-            - nthread: Number of threads to use for loading data when parallelization is applicable. If -1, uses maximum
-            threads available on the system. (Default is None)
-            
-            - objective: Specify the learning task and the corresponding learning objective or a custom objective
-            function to be used. (Default is "reg:squarederror")
-            
-            - random_state: Random number seed. (Default is 42)
-            
-            - reg_alpha: L1 regularization term on weights. (Default is 0)
-            
-            - reg_lambda: L2 regularization term on weights. (Default is 1)
-            
-            - scale_pos_weight: Balancing of positive and negative weights. (Default is 1)
-                        
-            - subsample: Subsample ratio of the training instance. (Default is 1)
-
-            – cv: the number of folds to use for cross validation of model (defaults to None)
         """
         if self._check_inputs():
             # Initialize regressor
@@ -309,8 +192,6 @@ class XGBoost:
     def predict_regressor(self, dataset_X=None):
         """
         Predicts the output of each datapoint in dataset_X using the regressor model. Returns the predictions.
-
-        predict_regressor() can only run after run_regressor() has successfully trained the regressor model.
         """
 
         # Check that run_regressor() has already been called
@@ -335,50 +216,6 @@ class XGBoost:
     def run_classifier(self):
         """
         Runs XGBClassifier model.
-        Parameters per XGBClassifier's documentation:
-
-            - max_depth: Maximum tree depth for base learners. (Default is 3)
-
-            - learning_rate: Boosting learning rate. (Default is 0.1)
-
-            - n_estimators: Number of gradient boosted trees. Equivalent to number of boosting rounds. (Default is 100)
-
-            - objective: Specify the learning task and the corresponding learning objective or a custom objective
-            function to be used. (Default is "binary:logistic")
-
-            - booster: Specify which booster to use: gbtree, gblinear, or dart. (Default is "gbtree")
-
-            - n_jobs: Number of parallel threads used to run xgboost. (Default is 1)
-
-            - nthread: Number of threads to use for loading data when parallelization is applicable. If -1, uses
-            maximum threads available on the system. (Default is None)
-
-            - gamma: Minimum loss reduction required to make a further partition on a leaf node of the tree.
-            (Default is 0)
-
-            - min_child_weight: Minimum sum of instance weight(hessian) needed in a child. (Default is 1)
-
-            - max_delta_step: Maximum delta step we allow each tree's weight estimation to be. (Default is 0)
-
-            - subsample: Subsample ratio of the training instance. (Default is 1)
-
-            - colsample_bylevel: Subsample ratio of columns for each level. (Default is 1)
-            
-            - colsample_bytree: Subsample ratio of columns when constructing each tree. (Default is 1)
-
-            - reg_alpha: L1 regularization term on weights. (Default is 0)
-            
-            - reg_lambda: L2 regularization term on weights. (Default is 1)
-
-            - scale_pos_weight: Balancing of positive and negative weights. (Default is 1)
-
-            - base_score: The initial prediction score of all instances, global bias. (Default is 0.5)
-
-            - random_state: Random number seed. (Default is 0)
-
-            - missing: Value in the data which needs to be present as a missing value. (Default is None)
-
-            – cv: the number of folds to use for cross validation of model (defaults to None)
         """
         if self._check_inputs():
             # Initialize classifier
@@ -420,8 +257,6 @@ class XGBoost:
     def predict_classifier(self, dataset_X=None):
         """
         Classifies each datapoint in dataset_X using the classifier model. Returns the predicted classifications.
-
-        predict_classifier() can only run after run_classifier() has successfully trained the classifier model.
         """
         # Check that run_classifier() has already been called
         if self.classifier is None:
