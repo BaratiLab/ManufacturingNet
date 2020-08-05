@@ -12,35 +12,13 @@ class AllClassificationModels:
     """
     Wrapper class around all supported classification models: LogisticRegression, RandomForest, SVC,
     NuSVC, LinearSVC, and XGBClassifier.
+
     AllClassificationModels runs every available classification algorithm on the given dataset and outputs the mean
     accuracy, ROC-AUC, and execution time of each successful model when run() is run.
     """
     def __init__(self, attributes=None, labels=None):
         """
         Initializes an AllClassificationModels object.
-
-        The following parameters are needed to use an AllClassificationModels object:
-
-            – attributes: a numpy array of the desired independent variables (Default is None)
-            – labels: a numpy array of the classes (Default is None)
-            – test_size: the proportion of the dataset to be used for testing the model;
-            the proportion of the dataset to be used for training will be the complement of test_size (Default is 0.25)
-            – verbose: specifies whether or not to ouput any and all logging during model training (Default is False)
-
-            Note: These are the only parameters allowed. All other parameters for each model will use their default
-            values. For more granular control, please instantiate each model individually.
-
-        The following instance data is found after running run() successfully:
-
-            – logistic_regression: a reference to the LogisticRegression model
-            – random_forest: a reference to the RandomForest model
-            – SVC: a reference to the SVC model
-            – nu_SVC: a reference to the NuSVC model
-            – linear_SVC: a reference to the LinearSVC model
-            – XGB_classifier: a reference to the XGBClassifier model
-
-        After running run(), the mean accuracy, ROC-AUC (if available), and execution time for
-        each model that ran successfully will be displayed in tabular form. Any models that failed to run will be listed.
         """
         self.attributes = attributes
         self.labels = labels
@@ -62,28 +40,18 @@ class AllClassificationModels:
     def get_attributes(self):
         """
         Accessor method for attributes.
-
-        If an AllClassificationModels object is initialized without specifying attributes, attributes will be None.
-        run() cannot be called until attributes is a populated numpy array of independent variables;
-        call set_attributes(new_attributes) to fix this.
         """
         return self.attributes
 
     def get_labels(self):
         """
         Accessor method for labels.
-
-        If an AllClassificationModels object is initialized without specifying labels, labels will be None.
-        run() cannot be called until labels is a populated numpy array of classes;
-        call set_labels(new_labels) to fix this.
         """
         return self.labels
 
     def get_all_classification_models(self):
         """
         Accessor method that returns a list of all models.
-
-        All models within the list will be None if run() hasn't been called, yet.
         """
         return [self.logistic_regression, self.random_forest, self.SVC, self.nu_SVC, self.linear_SVC,
                 self.XGB_classifier]
@@ -91,48 +59,36 @@ class AllClassificationModels:
     def get_logistic_regression(self):
         """
         Accessor method for logistic_regression.
-
-        Will return None if run() hasn't been called, yet.
         """
         return self.logistic_regression
 
     def get_random_forest(self):
         """
         Accessor method for random_forest.
-
-        Will return None if run() hasn't been called, yet.
         """
         return self.random_forest
 
     def get_SVC(self):
         """
         Accessor method for SVC.
-
-        Will return None if run() hasn't been called, yet.
         """
         return self.SVC
     
     def get_nu_SVC(self):
         """
         Accessor method for nu_SVC.
-
-        Will return None if run() hasn't been called, yet.
         """
         return self.nu_SVC
     
     def get_linear_SVC(self):
         """
         Accessor method for linear_SVC.
-
-        Will return None if run() hasn't been called, yet.
         """
         return self.linear_SVC
 
     def get_XGB_classifier(self):
         """
         Accessor method for XGB_classifier.
-
-        Will return None if run() hasn't been called, yet.
         """
         return self.XGB_classifier
 
@@ -141,16 +97,12 @@ class AllClassificationModels:
     def set_attributes(self, new_attributes=None):
         """
         Modifier method for attributes.
-
-        Input should be a numpy array of independent variables. Defaults to None.
         """
         self.attributes = new_attributes
 
     def set_labels(self, new_labels=None):
         """
         Modifier method for labels.
-
-        Input should be a numpy array of classes. Defaults to None.
         """
         self.labels = new_labels
 
@@ -159,13 +111,6 @@ class AllClassificationModels:
     def run(self):
         """
         Driver method for running all classification models with given attributes and labels.
-        run() first calls _create_models() to instantiate the models via user input.
-        run() then trains the models and determines their mean accuracy, ROC-AUC, and execution
-        time via _all_classification_models_runner(). Finally, run() calls _print_results() to
-        format and print each successful model's measurements, while also listing any failed models.
-
-        If verbose is True, all verbose logging for each model will be enabled.
-        If verbose is False, all logging to stdout and stderr will be suppressed.
         """
         # Get parameters; create models
         self._create_models()
@@ -186,8 +131,6 @@ class AllClassificationModels:
     def _create_models(self):
         """
         Prompts user for parameter input and instantiates all the classifier models.
-
-        _create_models() can only be called by run().
         """
         print("\n==========================================")
         print("= All Classifier Models Parameter Inputs =")
@@ -223,10 +166,6 @@ class AllClassificationModels:
     def _all_classification_models_runner(self):
         """
         Helper method that runs all models using the given dataset and all default parameters.
-        After running all models, each model is determined to be either a success or failure, and relevant data
-        (accuracy, ROC-AUC, execution time) is recorded.
-
-        _all_classification_models_runner() may only be called by run().
         """
 
         # Split dataset
@@ -304,8 +243,6 @@ class AllClassificationModels:
     def _print_results(self):
         """
         Helper method that prints results of _all_classification_models_runner() in tabular form.
-
-        _print_results() may only be called by run() after all models have attempted to run.
         """
 
         # Print models that didn't fail

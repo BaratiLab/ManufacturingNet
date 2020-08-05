@@ -11,35 +11,13 @@ class AllRegressionModels:
     """
     Wrapper class around all supported regression models: LinearRegression, RandomForest, SVR, NuSVR, LinearSVR, and
     XGBRegressor.
+
     AllRegressionModels runs every available regression algorithm on the given dataset and outputs the coefficient of
     determination and execution time of each successful model when run() is run.
     """
     def __init__(self, attributes=None, labels=None, test_size=0.25, verbose=False):
         """
         Initializes an AllRegressionModels object.
-
-        The following parameters are needed to use an AllRegressionModels object:
-
-            – attributes: a numpy array of the desired independent variables (Default is None)
-            – labels: a numpy array of the desired dependent variables (Default is None)
-            – test_size: the proportion of the dataset to be used for testing the model;
-            the proportion of the dataset to be used for training will be the complement of test_size (Default is 0.25)
-            – verbose: specifies whether or not to ouput any and all logging during model training (Default is False)
-
-            Note: These are the only parameters allowed. All other parameters for each model will use their default
-            values. For more granular control, please instantiate each model individually.
-
-        The following instance data is found after running run() successfully:
-
-            – linear_regression: a reference to the LinearRegression model
-            – random_forest: a reference to the RandomForest model
-            – SVR: a reference to the SVR model
-            – nu_SVR: a reference to the NuSVR model
-            – linear_SVR: a reference to the LinearSVR model
-            – XGB_regressor: a reference to the XGBRegressor model
-        
-        After running run(), the coefficient of determination and execution time for each model that
-        ran successfully will be displayed in tabular form. Any models that failed to run will be listed.
         """
         self.attributes = attributes
         self.labels = labels
@@ -61,76 +39,54 @@ class AllRegressionModels:
     def get_attributes(self):
         """
         Accessor method for attributes.
-
-        If an AllRegressionModels object is initialized without specifying attributes, attributes will be None.
-        run() cannot be called until attributes is a populated numpy array of independent variables;
-        call set_attributes(new_attributes) to fix this.
         """
         return self.attributes
 
     def get_labels(self):
         """
         Accessor method for labels.
-
-        If an AllRegressionModels object is initialized without specifying labels, labels will be None.
-        run() cannot be called until labels is a populated numpy array of dependent variables;
-        call set_labels(new_labels) to fix this.
         """
         return self.labels
 
     def get_all_regression_models(self):
         """
         Accessor method that returns a list of all models.
-
-        All models within the list will be None if run() hasn't been called, yet.
         """
         return [self.linear_regression, self.random_forest, self.SVR, self.nu_SVR, self.linear_SVR, self.XGB_regressor]
 
     def get_linear_regression(self):
         """
         Accessor method for linear_regression.
-
-        Will return None if run() hasn't been called, yet.
         """
         return self.linear_regression
 
     def get_random_forest(self):
         """
         Accessor method for random_forest.
-
-        Will return None if run() hasn't been called, yet.
         """
         return self.random_forest
 
     def get_SVR(self):
         """
         Accessor method for SVR.
-
-        Will return None if run() hasn't been called, yet.
         """
         return self.SVR
 
     def get_nu_SVR(self):
         """
         Accessor method for nu_SVR.
-
-        Will return None if run() hasn't been called, yet.
         """
         return self.nu_SVR
 
     def get_linear_SVR(self):
         """
         Accessor method for linear_SVR.
-
-        Will return None if run() hasn't been called, yet.
         """
         return self.linear_SVR
 
     def get_XGB_regressor(self):
         """
         Accessor method for XGB_regressor.
-
-        Will return None if run() hasn't been called, yet.
         """
         return self.XGB_regressor
 
@@ -139,16 +95,12 @@ class AllRegressionModels:
     def set_attributes(self, new_attributes=None):
         """
         Modifier method for attributes.
-
-        Input should be a numpy array of independent variables. Defaults to None.
         """
         self.attributes = new_attributes
 
     def set_labels(self, new_labels=None):
         """
         Modifier method for labels.
-
-        Input should be a numpy array of dependent variables. Defaults to None.
         """
         self.labels = new_labels
 
@@ -157,13 +109,6 @@ class AllRegressionModels:
     def run(self):
         """
         Driver method for running all regression models with given attributes and labels.
-        First, run() calls _create_models() to instantiate the models via user input.
-        run() then trains the models and determines their coefficients of determination and
-        execution time via _all_regression_models_runner(). Finally, run() calls _print_results() to
-        format and print each successful model's measurements, while also listing any failed models.
-
-        If verbose is True, all verbose logging for each model will be enabled.
-        If verbose is False, all logging to stdout and stderr will be suppressed.
         """
         # Get parameters; create models
         self._create_models()
@@ -184,8 +129,6 @@ class AllRegressionModels:
     def _create_models(self):
         """
         Prompts user for parameter input and instantiates all the regressor models.
-
-        _create_models() can only be called by run().
         """
         print("\n==========================================")
         print("= All Regression Models Parameter Inputs =")
@@ -221,10 +164,6 @@ class AllRegressionModels:
     def _all_regression_models_runner(self):
         """
         Helper method that runs all models using the given dataset and all default parameters.
-        After running all models, each model is determined to be either a success or failure, and relevant data
-        (R2 score, execution time) is recorded.
-
-        _all_regression_models_runner() may only be called by run().
         """
 
         # Split dataset
@@ -287,8 +226,6 @@ class AllRegressionModels:
     def _print_results(self):
         """
         Helper method that prints results of _all_regression_models_runner() in tabular form.
-
-        _print_results() may only be called by run() after all models have attempted to run.
         """
 
         # Print models that didn't fail
