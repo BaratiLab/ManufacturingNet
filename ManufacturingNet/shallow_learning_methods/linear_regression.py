@@ -6,10 +6,7 @@ from sklearn.model_selection import cross_val_score, train_test_split
 
 class LinRegression:
     """
-    Class framework for linear regression model. Per scikit-learn's documentation:
-
-    LinearRegression fits a linear model with coefficients to minimize the residual sum of squares between the observed
-    targets in the dataset, and the targets predicted by the linear approximation.
+    Class framework for linear regression model.
     """
 
     def __init__(self, attributes=None, labels=None):
