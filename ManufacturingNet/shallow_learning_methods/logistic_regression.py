@@ -135,7 +135,7 @@ class LogRegression:
 
             # Metrics
             self.accuracy = accuracy_score(y_prediction, dataset_y_test)
-            self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
+            #self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
             self.cross_val_scores = cross_val_score(self.regression, self.attributes, self.labels, cv=self.cv)
 
             # Output results
@@ -372,7 +372,7 @@ class LogRegression:
         print("\nIntercept:\n", self.intercept)
         print("\nNumber of Iterations:\n", self.n_iter)
         print("\n{:<20} {:<20}".format("Accuracy:", self.accuracy))
-        print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+        #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
         print("\nCross Validation Scores:\n", self.cross_val_scores)
         print("\n\nCall predict() to make predictions for new data.")
         
