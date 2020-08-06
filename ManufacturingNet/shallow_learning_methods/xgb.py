@@ -243,13 +243,13 @@ class XGBoost:
 
             self.accuracy = accuracy_score(dataset_y_test, y_prediction)
             self.confusion_matrix = confusion_matrix(dataset_y_test, y_prediction)
-            self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
+            #self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
             self.cross_val_scores_classifier = cross_val_score(self.classifier, self.attributes, self.labels, cv=self.cv)
 
-            self.precision_scores = { each : precision_score(dataset_y_test, y_prediction, pos_label=each) \
-                                                                    for each in self.classes}
-            self.recall_scores = { each : recall_score(dataset_y_test, y_prediction, pos_label=each) \
-                                                                    for each in self.classes}
+            #self.precision_scores = { each : precision_score(dataset_y_test, y_prediction, pos_label=each) \
+                                                                    #for each in self.classes}
+            #self.recall_scores = { each : recall_score(dataset_y_test, y_prediction, pos_label=each) \
+                                                                    #for each in self.classes}
             
             # Output results
             self._output_classifier_results()
@@ -525,7 +525,7 @@ class XGBoost:
         print("Classes:\n", self.classes)
         print("\nConfusion Matrix:\n", self.confusion_matrix)
         print("\n{:<20} {:<20}".format("Accuracy:", self.accuracy))
-        print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+        #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
         print("\nCross Validation Scores:\n", self.cross_val_scores_classifier)
         print("\n\nCall predict_classifier() to make predictions for new data.")
 

@@ -263,8 +263,8 @@ class SVM:
             self.accuracy_SVC = self.classifier_SVC.score(self.dataset_X_test, self.dataset_y_test)
             self.cross_val_scores_SVC = cross_val_score(self.classifier_SVC, self.attributes, self.labels, cv=self.cv)
 
-            self.roc_auc_SVC = roc_auc_score(self.classifier_SVC.predict(self.dataset_X_test),
-                                             self.classifier_SVC.predict_proba(self.dataset_X_test)[::, 1])
+            #self.roc_auc_SVC = roc_auc_score(self.classifier_SVC.predict(self.dataset_X_test),
+                                             #self.classifier_SVC.predict_proba(self.dataset_X_test)[::, 1])
 
             # Output results
             self._output_classifier_results(model="SVC")
@@ -316,8 +316,8 @@ class SVM:
             self.accuracy_nu_SVC = self.classifier_nu_SVC.score(self.dataset_X_test, self.dataset_y_test)
             self.cross_val_scores_nu_SVC = cross_val_score(self.classifier_nu_SVC, self.attributes, self.labels, cv=self.cv)
 
-            self.roc_auc_nu_SVC = roc_auc_score(self.classifier_nu_SVC.predict(self.dataset_X_test),
-                                                self.classifier_nu_SVC.predict_proba(self.dataset_X_test)[::, 1])
+            #self.roc_auc_nu_SVC = roc_auc_score(self.classifier_nu_SVC.predict(self.dataset_X_test),
+                                                #self.classifier_nu_SVC.predict_proba(self.dataset_X_test)[::, 1])
             
             # Output results
             self._output_classifier_results(model="NuSVC")
@@ -1256,8 +1256,8 @@ class SVM:
 
             print("{:<20} {:<20}".format("Accuracy:", self.accuracy_SVC))
 
-            if self.roc_auc_SVC is not None:
-                print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc_SVC))
+            #if self.roc_auc_SVC is not None:
+                #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc_SVC))
             
             print("\nCross Validation Scores:\n", self.cross_val_scores_SVC)
             print("\n\nCall predict_SVC() to make predictions for new data.")
@@ -1268,8 +1268,8 @@ class SVM:
 
             print("{:<20} {:<20}".format("Accuracy:", self.accuracy_nu_SVC))
 
-            if self.roc_auc_nu_SVC is not None:
-                print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc_nu_SVC))
+            #if self.roc_auc_nu_SVC is not None:
+                #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc_nu_SVC))
             
             print("\nCross Validation Scores:\n", self.cross_val_scores_nu_SVC)
             print("\n\nCall predict_nu_SVC() to make predictions for new data.")

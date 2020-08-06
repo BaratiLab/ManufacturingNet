@@ -137,8 +137,8 @@ class RandomForest:
 
             # Evaluate accuracy and ROC AUC of model using testing set and actual classification
             self.accuracy = self.classifier.score(dataset_X_test, dataset_y_test)
-            self.roc_auc = roc_auc_score(self.classifier.predict(dataset_X_test),
-                                         self.classifier.predict_proba(dataset_X_test)[::, 1])
+            #self.roc_auc = roc_auc_score(self.classifier.predict(dataset_X_test),
+                                         #self.classifier.predict_proba(dataset_X_test)[::, 1])
             self.cross_val_scores_classifier = cross_val_score(self.classifier, self.attributes, self.labels, cv=self.cv)
 
             # Output results
@@ -500,7 +500,7 @@ class RandomForest:
 
         print("Classes:\n", self.classifier.classes_)
         print("\n{:<20} {:<20}".format("Accuracy:", self.accuracy))
-        print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+        #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
         print("\nCross Validation Scores:\n", self.cross_val_scores_classifier)
         print("\n\nCall predict_classifier() to make predictions for new data.")
 
