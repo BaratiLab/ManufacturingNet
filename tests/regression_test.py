@@ -22,7 +22,6 @@ try:
         raise Exception()
     
     print("LinRegression ran successfully.")
-    print("r2 score:", lin_reg.get_r2_score())
 except Exception as e:
     print("LinRegression failed.")
     print(e)
@@ -37,7 +36,6 @@ try:
         raise Exception()
     
     print("RandomForest ran successfully.")
-    print("r2 score:", random_forest.get_r2_score())
 except Exception as e:
     print("RandomForest failed.")
     print(e)
@@ -52,7 +50,6 @@ try:
         raise Exception()
     
     print("SVR ran successfully.")
-    print("r2 score:", svm.get_r2_score_SVR())
 except Exception as e:
     print("SVR failed.")
     print(e)
@@ -67,7 +64,6 @@ try:
         raise Exception()
     
     print("NuSVR ran successfully.")
-    print("r2 score:", svm.get_r2_score_nu_SVR())
 except Exception as e:
     print("NuSVR failed.")
     print(e)
@@ -82,7 +78,6 @@ try:
         raise Exception()
     
     print("LinearSVR ran successfully.")
-    print("r2 score:", svm.get_r2_score_linear_SVR())
 except Exception as e:
     print("LinearSVR failed.")
     print(e)
@@ -97,7 +92,6 @@ try:
         raise Exception()
     
     print("XGBoost ran successfully.")
-    print("r2 score:", xgb.get_r2_score())
 except Exception as e:
     print("XGBoost failed.")
     print(e)
