@@ -1,5 +1,4 @@
 import numpy as np
-from sklearn.decomposition import PCA
 
 class MeanNormalizer():
     """
@@ -16,29 +15,33 @@ class MeanNormalizer():
         self.axis = axis
         self.data_mean = np.mean(self.data, self.axis)
         self.data_std = np.std(self.data, self.axis)
-        self.denormalized_data = None 
-        self.normalized_data = (self.data - self.data_mean)/(self.data_std + 0.000001) 
+        self.normalized_data = (self.data - self.data_mean)/(self.data_std) 
+        self.scaled_data = None 
+        
 
     def get_normalized_data(self):
 
         """
         Accessor method for getting normalized data
 
-        returns an array of normalized data along the given axis
+        Returns an array of normalized data along the given axis
         
         """
+        
+
         return self.normalized_data
     
     def get_scaled_data(self, test_data):
 
         """
         Accessor method for getting the scaled data
-        get_scaled_data() cannot be called until the 'get_normalized_data' is called.
-        returns an array of normalized data along the given axis or None.
+
+        Returns an array of normalized data along the given axis or None.
 
         """
+        self.scaled_data = (test_data*(self.data_std)) + self.data_mean
 
-        return self.denormalized_data = (self.test_data*(self.data_std + 0.000001)) + self.data_mean
+        return self.scaled_data
 
 
 
@@ -55,7 +58,7 @@ class MinMaxNormalizer():
         self.axis = axis
         self.data_min = np.min(self.data, self.axis)
         self.data_max = np.max(self.data, self.axis)
-        self.denormalized_data = None 
+        self.scaled_data = None 
         self.normalized_data = (self.data - self.data_min)/(self.data_max -self.data_min) 
 
     def get_normalized_data(self):
@@ -63,22 +66,21 @@ class MinMaxNormalizer():
         """
         Accessor method for getting normalized data
 
-        returns an array of normalized data along the given axis
-        
-        
+        Returns an array of normalized data along the given axis
         """
         return self.normalized_data
     
-    def get_denormalized_data(self, test_data):
+    def get_scaled_data(self, test_data):
         
         """
         Accessor method for getting the scaled data
-        get_scaled_data() cannot be called until the 'get_normalized_data' is called.
-        returns an array of normalized data along the given axis or None.
+
+        Returns an array of normalized data along the given axis or None.
 
         """
+        self.scaled_data = (test_data*(self.data_max - self.data_min)) + self.data_min
 
-        return self.denormalized_data = (self.test_data*(self.data_max - self.data_min)) + self.data_min
+        return self.scaled_data
 
 
 class QuantileNormalizer():
@@ -91,11 +93,14 @@ class QuantileNormalizer():
     """
     def __init__(self, a, axis = 0, q1 = 0.25, q2 = 0.75):
         
+        assert q1 > 0 and q1 < 1
+        assert q2 > q1 and q2 < 1
+        
         self.data = a
         self.axis = axis
         self.IQR = np.percentile(self.data, q2, self.axis) - np.percentile(self.data, q1, self.axis)
         self.data_median = np.median(self.data, self.axis)
-        self.denormalized_data = None 
+        self.scaled_data = None 
         self.normalized_data = (self.data - self.data_median)/(self.IQR) 
 
     def get_normalized_data(self):
@@ -103,19 +108,20 @@ class QuantileNormalizer():
         """
         Accessor method for getting normalized data
 
-        returns an array of normalized data along the given axis
+        Returns an array of normalized data along the given axis
         
         
         """
         return self.normalized_data
     
-    def get_denormalized_data(self, test_data):
+    def get_scaled_data(self, test_data):
         
         """
         Accessor method for getting the scaled data
-        get_scaled_data() cannot be called until the 'get_normalized_data' is called.
-        returns an array of normalized data along the given axis or None.
+
+        Returns an array of normalized data along the given axis or None.
 
         """
+        self.scaled_data = (test_data*(self.IQR)) + self.data_median
 
-        return self.denormalized_data = (self.test_data*(self.IQR)) + self.data_median
+        return self.scaled_data
