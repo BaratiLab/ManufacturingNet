@@ -3,10 +3,12 @@ import io
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC, NuSVC, LinearSVC
 import time
 from xgboost import XGBClassifier
+import numpy as np
 
 class AllClassificationModels:
     """
@@ -33,7 +35,7 @@ class AllClassificationModels:
         self.XGB_classifier = None
 
         #self._classification_models = {"Model": ["Accuracy", "ROC-AUC", "Time (seconds)"]}
-        self._classification_models = {"Model": ["Accuracy", "Time (seconds)"]}
+        self._classification_models = {"Model": ["Accuracy", "5-Fold CV Mean", "Time (seconds)"]}
         self._failures = []
 
     # Accessor methods
@@ -185,7 +187,7 @@ class AllClassificationModels:
                 end_time - start_time]'''
 
             self._classification_models["LogisticRegression"] =\
-                [self.logistic_regression.score(dataset_X_test, dataset_y_test), end_time - start_time]
+                [self.logistic_regression.score(dataset_X_test, dataset_y_test), np.mean(cross_val_score(self.logistic_regression, self.attributes, self.labels, cv=5)), end_time - start_time]
 
         except:
             self._failures.append("LogisticRegression")
@@ -200,7 +202,7 @@ class AllClassificationModels:
                                 self.random_forest.predict_proba(dataset_X_test)[::, 1]),
                     end_time - start_time]'''
             self._classification_models["RandomForest"] =\
-                [self.random_forest.score(dataset_X_test, dataset_y_test), end_time - start_time]
+                [self.random_forest.score(dataset_X_test, dataset_y_test), np.mean(cross_val_score(self.random_forest, self.attributes, self.labels, cv=5)), end_time - start_time]
         except:
             self._failures.append("RandomForest")
         
@@ -213,7 +215,7 @@ class AllClassificationModels:
                     roc_auc_score(self.SVC.predict(dataset_X_test), self.SVC.predict_proba(dataset_X_test)[::, 1]),
                     end_time - start_time]'''
             self._classification_models["SVC"] =\
-                [self.SVC.score(dataset_X_test, dataset_y_test), end_time - start_time]
+                [self.SVC.score(dataset_X_test, dataset_y_test), np.mean(cross_val_score(self.SVC, self.attributes, self.labels, cv=5)), end_time - start_time]
         except:
             self._failures.append("SVC")
 
@@ -226,7 +228,7 @@ class AllClassificationModels:
                     roc_auc_score(self.nu_SVC.predict(dataset_X_test), self.nu_SVC.predict_proba(dataset_X_test)[::, 1]),
                     end_time - start_time]'''
             self._classification_models["NuSVC"] =\
-                [self.nu_SVC.score(dataset_X_test, dataset_y_test), end_time - start_time]
+                [self.nu_SVC.score(dataset_X_test, dataset_y_test), np.mean(cross_val_score(self.nu_SVC, self.attributes, self.labels, cv=5)), end_time - start_time]
         except:
             self._failures.append("NuSVC")
 
@@ -235,7 +237,7 @@ class AllClassificationModels:
             self.linear_SVC.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
             self._classification_models["LinearSVC"] =\
-                [self.linear_SVC.score(dataset_X_test, dataset_y_test), end_time - start_time]
+                [self.linear_SVC.score(dataset_X_test, dataset_y_test), np.mean(cross_val_score(self.linear_SVC, self.attributes, self.labels, cv=5)), end_time - start_time]
             '''self._classification_models["LinearSVC"] =\
                 [self.linear_SVC.score(dataset_X_test, dataset_y_test), "Not Available", end_time - start_time]'''
         except:
@@ -251,7 +253,7 @@ class AllClassificationModels:
                                   self.XGB_classifier.predict_proba(dataset_X_test)[::, 1]),
                     end_time - start_time]'''
             self._classification_models["XGBClassifier"] =\
-                [self.XGB_classifier.score(dataset_X_test, dataset_y_test), end_time - start_time]
+                [self.XGB_classifier.score(dataset_X_test, dataset_y_test), np.mean(cross_val_score(self.XGB_classifier, self.attributes, self.labels, cv=5)), end_time - start_time]
 
         except:
             self._failures.append("XGBClassifier")
@@ -267,7 +269,7 @@ class AllClassificationModels:
         print("===========\n")
 
         for model, data in self._classification_models.items():
-        	print("{:<20} {:<20} {:<20}".format(model, data[0], data[1]))
+        	print("{:<20} {:<20} {:<20} {:<20}".format(model, data[0], data[1], data[2]))
             #print("{:<20} {:<20} {:<20} {:<20}".format(model, data[0], data[1], data[2]))
 
         print()
