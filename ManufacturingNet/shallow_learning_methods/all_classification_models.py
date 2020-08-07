@@ -32,7 +32,8 @@ class AllClassificationModels:
         self.linear_SVC = None
         self.XGB_classifier = None
 
-        self._classification_models = {"Model": ["Accuracy", "ROC-AUC", "Time (seconds)"]}
+        #self._classification_models = {"Model": ["Accuracy", "ROC-AUC", "Time (seconds)"]}
+        self._classification_models = {"Model": ["Accuracy", "Time (seconds)"]}
         self._failures = []
 
     # Accessor methods
@@ -177,11 +178,15 @@ class AllClassificationModels:
             start_time = time.time()
             self.logistic_regression.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
-            self._classification_models["LogisticRegression"] =\
+            '''self._classification_models["LogisticRegression"] =\
                 [self.logistic_regression.score(dataset_X_test, dataset_y_test),
                 roc_auc_score(self.logistic_regression.predict(dataset_X_test),
                               self.logistic_regression.predict_proba(dataset_X_test)[::, 1]),
-                end_time - start_time]
+                end_time - start_time]'''
+
+            self._classification_models["LogisticRegression"] =\
+                [self.logistic_regression.score(dataset_X_test, dataset_y_test), end_time - start_time]
+
         except:
             self._failures.append("LogisticRegression")
 
@@ -189,11 +194,13 @@ class AllClassificationModels:
             start_time = time.time()
             self.random_forest.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
-            self._classification_models["RandomForest"] =\
+            '''self._classification_models["RandomForest"] =\
                 [self.random_forest.score(dataset_X_test, dataset_y_test),
                     roc_auc_score(self.random_forest.predict(dataset_X_test),
                                 self.random_forest.predict_proba(dataset_X_test)[::, 1]),
-                    end_time - start_time]
+                    end_time - start_time]'''
+            self._classification_models["RandomForest"] =\
+                [self.random_forest.score(dataset_X_test, dataset_y_test), end_time - start_time]
         except:
             self._failures.append("RandomForest")
         
@@ -201,10 +208,12 @@ class AllClassificationModels:
             start_time = time.time()
             self.SVC.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
-            self._classification_models["SVC"] =\
+            '''self._classification_models["SVC"] =\
                 [self.SVC.score(dataset_X_test, dataset_y_test),
                     roc_auc_score(self.SVC.predict(dataset_X_test), self.SVC.predict_proba(dataset_X_test)[::, 1]),
-                    end_time - start_time]
+                    end_time - start_time]'''
+            self._classification_models["SVC"] =\
+                [self.SVC.score(dataset_X_test, dataset_y_test), end_time - start_time]
         except:
             self._failures.append("SVC")
 
@@ -212,10 +221,12 @@ class AllClassificationModels:
             start_time = time.time()
             self.nu_SVC.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
-            self._classification_models["NuSVC"] =\
+            '''self._classification_models["NuSVC"] =\
                 [self.nu_SVC.score(dataset_X_test, dataset_y_test),
                     roc_auc_score(self.nu_SVC.predict(dataset_X_test), self.nu_SVC.predict_proba(dataset_X_test)[::, 1]),
-                    end_time - start_time]
+                    end_time - start_time]'''
+            self._classification_models["NuSVC"] =\
+                [self.nu_SVC.score(dataset_X_test, dataset_y_test), end_time - start_time]
         except:
             self._failures.append("NuSVC")
 
@@ -224,7 +235,9 @@ class AllClassificationModels:
             self.linear_SVC.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
             self._classification_models["LinearSVC"] =\
-                [self.linear_SVC.score(dataset_X_test, dataset_y_test), "Not Available", end_time - start_time]
+                [self.linear_SVC.score(dataset_X_test, dataset_y_test), end_time - start_time]
+            '''self._classification_models["LinearSVC"] =\
+                [self.linear_SVC.score(dataset_X_test, dataset_y_test), "Not Available", end_time - start_time]'''
         except:
             self._failures.append("LinearSVC")
 
@@ -232,11 +245,14 @@ class AllClassificationModels:
             start_time = time.time()
             self.XGB_classifier.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
-            self._classification_models["XGBClassifier"] =\
+            '''self._classification_models["XGBClassifier"] =\
                 [self.XGB_classifier.score(dataset_X_test, dataset_y_test),
                     roc_auc_score(self.XGB_classifier.predict(dataset_X_test),
                                   self.XGB_classifier.predict_proba(dataset_X_test)[::, 1]),
-                    end_time - start_time]
+                    end_time - start_time]'''
+            self._classification_models["XGBClassifier"] =\
+                [self.XGB_classifier.score(dataset_X_test, dataset_y_test), end_time - start_time]
+
         except:
             self._failures.append("XGBClassifier")
     
@@ -251,7 +267,8 @@ class AllClassificationModels:
         print("===========\n")
 
         for model, data in self._classification_models.items():
-            print("{:<20} {:<20} {:<20} {:<20}".format(model, data[0], data[1], data[2]))
+        	print("{:<20} {:<20} {:<20}".format(model, data[0], data[1]))
+            #print("{:<20} {:<20} {:<20} {:<20}".format(model, data[0], data[1], data[2]))
 
         print()
 

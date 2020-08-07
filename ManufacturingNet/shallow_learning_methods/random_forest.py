@@ -1,6 +1,8 @@
 from math import sqrt
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_squared_error, roc_auc_score
+from sklearn.metrics import make_scorer, accuracy_score
 from sklearn.model_selection import cross_val_score, train_test_split
 
 class RandomForest:
@@ -27,6 +29,7 @@ class RandomForest:
         self.r_score = None
         self.mean_squared_error = None
         self.cross_val_scores_regressor = None
+        self.gridsearch = False
     
     # Accessor methods
 
@@ -260,6 +263,9 @@ class RandomForest:
         
         self.test_size = 0.25
         self.cv = None
+        self.gridsearch = False
+        self.gs_params = None
+        self.gs_results = None
         n_estimators = 100
         max_depth = None
         min_samples_split = 2
@@ -286,7 +292,47 @@ class RandomForest:
             except:
                 if user_input.lower() == "q":
                     break
-            
+
+            print('\n')
+            user_input = input("Use Grid Search to find the best parameters? Enter y/N: ").lower()
+
+            if user_input == "q":
+                break
+            elif user_input == "y":
+
+            	self.gridsearch = True
+
+            	params = {}
+
+            	if classifier:
+            		user_input = input("Enter the max_features for the best split. (Options: auto, sqrt, log2. Enter 'all' for all options) : ")
+            		if user_input == "all":
+            			feat_params = ['auto', 'sqrt', 'log2']
+            		else:
+            			feat_params = list(user_input.split(",")) 
+            		
+            		params['max_features'] = feat_params
+            		
+            		user_input = input("Enter the list of num_estimators to try out: ")
+            		n_est_params = list(map(int, list(user_input.split(","))))
+            		params['n_estimators'] = n_est_params
+            		
+            		user_input = input("Enter the criterion to be tried for (Options: gini, entropy. Enter 'all' for all options): ")
+            		if user_input == "all":
+            			crit_params = ['gini', 'entropy']
+            		else:
+            			crit_params = list(user_input.split(",")) 
+            		
+            		params['criterion'] = crit_params
+            		
+            		user_input = input('Enter the maximum depth of trees to try for: ')
+            		max_dep_params = list(map(int, list(user_input.split(","))))
+            		params['max_depth'] = max_dep_params
+
+            		self.gs_params = params
+
+            print('\n')
+
             user_input = input("Input the number of folds for cross validation: ")
 
             try:
@@ -473,8 +519,34 @@ class RandomForest:
         print("= End of parameter inputs; press any key to continue. =")
         input("=======================================================\n")
 
+
+
+
+
+
         if classifier:
-            return RandomForestClassifier(n_estimators=n_estimators, criterion=criterion, max_depth=max_depth,
+        	if self.gridsearch:
+        		acc_scorer = make_scorer(accuracy_score)
+
+        		clf = RandomForestClassifier()
+        		dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
+        		
+        		#Run the grid search
+        		grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
+        		grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+        		#Set the clf to the best combination of parameters
+        		clf = grid_obj.best_estimator_
+
+        		print('Best Grid Search Parameters: ')
+        		print(clf)
+
+        		# Fit the best algorithm to the data. 
+        		clf.fit(dataset_X_train, dataset_y_train)
+        		predictions = clf.predict(dataset_X_test)
+        		self.gs_result = accuracy_score(dataset_y_test, predictions)
+
+        	return RandomForestClassifier(n_estimators=n_estimators, criterion=criterion, max_depth=max_depth,
                                           min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
                                           min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features,
                                           max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease,
@@ -502,6 +574,8 @@ class RandomForest:
         print("\n{:<20} {:<20}".format("Accuracy:", self.accuracy))
         #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
         print("\nCross Validation Scores:\n", self.cross_val_scores_classifier)
+        if self.gridsearch:
+        	print("\nGrid Search Score:\n", self.gs_result)
         print("\n\nCall predict_classifier() to make predictions for new data.")
 
         print("\n===================")
