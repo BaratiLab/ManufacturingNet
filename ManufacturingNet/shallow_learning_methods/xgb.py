@@ -3,6 +3,9 @@ from scipy.stats import uniform, randint
 from sklearn.metrics import accuracy_score, confusion_matrix, mean_squared_error, r2_score, roc_auc_score, precision_score, recall_score
 from sklearn.model_selection import cross_val_score, train_test_split
 from xgboost import XGBClassifier, XGBRegressor
+from sklearn.metrics import make_scorer, accuracy_score
+from sklearn.model_selection import GridSearchCV
+
 import numpy as np
 
 class XGBoost: 
@@ -33,6 +36,10 @@ class XGBoost:
         self.roc_auc = None
         self.classes = None
         self.cross_val_scores_classifier = None
+
+        self.gridsearch = False
+        self.gs_params = None
+        self.gs_results = None
 
     # Accessor methods
 
@@ -344,7 +351,70 @@ class XGBoost:
             except:
                 if user_input.lower() == "q":
                     break
-            
+
+            #num_trees
+            #max_depth
+            #learning_rate
+            #booster
+            #gamma
+            #
+
+            print('\n')
+            user_input = input("Use Grid Search to find the best parameters? Enter y/N: ").lower()
+
+            if user_input == "q":
+            	break
+            elif user_input == "y":
+            	self.gridsearch = True
+
+            	params = {}
+            	user_input = input("Enter the types of boosters. (Options: 1-gbtree, 2-gblinear or 3-dart. Enter 'all' for all options. Example input :1,2,3) : ")
+            	if user_input == 'q':
+            		self.gridsearch = False
+            		break
+            	elif user_input == "all":
+            		boost_params = ['gbtree', 'gblinear', 'dart']
+            	else:
+            		boost_dict = {1:'gbtree', 2:'gblinear', 3:'dart'}
+            		boost_params_int = list(map(int, list(user_input.split(","))))
+            		boost_params = []
+            		for each in boost_params_int:
+            			boost_params.append(boost_dict.get(each))
+            	params['booster'] = boost_params
+
+
+            	user_input = input("Enter the list of learning_rates to try out. Example input: 0.1,0.01,0.001: ")
+
+            	if user_input == "q":
+            		break
+            	lr_params = list(map(float, list(user_input.split(","))))
+            	params['learning_rate'] = lr_params
+
+
+            	user_input = input("Enter the list of gamma/minimum loss reductions to try out. (Example input: 0.5,1,1.5): ")
+            	if user_input == "q":
+            		break
+            	gamma_params = list(map(float, list(user_input.split(","))))
+            	params['gamma'] = gamma_params
+
+
+            	user_input = input("Enter the list of number of trees to try out. (Example input: 1,2,3) : ")
+            	if user_input == "q":
+            		break
+            	ntrees_params = list(map(int, list(user_input.split(","))))
+            	params['n_estimators'] = ntrees_params
+
+
+            	user_input = input("Enter the list of max depth of trees to try out. (Example input: 1,2,3) : ")
+            	if user_input == "q":
+            		break
+            	mdepth_params = list(map(int, list(user_input.split(","))))
+            	params['max_depth'] = mdepth_params
+
+            	self.gs_params = params
+            	#print(params)
+
+
             user_input = input("Input the number of folds for cross validation: ")
 
             try:
@@ -500,7 +570,27 @@ class XGBoost:
         input("=======================================================\n")
 
         if classifier:
-            return XGBClassifier(max_depth=max_depth, learning_rate=learning_rate, n_estimators=n_estimators,
+        	if self.gridsearch:
+        		acc_scorer = make_scorer(accuracy_score)
+        		clf = XGBClassifier()
+        		dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
+
+        		#Run the grid search
+        		grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
+        		grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+        		#Set the clf to the best combination of parameters
+        		clf = grid_obj.best_estimator_
+
+        		#print('Best Grid Search Parameters: ')
+        		#print(clf)
+
+        		# Fit the best algorithm to the data. 
+        		clf.fit(dataset_X_train, dataset_y_train)
+        		predictions = clf.predict(dataset_X_test)
+        		self.gs_result = accuracy_score(dataset_y_test, predictions)
+
+        	return XGBClassifier(max_depth=max_depth, learning_rate=learning_rate, n_estimators=n_estimators,
                                  objective=objective, booster=booster, n_jobs=n_jobs, nthread=nthread, gamma=gamma,
                                  min_child_weight=min_child_weight, max_delta_step=max_delta_step, subsample=subsample,
                                  colsample_bytree=colsample_bytree, colsample_bylevel=colsample_bylevel,
@@ -526,7 +616,9 @@ class XGBoost:
         print("\nConfusion Matrix:\n", self.confusion_matrix)
         print("\n{:<20} {:<20}".format("Accuracy:", self.accuracy))
         #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
-        print("\nCross Validation Scores:\n", self.cross_val_scores_classifier)
+        print("\nCross Validation Scores:", self.cross_val_scores_classifier)
+        if self.gridsearch:
+        	print("\nGrid Search Score: ", self.gs_result)
         print("\n\nCall predict_classifier() to make predictions for new data.")
 
         print("\n===================")
