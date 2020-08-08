@@ -29,8 +29,10 @@ class RandomForest:
         self.r_score = None
         self.mean_squared_error = None
         self.cross_val_scores_regressor = None
+        
         self.gridsearch = False
-    
+        self.gs_params = None
+        self.gs_results = None    
     # Accessor methods
 
     def get_attributes(self):
@@ -263,9 +265,7 @@ class RandomForest:
         
         self.test_size = 0.25
         self.cv = None
-        self.gridsearch = False
-        self.gs_params = None
-        self.gs_results = None
+
         n_estimators = 100
         max_depth = None
         min_samples_split = 2
@@ -305,31 +305,48 @@ class RandomForest:
             	params = {}
 
             	if classifier:
-            		user_input = input("Enter the max_features for the best split. (Options: auto, sqrt, log2. Enter 'all' for all options) : ")
-            		if user_input == "all":
-            			feat_params = ['auto', 'sqrt', 'log2']
-            		else:
-            			feat_params = list(user_input.split(",")) 
-            		
-            		params['max_features'] = feat_params
-            		
-            		user_input = input("Enter the list of num_estimators to try out: ")
-            		n_est_params = list(map(int, list(user_input.split(","))))
-            		params['n_estimators'] = n_est_params
-            		
-            		user_input = input("Enter the criterion to be tried for (Options: gini, entropy. Enter 'all' for all options): ")
-            		if user_input == "all":
-            			crit_params = ['gini', 'entropy']
-            		else:
-            			crit_params = list(user_input.split(",")) 
-            		
-            		params['criterion'] = crit_params
-            		
-            		user_input = input('Enter the maximum depth of trees to try for: ')
-            		max_dep_params = list(map(int, list(user_input.split(","))))
-            		params['max_depth'] = max_dep_params
+                    user_input = input("Enter the max_features for the best split. (Options: 1-auto, 2-sqrt, 3-log2. Enter 'all' for all options) : ")
+                    if user_input == 'q':
+                        self.gridsearch = False
+                        break
+                    elif user_input == "all":
+                        feat_params = ['auto', 'sqrt', 'log2']
+                    else:
+                        feat_dict = {1:'auto', 2:'sqrt', 3:'log2'}
+                        feat_params_int = list(map(int, list(user_input.split(","))))
+                        feat_params = []
+                        for each in feat_params_int:
+                            feat_params.append(feat_dict.get(each))
 
-            		self.gs_params = params
+                    params['max_features'] = feat_params
+
+                    user_input = input("Enter the list of num_estimators to try out (Example input: 1,2,3) : ")
+                    if user_input == "q":
+                        break
+                    n_est_params = list(map(int, list(user_input.split(","))))
+                    params['n_estimators'] = n_est_params
+
+                    user_input = input("Enter the criterion to be tried for (Options: 1-gini, 2-entropy. Enter 'all' for all options): ")
+                    if user_input == "q":
+                        break
+                    elif user_input == "all":
+                        crit_params = ['gini', 'entropy']
+                    else:
+                        crit_dict = {1:'gini', 2:'entropy'}
+                        crit_params_int = list(user_input.split(",")) 
+                        crit_params = []
+                        for each in crit_params_int:
+                            crit_params.append(crit_dict.get(each))
+
+                    params['criterion'] = crit_params
+
+                    user_input = input('Enter the maximum depth of trees to try for (Example input: 1,2,3) : ')
+                    if user_input == "q":
+                        break
+                    max_dep_params = list(map(int, list(user_input.split(","))))
+                    params['max_depth'] = max_dep_params
+
+                    self.gs_params = params
 
             print('\n')
 
@@ -573,9 +590,9 @@ class RandomForest:
         print("Classes:\n", self.classifier.classes_)
         print("\n{:<20} {:<20}".format("Accuracy:", self.accuracy))
         #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
-        print("\nCross Validation Scores:\n", self.cross_val_scores_classifier)
+        print("\nCross Validation Scores: ", self.cross_val_scores_classifier)
         if self.gridsearch:
-        	print("\nGrid Search Score:\n", self.gs_result)
+        	print("\nGrid Search Score: ", self.gs_result)
         print("\n\nCall predict_classifier() to make predictions for new data.")
 
         print("\n===================")
