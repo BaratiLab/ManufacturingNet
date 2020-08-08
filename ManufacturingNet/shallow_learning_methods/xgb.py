@@ -383,7 +383,7 @@ class XGBoost:
             	params['booster'] = boost_params
 
 
-            	user_input = input("Enter the list of learning_rates to try out. Example input: 0.1,0.01,0.001: ")
+            	user_input = input("Enter the list of learning_rates to try out. (Example input: 0.1,0.01,0.001): ")
 
             	if user_input == "q":
             		break
@@ -582,8 +582,8 @@ class XGBoost:
         		#Set the clf to the best combination of parameters
         		clf = grid_obj.best_estimator_
 
-        		#print('Best Grid Search Parameters: ')
-        		#print(clf)
+        		print('Best Grid Search Parameters: ')
+        		print(clf.get_xgb_params())
 
         		# Fit the best algorithm to the data. 
         		clf.fit(dataset_X_train, dataset_y_train)
