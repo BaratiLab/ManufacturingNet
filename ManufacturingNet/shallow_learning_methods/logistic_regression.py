@@ -1,5 +1,7 @@
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, roc_auc_score
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import roc_auc_score
+from sklearn.metrics import make_scorer, accuracy_score
 from sklearn.model_selection import cross_val_score, train_test_split
 import numpy as np
 
@@ -17,6 +19,10 @@ class LogRegression:
 
         self.test_size = None
         self.cv = None
+
+        self.gridsearch = False
+        self.gs_params = None
+        self.gs_result = None
 
         self.regression = None
         self.classes = None
@@ -212,7 +218,48 @@ class LogRegression:
             except:
                 if user_input.lower() == "q":
                     break
+
+            print('\n')
+            user_input = input("Use Grid Search to find the best parameters? Enter y/N: ").lower()
+
+            if user_input == "q":
+                break
             
+            elif user_input == "y":
+                self.gridsearch = True
+                params = {}
+
+                print("Enter the classifier penalties to evaluate.")
+                user_input = input("Options: 1-l1, 2-l2, 3-elasticnet. Enter 'all' for all options. (Example input: 1,2,3) : ")
+                if user_input == 'q':
+                    self.gridsearch = False
+                    break
+                elif user_input == "all":
+                    pen_params = ['l1', 'l2', 'elasticnet']
+                else:
+                    pen_dict = {1:"l1", 2:"l2", 3:"elasticnet"}
+                    pen_params_int = list(map(int, list(user_input.split(","))))
+                    pen_params = []
+                    for each in pen_params_int:
+                        pen_params.append(pen_dict.get(each))
+                params['penalty'] = pen_params
+
+                print("Enter the solvers to evaluate. ")
+                user_input = input("Options: 1- newton-cg, 2-lbfgs, 3-liblinear, 4-sag, 5-saga. Enter 'all' for all options. (Example input: 1,2,3) : ")
+                if user_input == 'q':
+                    break
+                elif user_input == "all":
+                    sol_params = ['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
+                else:
+                    sol_dict = {1:"newton-cg", 2:"lbfgs", 3:"liblinear", 4:"sag", 5:"saga"}
+                    sol_params_int = list(map(int, list(user_input.split(","))))
+                    sol_params = []
+                    for each in sol_params_int:
+                        sol_params.append(sol_dict.get(each))
+
+                params['solver'] = sol_params
+                self.gs_params = params
+
             user_input = input("Input the number of folds for cross validation: ")
 
             try:
@@ -354,6 +401,30 @@ class LogRegression:
         print("= End of parameter inputs; press any key to continue. =")
         input("=======================================================\n")
 
+
+        if self.gridsearch:
+
+        	acc_scorer = make_scorer(accuracy_score)
+
+        	clf = LogisticRegression()
+        	dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
+
+        	#Run the grid search
+        	grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
+        	grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+        	#Set the clf to the best combination of parameters
+        	clf = grid_obj.best_estimator_
+
+        	print('Best Grid Search Parameters: ')
+        	print(clf)
+
+        	# Fit the best algorithm to the data. 
+        	clf.fit(dataset_X_train, dataset_y_train)
+        	predictions = clf.predict(dataset_X_test)
+        	self.gs_result = accuracy_score(dataset_y_test, predictions)
+
+
         return LogisticRegression(penalty=penalty, dual=dual, tol=tol, C=C, fit_intercept=fit_intercept,
                                   intercept_scaling=intercept_scaling, class_weight=class_weight,
                                   random_state=random_state, solver=solver, max_iter=max_iter, multi_class=multi_class,
@@ -368,12 +439,14 @@ class LogRegression:
         print("=========================\n")
 
         print("Classes:\n", self.classes)
-        print("\nCoefficients:\n", self.coefficients)
-        print("\nIntercept:\n", self.intercept)
+        #print("\nCoefficients:\n", self.coefficients)
+        #print("\nIntercept:\n", self.intercept)
         print("\nNumber of Iterations:\n", self.n_iter)
         print("\n{:<20} {:<20}".format("Accuracy:", self.accuracy))
         #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
-        print("\nCross Validation Scores:\n", self.cross_val_scores)
+        print("\nCross Validation Scores: ", self.cross_val_scores)
+        if self.gridsearch:
+        	print("\nGrid Search Score: ", self.gs_result)
         print("\n\nCall predict() to make predictions for new data.")
         
         print("\n===================")
