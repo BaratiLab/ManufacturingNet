@@ -15,7 +15,7 @@ class AllRegressionModels:
     AllRegressionModels runs every available regression algorithm on the given dataset and outputs the coefficient of
     determination and execution time of each successful model when run() is run.
     """
-    def __init__(self, attributes=None, labels=None, test_size=0.25, verbose=False):
+    def __init__(self, attributes=None, labels=None):
         """
         Initializes an AllRegressionModels object.
         """
