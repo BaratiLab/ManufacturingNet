@@ -497,7 +497,7 @@ class XGBoost:
                 if user_input.lower() == "q":
                     break
 
-            user_input = input("Enter the subsample ratio of columns for each tree: ")
+            user_input = input("Enter the subsample column ratio for all trees: ")
 
             try:
                 colsample_bytree = float(user_input)
@@ -505,7 +505,7 @@ class XGBoost:
                 if user_input.lower() == "q":
                     break
 
-            user_input = input("Enter the subsample ratio of columns for each level: ")
+            user_input = input("Enter the subsample column ratio for all levels: ")
 
             try:
                 colsample_bylevel = float(user_input)
@@ -513,7 +513,7 @@ class XGBoost:
                 if user_input.lower() == "q":
                     break
 
-            user_input = input("Enter alpha, the L1 regularization term on weights: ")
+            user_input = input("Enter alpha, the L1 regularization term: ")
 
             try:
                 reg_alpha = float(user_input)
@@ -521,7 +521,7 @@ class XGBoost:
                 if user_input.lower() == "q":
                     break
 
-            user_input = input("Enter lambda, the L2 regularization term on weights: ")
+            user_input = input("Enter lambda, the L2 regularization term: ")
 
             try:
                 reg_lambda = float(user_input)
