@@ -164,7 +164,7 @@ class CNN2D(nn.Module):
     print("="*25)
 
     self.make_CNN(self.block,self.n_conv,self.pooling_list, self.drop,self.batch_normalization_list)
-    #print(self.net)
+    #print(self.net)# not returning from make_CNN purposely
 
 # the gates are added to the code in cases where the user accidentally inputs an unacceptable parameter
   def get_number_classes(self): # get number of classes
