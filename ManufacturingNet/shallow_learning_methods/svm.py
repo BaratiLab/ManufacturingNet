@@ -1,6 +1,8 @@
 from math import sqrt
 from sklearn.metrics import mean_squared_error, roc_auc_score
 from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.metrics import make_scorer, accuracy_score
+from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC, NuSVC, LinearSVC, SVR, NuSVR, LinearSVR
 
 class SVM:
@@ -28,6 +30,10 @@ class SVM:
         self.classifier_linear_SVC = None
         self.accuracy_linear_SVC = None
         self.cross_val_scores_linear_SVC = None
+
+        self.gridsearch = False
+        self.gs_params = None
+        self.gs_result = None
 
         self.regressor_SVR = None
         self.mean_squared_error_SVR = None
@@ -626,6 +632,54 @@ class SVM:
                 if user_input.lower() == "q":
                     break
             
+            #kernel type
+            #gamma
+            #C
+
+            print('\n')
+            user_input = input("Use Grid Search to find the best parameters? Enter y/N: ").lower()
+            if user_input == "q":
+            	break
+            elif user_input == "y":
+                self.gridsearch = True
+                params = {}
+                print("Enter the kernels to try out: ")
+                user_input = input( "Options: 1-linear, 2-poly, 3-rbf, 4-sigmoid. Enter 'all' for all options (Example input: 1,2,3) : ")
+                if user_input == 'q':
+                    self.gridsearch = False
+                    break
+                elif user_input == "all":
+                    kern_params = ['linear', 'poly', 'rbf', 'sigmoid']
+                else:
+                    kern_dict = {1:'linear', 2:'poly', 3:'rbf', 4:'sigmoid'}
+                    kern_params_int = list(map(int, list(user_input.split(","))))
+                    kern_params = []
+                    for each in kern_params_int:
+                        kern_params.append(kern_dict.get(each))
+                    kern_params = list(user_input.split(","))
+                params['kernel'] = kern_params
+
+                user_input = input("Enter the list of kernel coefficient/gamma values to try out. (Example input: 0.001,0.0001): ")
+                if user_input == "q":
+                    break
+                gamma_params = list(map(float, list(user_input.split(","))))
+                params['gamma'] = gamma_params
+
+                if not is_nu:
+                    user_input = input("Enter the list of regularization parameters to try out. (Example input: 1,10,100): ")
+                    if user_input == "q":
+                        break
+                    gamma_params = list(map(int, list(user_input.split(","))))
+                    params['C'] = gamma_params
+
+                self.gs_params = params
+
+
+
+            #print(params)
+            print('\n')
+
+
             user_input = input("Input the number of folds for cross validation: ")
 
             try:
@@ -768,7 +822,28 @@ class SVM:
                          verbose=verbose, max_iter=max_iter, decision_function_shape=decision_function_shape,
                          break_ties=break_ties, random_state=random_state)
         else:
-            return SVC(C=C, kernel=kernel, degree=degree, gamma=gamma, coef0=coef0, shrinking=shrinking,
+        	if self.gridsearch:
+        		acc_scorer = make_scorer(accuracy_score)
+
+        		clf = SVC()
+        		dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
+        		
+        		#Run the grid search
+        		grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
+        		grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+        		#Set the clf to the best combination of parameters
+        		clf = grid_obj.best_estimator_
+
+        		print('Best Grid Search Parameters: ')
+        		print(clf)
+
+        		# Fit the best algorithm to the data. 
+        		clf.fit(dataset_X_train, dataset_y_train)
+        		predictions = clf.predict(dataset_X_test)
+        		self.gs_result = accuracy_score(dataset_y_test, predictions)
+
+        	return SVC(C=C, kernel=kernel, degree=degree, gamma=gamma, coef0=coef0, shrinking=shrinking,
                        probability=probability, tol=tol, cache_size=cache_size, class_weight=class_weight,
                        verbose=verbose, max_iter=max_iter, decision_function_shape=decision_function_shape,
                        break_ties=break_ties, random_state=random_state)
@@ -818,7 +893,55 @@ class SVM:
             except:
                 if user_input.lower() == "q":
                     break
-            
+
+            '''user_input = input("Use Grid Search to find the best parameters? Enter y/N: ").lower()
+            if user_input == "q":
+                break
+            elif user_input == "y":
+                self.gridsearch = True
+                params = {}
+                print("Enter the penalties to try out: ")
+                user_input = input( "Options: 1-l1, 2-l2. Enter 'all' for all options (Example input: 1,2) : ")
+                if user_input == 'q':
+                    self.gridsearch = False
+                    break
+                elif user_input == "all":
+                    pen_params = ['l1', 'l2']
+                else:
+                    pen_dict = {1:'l1', 2:'l2'}
+                    pen_params_int = list(map(int, list(user_input.split(","))))
+                    pen_params = []
+                    for each in pen_params_int:
+                        pen_params.append(pen_dict.get(each))
+                    pen_params = list(user_input.split(","))
+                params['penalty'] = pen_params
+
+
+                print("Enter the loss functions to try out: ")
+                user_input = input( "Options: 1-hinge, 2-squared_hinge. Enter 'all' for all options (Example input: 1,2) : ")
+                if user_input == 'q':
+                    self.gridsearch = False
+                    break
+                elif user_input == "all":
+                    loss_params = ['hinge', 'squared_hinge']
+                else:
+                    loss_dict = {1:'hinge', 2:'squared_hinge'}
+                    loss_params_int = list(map(int, list(user_input.split(","))))
+                    loss_params = []
+                    for each in loss_params_int:
+                        loss_params.append(loss_dict.get(each))
+                    loss_params = list(user_input.split(","))
+                params['loss'] = loss_params
+
+
+                user_input = input("Enter the list of regularization parameters to try out. (Example input: 1,10,100): ")
+                if user_input == "q":
+                    break
+                reg_params = list(map(float, list(user_input.split(","))))
+                params['C'] = reg_params
+
+                self.params = params'''
+
             user_input = input("Input the number of folds for cross validation: ")
 
             try:
@@ -923,7 +1046,28 @@ class SVM:
         print("\n=======================================================")
         print("= End of parameter inputs; press any key to continue. =")
         input("=======================================================\n")
-        
+
+        '''if self.gridsearch:
+            acc_scorer = make_scorer(accuracy_score)
+            clf = LinearSVC()
+            dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
+
+            #Run the grid search
+            grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
+            grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+            #Set the clf to the best combination of parameters
+            clf = grid_obj.best_estimator_
+
+            print('Best Grid Search Parameters: ')
+            print(clf)
+
+            # Fit the best algorithm to the data. 
+            clf.fit(dataset_X_train, dataset_y_train)
+            predictions = clf.predict(dataset_X_test)
+            self.gs_result = accuracy_score(dataset_y_test, predictions)'''
+
+
         return LinearSVC(penalty=penalty, loss=loss, dual=dual, tol=tol, C=C, multi_class=multi_class,
                          fit_intercept=fit_intercept, intercept_scaling=intercept_scaling, class_weight=class_weight,
                          verbose=verbose, random_state=random_state, max_iter=max_iter)
@@ -1259,7 +1403,9 @@ class SVM:
             #if self.roc_auc_SVC is not None:
                 #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc_SVC))
             
-            print("\nCross Validation Scores:\n", self.cross_val_scores_SVC)
+            print("\nCross Validation Scores:", self.cross_val_scores_SVC)
+            if self.gridsearch:
+            	print("\nGrid Search Score:", self.gs_result)
             print("\n\nCall predict_SVC() to make predictions for new data.")
         elif model == "NuSVC":
             print("\n=================")
@@ -1279,7 +1425,7 @@ class SVM:
             print("=====================\n")
 
             print("{:<20} {:<20}".format("Accuracy:", self.accuracy_linear_SVC))            
-            print("\nCross Validation Scores:\n", self.cross_val_scores_linear_SVC)
+            print("\nCross Validation Scores:", self.cross_val_scores_linear_SVC)
             print("\n\nCall predict_linear_SVC() to make predictions for new data.")
         
         print("\n===================")
