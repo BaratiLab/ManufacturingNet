@@ -570,8 +570,7 @@ class CNNModel(object):
             self.valset_size = (input('Please enter the validation set size (size > 0 and size < 1) \n For default size, please directly press enter without any input: '))
             if self.valset_size == '':              # handling default case for valsize
                 print('Default value selected')
-                self.valset_size = 0.2
-                gate = 1
+                self.valset_size = '0.2'
             if self.valset_size.replace('.','').isdigit() :
                 if float(self.valset_size) >0 and float(self.valset_size) < 1 :
                     self.valset_size = float(self.valset_size)
