@@ -1,7 +1,7 @@
 from math import sqrt
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import mean_squared_error, roc_auc_score
+from sklearn.metrics import mean_squared_error, roc_auc_score, r2_score
 from sklearn.metrics import make_scorer, accuracy_score
 from sklearn.model_selection import cross_val_score, train_test_split
 
@@ -300,32 +300,32 @@ class RandomForest:
                 break
             elif user_input == "y":
 
-            	self.gridsearch = True
+                self.gridsearch = True
+                params = {}
+                print("Enter the max_features for the best split. ")
+                user_input = input("Options: 1-auto, 2-sqrt, 3-log2. Enter 'all' for all options. (Example input: 1,2) : ")
+                if user_input == 'q':
+                    self.gridsearch = False
+                    break
+                elif user_input == "all":
+                    feat_params = ['auto', 'sqrt', 'log2']
+                else:
+                    feat_dict = {1:'auto', 2:'sqrt', 3:'log2'}
+                    feat_params_int = list(map(int, list(user_input.split(","))))
+                    feat_params = []
+                    for each in feat_params_int:
+                        feat_params.append(feat_dict.get(each))
 
-            	params = {}
+                params['max_features'] = feat_params
 
-            	if classifier:
-                    user_input = input("Enter the max_features for the best split. (Options: 1-auto, 2-sqrt, 3-log2. Enter 'all' for all options) : ")
-                    if user_input == 'q':
-                        self.gridsearch = False
-                        break
-                    elif user_input == "all":
-                        feat_params = ['auto', 'sqrt', 'log2']
-                    else:
-                        feat_dict = {1:'auto', 2:'sqrt', 3:'log2'}
-                        feat_params_int = list(map(int, list(user_input.split(","))))
-                        feat_params = []
-                        for each in feat_params_int:
-                            feat_params.append(feat_dict.get(each))
+                user_input = input("Enter the list of num_estimators to try out (Example input: 1,2,3) : ")
+                if user_input == "q":
+                    break
+                n_est_params = list(map(int, list(user_input.split(","))))
+                params['n_estimators'] = n_est_params
 
-                    params['max_features'] = feat_params
-
-                    user_input = input("Enter the list of num_estimators to try out (Example input: 1,2,3) : ")
-                    if user_input == "q":
-                        break
-                    n_est_params = list(map(int, list(user_input.split(","))))
-                    params['n_estimators'] = n_est_params
-
+                
+                if classifier:
                     user_input = input("Enter the criterion to be tried for (Options: 1-gini, 2-entropy. Enter 'all' for all options): ")
                     if user_input == "q":
                         break
@@ -338,15 +338,29 @@ class RandomForest:
                         for each in crit_params_int:
                             crit_params.append(crit_dict.get(each))
 
-                    params['criterion'] = crit_params
-
-                    user_input = input('Enter the maximum depth of trees to try for (Example input: 1,2,3) : ')
+                else:
+                    user_input = input("Enter the criterion to be tried for (Options: 1-mse, 2-mae. Enter 'all' for all options): ")
                     if user_input == "q":
                         break
-                    max_dep_params = list(map(int, list(user_input.split(","))))
-                    params['max_depth'] = max_dep_params
+                    elif user_input == "all":
+                        crit_params = ['mse', 'mae']
+                    else:
+                        crit_dict = {1:'mse', 2:'mae'}
+                        crit_params_int = list(user_input.split(",")) 
+                        crit_params = []
+                        for each in crit_params_int:
+                            crit_params.append(crit_dict.get(each))
 
-                    self.gs_params = params
+                params['criterion'] = crit_params
+
+                user_input = input('Enter the maximum depth of trees to try for (Example input: 1,2,3) : ')
+                if user_input == "q":
+                    break
+                max_dep_params = list(map(int, list(user_input.split(","))))
+                params['max_depth'] = max_dep_params
+
+                self.gs_params = params
+
 
             print('\n')
 
@@ -556,7 +570,7 @@ class RandomForest:
         		clf = grid_obj.best_estimator_
 
         		print('Best Grid Search Parameters: ')
-        		print(clf)
+        		print(grid_obj.best_params_)
 
         		# Fit the best algorithm to the data. 
         		clf.fit(dataset_X_train, dataset_y_train)
@@ -571,6 +585,28 @@ class RandomForest:
                                           n_jobs=n_jobs, random_state=random_state, verbose=verbose, warm_start=warm_start,
                                           class_weight=class_weight, ccp_alpha=ccp_alpha, max_samples=max_samples)
         else:
+
+            if self.gridsearch:
+                #acc_scorer = make_scorer(accuracy_score)
+
+                clf = RandomForestRegressor()
+                dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
+                
+                #Run the grid search
+                grid_obj = GridSearchCV(clf, self.gs_params, scoring='r2')
+                grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+                #Set the clf to the best combination of parameters
+                clf = grid_obj.best_estimator_
+
+                print('Best Grid Search Parameters: ')
+                print(grid_obj.best_params_)
+
+                # Fit the best algorithm to the data. 
+                clf.fit(dataset_X_train, dataset_y_train)
+                predictions = clf.predict(dataset_X_test)
+                self.gs_result = r2_score(dataset_y_test, predictions)
+
             return RandomForestRegressor(n_estimators=n_estimators, criterion=criterion, max_depth=max_depth,
                                          min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
                                          min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features,
@@ -610,7 +646,9 @@ class RandomForest:
         print("{:<20} {:<20}".format("Mean Squared Error:", self.mean_squared_error))
         print("\n{:<20} {:<20}".format("R2 Score:", self.r2_score))
         print("\n{:<20} {:<20}".format("R Score:", self.r_score))
-        print("\nCross Validation Scores:\n", self.cross_val_scores_regressor)
+        print("\nCross Validation Scores:", self.cross_val_scores_regressor)
+        if self.gridsearch:
+            print("\nGrid Search Score:", self.gs_result)
         print("\n\nCall predict_regressor() to make predictions for new data.")
 
         print("\n===================")
