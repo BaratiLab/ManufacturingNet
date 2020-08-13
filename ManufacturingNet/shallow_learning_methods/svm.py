@@ -1,7 +1,7 @@
 from math import sqrt
 from sklearn.metrics import mean_squared_error, roc_auc_score
 from sklearn.model_selection import cross_val_score, train_test_split
-from sklearn.metrics import make_scorer, accuracy_score
+from sklearn.metrics import make_scorer, accuracy_score, r2_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC, NuSVC, LinearSVC, SVR, NuSVR, LinearSVR
 
@@ -817,6 +817,26 @@ class SVM:
         input("=======================================================\n")
 
         if is_nu:
+            if self.gridsearch:
+                acc_scorer = make_scorer(accuracy_score)
+
+                clf = NuSVC()
+                dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
+                
+                #Run the grid search
+                grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
+                grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+                #Set the clf to the best combination of parameters
+                clf = grid_obj.best_estimator_
+
+                print('Best Grid Search Parameters: ')
+                print(clf)
+
+                # Fit the best algorithm to the data. 
+                clf.fit(dataset_X_train, dataset_y_train)
+                predictions = clf.predict(dataset_X_test)
+                self.gs_result = accuracy_score(dataset_y_test, predictions)
             return NuSVC(nu=nu, kernel=kernel, degree=degree, gamma=gamma, coef0=coef0, shrinking=shrinking,
                          probability=probability, tol=tol, cache_size=cache_size, class_weight=class_weight,
                          verbose=verbose, max_iter=max_iter, decision_function_shape=decision_function_shape,
@@ -1129,7 +1149,54 @@ class SVM:
             except:
                 if user_input.lower() == "q":
                     break
-            
+
+            user_input = input("Use Grid Search to find the best parameters? Enter y/N: ").lower()
+            if user_input == "q":
+                break
+            elif user_input == "y":
+                self.gridsearch = True
+                params = {}
+                print("Enter the kernels to try out: ")
+                user_input = input( "Options: 1-linear, 2-poly, 3-rbf, 4-sigmoid. Enter 'all' for all options (Example input: 1,2,3) : ")
+                if user_input == 'q':
+                    self.gridsearch = False
+                    break
+                elif user_input == "all":
+                    kern_params = ['linear', 'poly', 'rbf', 'sigmoid']
+                else:
+                    kern_dict = {1:'linear', 2:'poly', 3:'rbf', 4:'sigmoid'}
+                    kern_params_int = list(map(int, list(user_input.split(","))))
+                    kern_params = []
+                    for each in kern_params_int:
+                        kern_params.append(kern_dict.get(each))
+                    kern_params = list(user_input.split(","))
+                params['kernel'] = kern_params
+
+                if is_nu:
+                    user_input = input("Enter a list of decimals for nu (Example input: 0.1,0.2,0.3): ")
+                    if user_input.lower() == "q":
+                        break
+                    nu_params = list(map(float, list(user_input.split(","))))
+                    params['nu'] = nu_params
+
+                else:
+                    user_input = input("Enter epsilon, the range from an actual value where penalties aren't applied (Example input: 0.1,0.2,0.3): ")
+                    if user_input.lower() == "q":
+                        break
+                    eps_params = list(map(float, list(user_input.split(","))))
+                    params['epsilon'] = eps_params
+
+
+                if not is_nu:
+                    user_input = input("Enter the list of regularization parameters to try out. (Example input: 1,10,100): ")
+
+                    gamma_params = list(map(int, list(user_input.split(","))))
+                    params['C'] = gamma_params
+
+                self.gs_params = params
+
+
+
             user_input = input("Input the number of folds for cross validation: ")
 
             try:
@@ -1245,9 +1312,47 @@ class SVM:
         input("=======================================================\n")
 
         if is_nu:
+            if self.gridsearch:
+                clf = NuSVR()
+                dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
+                
+                #Run the grid search
+                grid_obj = GridSearchCV(clf, self.gs_params, scoring='r2')
+                grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+                #Set the clf to the best combination of parameters
+                clf = grid_obj.best_estimator_
+
+                print('Best Grid Search Parameters: ')
+                print(grid_obj.best_params_)
+
+                # Fit the best algorithm to the data. 
+                clf.fit(dataset_X_train, dataset_y_train)
+                predictions = clf.predict(dataset_X_test)
+                self.gs_result = r2_score(dataset_y_test, predictions)
+
             return NuSVR(nu=nu, C=C, kernel=kernel, degree=degree, gamma=gamma, coef0=coef0, shrinking=shrinking,
                          tol=tol, cache_size=cache_size, verbose=verbose, max_iter=max_iter)
         else:
+            if self.gridsearch:
+                clf = SVR()
+                dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
+                
+                #Run the grid search
+                grid_obj = GridSearchCV(clf, self.gs_params, scoring='r2')
+                grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+                #Set the clf to the best combination of parameters
+                clf = grid_obj.best_estimator_
+
+                print('Best Grid Search Parameters: ')
+                print(grid_obj.best_params_)
+
+                # Fit the best algorithm to the data. 
+                clf.fit(dataset_X_train, dataset_y_train)
+                predictions = clf.predict(dataset_X_test)
+                self.gs_result = r2_score(dataset_y_test, predictions)
+
             return SVR(kernel=kernel, degree=degree, gamma=gamma, coef0=coef0, tol=tol, C=C, epsilon=epsilon,
                        shrinking=shrinking, cache_size=cache_size, verbose=verbose, max_iter=max_iter)
 
@@ -1444,7 +1549,9 @@ class SVM:
             print("{:<20} {:<20}".format("Mean Squared Error:", self.mean_squared_error_SVR))
             print("\n{:<20} {:<20}".format("R2 Score:", self.r2_score_SVR))
             print("\n{:<20} {:<20}".format("R Score:", self.r_score_SVR))
-            print("\nCross Validation Scores:\n", self.cross_val_scores_SVR)
+            print("\nCross Validation Scores", self.cross_val_scores_SVR)
+            if self.gridsearch:
+                print("\nGrid Search Score:", self.gs_result)
             print("\n\nCall predict_SVR() to make predictions for new data.")
         elif model == "NuSVR":
             print("\n=================")
@@ -1454,7 +1561,9 @@ class SVM:
             print("{:<20} {:<20}".format("Mean Squared Error:", self.mean_squared_error_nu_SVR))
             print("{:<20} {:<20}".format("R2 Score:", self.r2_score_nu_SVR))
             print("\n{:<20} {:<20}".format("R Score:", self.r_score_nu_SVR))
-            print("\nCross Validation Scores:\n", self.cross_val_scores_nu_SVR)
+            print("\nCross Validation Scores:", self.cross_val_scores_nu_SVR)
+            if self.gridsearch:
+                print("\nGrid Search Score:", self.gs_result)
             print("\n\nCall predict_nu_SVR() to make predictions for new data.")
         else:
             print("\n=====================")
