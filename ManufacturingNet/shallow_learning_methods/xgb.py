@@ -1,6 +1,6 @@
 from math import sqrt
 from scipy.stats import uniform, randint
-from sklearn.metrics import accuracy_score, confusion_matrix, mean_squared_error, r2_score, roc_auc_score, precision_score, recall_score
+from sklearn.metrics import accuracy_score, confusion_matrix, mean_squared_error, r2_score, roc_auc_score, precision_score, recall_score, r2_score
 from sklearn.model_selection import cross_val_score, train_test_split
 from xgboost import XGBClassifier, XGBRegressor
 from sklearn.metrics import make_scorer, accuracy_score
@@ -597,6 +597,27 @@ class XGBoost:
                                  reg_alpha=reg_alpha, reg_lambda=reg_lambda, scale_pos_weight=scale_pos_weight,
                                  base_score=base_score, random_state=random_state, missing=missing, verbosity=verbosity)
         else:
+
+            if self.gridsearch:
+                clf = XGBRegressor()
+                dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
+
+                #Run the grid search
+                grid_obj = GridSearchCV(clf, self.gs_params, scoring='r2')
+                grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+                #Set the clf to the best combination of parameters
+                clf = grid_obj.best_estimator_
+
+                print('Best Grid Search Parameters: ')
+                print(grid_obj.best_params_)
+
+                # Fit the best algorithm to the data. 
+                clf.fit(dataset_X_train, dataset_y_train)
+                predictions = clf.predict(dataset_X_test)
+                self.gs_result = r2_score(dataset_y_test, predictions)
+
+
             return XGBRegressor(max_depth=max_depth, learning_rate=learning_rate, n_estimators=n_estimators,
                                 objective=objective, booster=booster, n_jobs=n_jobs, nthread=nthread, gamma=gamma,
                                 min_child_weight=min_child_weight, max_delta_step=max_delta_step, subsample=subsample,
@@ -636,7 +657,9 @@ class XGBoost:
         print("{:<20} {:<20}".format("Mean Squared Error:", self.mean_squared_error))
         print("\n{:<20} {:<20}".format("R2 Score:", self.r2_score))
         print("\n{:<20} {:<20}".format("R Score:", self.r_score))
-        print("\nCross Validation Scores:\n", self.cross_val_scores_regressor)
+        print("\nCross Validation Scores:", self.cross_val_scores_regressor)
+        if self.gridsearch:
+            print("\nGrid Search Score: ", self.gs_result)
         print("\n\nCall predict_regressor() to make predictions for new data.")
 
         print("\n===================")
