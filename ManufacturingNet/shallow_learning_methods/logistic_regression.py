@@ -1,9 +1,10 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import roc_auc_score
-from sklearn.metrics import make_scorer, accuracy_score
+from sklearn.metrics import make_scorer, accuracy_score, roc_curve, roc_auc_score, confusion_matrix
 from sklearn.model_selection import cross_val_score, train_test_split
 import numpy as np
+import matplotlib.pyplot as plt
 
 class LogRegression: 
     """
@@ -19,6 +20,10 @@ class LogRegression:
 
         self.test_size = None
         self.cv = None
+
+        self.fpr = None
+        self.tpr = None
+        self.bin = False
 
         self.gridsearch = False
         self.gs_params = None
@@ -141,6 +146,17 @@ class LogRegression:
 
             # Metrics
             self.accuracy = accuracy_score(y_prediction, dataset_y_test)
+            probas = self.regression.predict_proba(dataset_X_test)
+
+
+            if probas.shape[1] == 2:
+                self.bin = True
+                self.roc_auc = roc_auc_score(self.regression.predict(dataset_X_test), probas[::, 1])
+                self.fpr, self.tpr, _ = roc_curve(dataset_y_test, probas[::, 1])
+            
+            else:
+                self.confusion_matrix = confusion_matrix(dataset_y_test, y_prediction)
+
             #self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
             self.cross_val_scores = cross_val_score(self.regression, self.attributes, self.labels, cv=self.cv)
 
@@ -443,10 +459,23 @@ class LogRegression:
         #print("\nIntercept:\n", self.intercept)
         print("\nNumber of Iterations:\n", self.n_iter)
         print("\n{:<20} {:<20}".format("Accuracy:", self.accuracy))
+        if self.bin:
+            print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+        else:
+            print("\nConfusion Matrix:\n", self.confusion_matrix)
         #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
         print("\nCross Validation Scores: ", self.cross_val_scores)
         if self.gridsearch:
         	print("\nGrid Search Score: ", self.gs_result)
+
+        if self.bin:
+            plt.plot(self.fpr,self.tpr)
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title('ROC Curve')
+            plt.legend(loc=4)
+            plt.show()
+
         print("\n\nCall predict() to make predictions for new data.")
         
         print("\n===================")
