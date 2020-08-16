@@ -1,9 +1,12 @@
 from math import sqrt
 from sklearn.metrics import mean_squared_error, roc_auc_score
 from sklearn.model_selection import cross_val_score, train_test_split
-from sklearn.metrics import make_scorer, accuracy_score, r2_score
+from sklearn.metrics import make_scorer, accuracy_score, r2_score, roc_curve, roc_auc_score, confusion_matrix
 from sklearn.model_selection import GridSearchCV
 from sklearn.svm import SVC, NuSVC, LinearSVC, SVR, NuSVR, LinearSVR
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 class SVM:
     """
@@ -30,6 +33,10 @@ class SVM:
         self.classifier_linear_SVC = None
         self.accuracy_linear_SVC = None
         self.cross_val_scores_linear_SVC = None
+
+        self.fpr = None
+        self.tpr = None
+        self.bin = False
 
         self.gridsearch = False
         self.gs_params = None
@@ -267,6 +274,22 @@ class SVM:
 
             # Evaluate metrics of model
             self.accuracy_SVC = self.classifier_SVC.score(self.dataset_X_test, self.dataset_y_test)
+
+            y_prediction = self.classifier_SVC.predict(self.dataset_X_test)
+
+
+            probas = self.classifier_SVC.predict_proba(self.dataset_X_test)
+
+
+            if probas.shape[1] == 2:
+                self.bin = True
+                self.roc_auc = roc_auc_score(self.classifier_SVC.predict(self.dataset_X_test), probas[::, 1])
+                self.fpr, self.tpr, _ = roc_curve(self.dataset_y_test, probas[::, 1])
+            
+            else:
+                self.confusion_matrix = confusion_matrix(self.dataset_y_test, y_prediction)
+
+
             self.cross_val_scores_SVC = cross_val_score(self.classifier_SVC, self.attributes, self.labels, cv=self.cv)
 
             #self.roc_auc_SVC = roc_auc_score(self.classifier_SVC.predict(self.dataset_X_test),
@@ -320,10 +343,23 @@ class SVM:
 
             # Evaluate metrics of model
             self.accuracy_nu_SVC = self.classifier_nu_SVC.score(self.dataset_X_test, self.dataset_y_test)
+
+            y_prediction = self.classifier_nu_SVC.predict(self.dataset_X_test)
+
+            probas = self.classifier_nu_SVC.predict_proba(self.dataset_X_test)
+
+
+            if probas.shape[1] == 2:
+                self.bin = True
+                self.roc_auc = roc_auc_score(self.classifier_nu_SVC.predict(self.dataset_X_test), probas[::, 1])
+                self.fpr, self.tpr, _ = roc_curve(self.dataset_y_test, probas[::, 1])
+            
+            else:
+                self.confusion_matrix = confusion_matrix(self.dataset_y_test, y_prediction)
+                
             self.cross_val_scores_nu_SVC = cross_val_score(self.classifier_nu_SVC, self.attributes, self.labels, cv=self.cv)
 
-            #self.roc_auc_nu_SVC = roc_auc_score(self.classifier_nu_SVC.predict(self.dataset_X_test),
-                                                #self.classifier_nu_SVC.predict_proba(self.dataset_X_test)[::, 1])
+            print('Done!')
             
             # Output results
             self._output_classifier_results(model="NuSVC")
@@ -373,6 +409,17 @@ class SVM:
 
             # Evaluate metrics of model
             self.accuracy_linear_SVC = self.classifier_linear_SVC.score(self.dataset_X_test, self.dataset_y_test)
+
+            '''probas = self.classifier.predict_proba(dataset_X_test)
+
+            if probas.shape[1] == 2:
+                self.bin = True
+                self.roc_auc = roc_auc_score(self.classifier.predict(dataset_X_test), probas[::, 1])
+                self.fpr, self.tpr, _ = roc_curve(dataset_y_test, probas[::, 1])
+
+            else:
+                self.roc_auc = roc_auc_score(self.classifier.predict(dataset_X_test), probas, multi_class='ovo')'''
+
             self.cross_val_scores_linear_SVC =\
                 cross_val_score(self.classifier_linear_SVC, self.attributes, self.labels, cv=self.cv)
             
@@ -1504,6 +1551,10 @@ class SVM:
             print("===============\n")
 
             print("{:<20} {:<20}".format("Accuracy:", self.accuracy_SVC))
+            if self.bin:
+                print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+            else:
+                print("\nConfusion Matrix:\n", self.confusion_matrix)
 
             #if self.roc_auc_SVC is not None:
                 #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc_SVC))
@@ -1511,6 +1562,15 @@ class SVM:
             print("\nCross Validation Scores:", self.cross_val_scores_SVC)
             if self.gridsearch:
             	print("\nGrid Search Score:", self.gs_result)
+
+            if self.bin:
+                plt.plot(self.fpr,self.tpr,label="data 1")
+                plt.xlabel('False Positive Rate')
+                plt.ylabel('True Positive Rate')
+                plt.title('ROC Curve')
+                plt.legend(loc=4)
+                plt.show()
+
             print("\n\nCall predict_SVC() to make predictions for new data.")
         elif model == "NuSVC":
             print("\n=================")
@@ -1518,11 +1578,24 @@ class SVM:
             print("=================\n")
 
             print("{:<20} {:<20}".format("Accuracy:", self.accuracy_nu_SVC))
-
-            #if self.roc_auc_nu_SVC is not None:
+            if self.bin:
+                print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+            else:
+                print("\nConfusion Matrix:\n", self.confusion_matrix)            #if self.roc_auc_nu_SVC is not None:
                 #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc_nu_SVC))
             
-            print("\nCross Validation Scores:\n", self.cross_val_scores_nu_SVC)
+            print("\nCross Validation Scores:", self.cross_val_scores_nu_SVC)
+            if self.gridsearch:
+                print("\nGrid Search Score:", self.gs_result)
+
+            if self.bin:
+                plt.plot(self.fpr,self.tpr,label="data 1")
+                plt.xlabel('False Positive Rate')
+                plt.ylabel('True Positive Rate')
+                plt.title('ROC Curve')
+                plt.legend(loc=4)
+                plt.show()
+            
             print("\n\nCall predict_nu_SVC() to make predictions for new data.")
         else:
             print("\n=====================")
