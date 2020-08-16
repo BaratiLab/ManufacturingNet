@@ -1,9 +1,12 @@
 from math import sqrt
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import mean_squared_error, roc_auc_score, r2_score
-from sklearn.metrics import make_scorer, accuracy_score
+from sklearn.metrics import mean_squared_error, roc_auc_score, r2_score, auc
+from sklearn.metrics import make_scorer, accuracy_score, roc_curve, confusion_matrix
 from sklearn.model_selection import cross_val_score, train_test_split
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 class RandomForest:
     """
@@ -30,6 +33,13 @@ class RandomForest:
         self.mean_squared_error = None
         self.cross_val_scores_regressor = None
         
+        self.fpr = None
+        self.tpr = None
+
+        self.confusion_matrix = None
+
+        self.bin = False 
+
         self.gridsearch = False
         self.gs_params = None
         self.gs_results = None    
@@ -142,8 +152,20 @@ class RandomForest:
 
             # Evaluate accuracy and ROC AUC of model using testing set and actual classification
             self.accuracy = self.classifier.score(dataset_X_test, dataset_y_test)
-            #self.roc_auc = roc_auc_score(self.classifier.predict(dataset_X_test),
-                                         #self.classifier.predict_proba(dataset_X_test)[::, 1])
+
+            y_prediction = self.classifier.predict(dataset_X_test)
+
+            probas = self.classifier.predict_proba(dataset_X_test)
+
+            if probas.shape[1] == 2:
+                self.bin = True
+                self.roc_auc = roc_auc_score(y_prediction, probas[::, 1])
+                self.fpr, self.tpr, _ = roc_curve(dataset_y_test, probas[::, 1])
+            
+            else:
+                self.confusion_matrix = confusion_matrix(dataset_y_test, y_prediction)
+
+           
             self.cross_val_scores_classifier = cross_val_score(self.classifier, self.attributes, self.labels, cv=self.cv)
 
             # Output results
@@ -625,10 +647,23 @@ class RandomForest:
 
         print("Classes:\n", self.classifier.classes_)
         print("\n{:<20} {:<20}".format("Accuracy:", self.accuracy))
-        #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+        if self.bin:
+            print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+        else:
+            print("\nConfusion Matrix:\n", self.confusion_matrix)
+
         print("\nCross Validation Scores: ", self.cross_val_scores_classifier)
         if self.gridsearch:
         	print("\nGrid Search Score: ", self.gs_result)
+
+        if self.bin:
+            plt.plot(self.fpr,self.tpr,label="data 1")
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title('ROC Curve')
+            plt.legend(loc=4)
+            plt.show()
+        
         print("\n\nCall predict_classifier() to make predictions for new data.")
 
         print("\n===================")
