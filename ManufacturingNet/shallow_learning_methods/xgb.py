@@ -1,10 +1,11 @@
 from math import sqrt
 from scipy.stats import uniform, randint
-from sklearn.metrics import accuracy_score, confusion_matrix, mean_squared_error, r2_score, roc_auc_score, precision_score, recall_score, r2_score
+from sklearn.metrics import accuracy_score, confusion_matrix, mean_squared_error, r2_score, roc_auc_score, precision_score, recall_score, r2_score, roc_auc_score, roc_curve
 from sklearn.model_selection import cross_val_score, train_test_split
 from xgboost import XGBClassifier, XGBRegressor
 from sklearn.metrics import make_scorer, accuracy_score
 from sklearn.model_selection import GridSearchCV
+import matplotlib.pyplot as plt
 
 import numpy as np
 
@@ -36,6 +37,10 @@ class XGBoost:
         self.roc_auc = None
         self.classes = None
         self.cross_val_scores_classifier = None
+
+        self.fpr = None
+        self.tpr = None
+        self.bin = False
 
         self.gridsearch = False
         self.gs_params = None
@@ -249,6 +254,17 @@ class XGBoost:
             self.classes = self.classifier.classes_
 
             self.accuracy = accuracy_score(dataset_y_test, y_prediction)
+            probas = self.classifier.predict_proba(dataset_X_test)
+
+
+            if probas.shape[1] == 2:
+                self.bin = True
+                self.roc_auc = roc_auc_score(self.classifier.predict(dataset_X_test), probas[::, 1])
+                self.fpr, self.tpr, _ = roc_curve(dataset_y_test, probas[::, 1])
+            
+            else:
+                self.roc_auc = roc_auc_score(self.classifier.predict(dataset_X_test), probas, multi_class='ovo')
+
             self.confusion_matrix = confusion_matrix(dataset_y_test, y_prediction)
             #self.roc_auc = roc_auc_score(y_prediction, y_pred_probas)
             self.cross_val_scores_classifier = cross_val_score(self.classifier, self.attributes, self.labels, cv=self.cv)
@@ -634,12 +650,26 @@ class XGBoost:
         print("=========================\n")
 
         print("Classes:\n", self.classes)
-        print("\nConfusion Matrix:\n", self.confusion_matrix)
         print("\n{:<20} {:<20}".format("Accuracy:", self.accuracy))
         #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+        if self.bin:
+            print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+        else:
+            print("\nConfusion Matrix:\n", self.confusion_matrix)
+
+
         print("\nCross Validation Scores:", self.cross_val_scores_classifier)
         if self.gridsearch:
         	print("\nGrid Search Score: ", self.gs_result)
+
+        if self.bin:
+            plt.plot(self.fpr,self.tpr,label="data 1")
+            plt.xlabel('False Positive Rate')
+            plt.ylabel('True Positive Rate')
+            plt.title('ROC Curve')
+            plt.legend(loc=4)
+            plt.show()
+
         print("\n\nCall predict_classifier() to make predictions for new data.")
 
         print("\n===================")
