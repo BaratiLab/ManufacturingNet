@@ -12,7 +12,7 @@ For more information, visit our website, [manufacturingnet.io.](http://manufactu
 
 ## Requirements
 
-To use ManufacturingNet, you will need a version of [Python](https://www.python.org/downloads/) installed greater than 3.4. 
+To use ManufacturingNet, you will need a version of [Python](https://www.python.org/downloads/) greater than 3.4 installed. 
 
 To check if Python3 is installed, open the terminal on Linux/MacOS or PowerShell on Windows and run the following command:
 
