@@ -47,9 +47,8 @@ class MeanNormalizer():
 
 class MinMaxNormalizer():
     """
-    This class performs normalizaation of the data along the given axis. It calculates the min and max values along the axis.
+    This class performs normalization of the data along the given axis. It calculates the min and max values along the axis.
     It subtracts the min and divides by the range (range = max - min).
-    
     
     """
     def __init__(self, a, axis = 0):
