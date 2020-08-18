@@ -5,4 +5,4 @@ from .alexnet import AlexNet
 from .googlenet import GoogleNet
 from .mobilenet import MobileNet
 
-__all__=['ResNet','VGG','DenseNet','AlexNet','MobileNet'.'GoogleNet']
+__all__=['ResNet','VGG','DenseNet','AlexNet','MobileNet','GoogleNet']
