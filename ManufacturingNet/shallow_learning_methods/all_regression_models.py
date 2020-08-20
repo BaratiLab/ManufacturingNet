@@ -251,10 +251,10 @@ class AllRegressionModels:
         # Print models that didn't fail
         print("\n===========")
         print("= Results =")
-        print("===========\n")
+        print("===========")
 
         for model, data in self._regression_models.items():
-            print("{:<20} {:<20} {:<20}".format(model, data[0], data[1]))
+            print("\n{:<20} {:<20} {:<20}".format(model, data[0], data[1]))
 
         print()
 
