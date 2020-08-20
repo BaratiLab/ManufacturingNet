@@ -169,7 +169,9 @@ class AllRegressionModels:
 
             self._regression_models["LinearRegression"] = \
                 [r2_score, elapsed_time]
-        except Exception:
+        except Exception as e:
+            print("\nLinearRegression failed. Exception message:")
+            print(e, "\n")
             self._failures.append("LinearRegression")
 
         try:
@@ -181,7 +183,9 @@ class AllRegressionModels:
             elapsed_time = end_time - start_time
 
             self._regression_models["RandomForest"] = [r2_score, elapsed_time]
-        except Exception:
+        except Exception as e:
+            print("\nRandomForest failed. Exception message:")
+            print(e, "\n")
             self._failures.append("RandomForest")
 
         try:
@@ -193,7 +197,9 @@ class AllRegressionModels:
             elapsed_time = end_time - start_time
 
             self._regression_models["SVR"] = [r2_score, elapsed_time]
-        except Exception:
+        except Exception as e:
+            print("\nSVR failed. Exception message:")
+            print(e, "\n")
             self._failures.append("SVR")
 
         try:
@@ -205,7 +211,9 @@ class AllRegressionModels:
             elapsed_time = end_time - start_time
 
             self._regression_models["NuSVR"] = [r2_score, elapsed_time]
-        except Exception:
+        except Exception as e:
+            print("\nNuSVR failed. Exception message:")
+            print(e, "\n")
             self._failures.append("NuSVR")
 
         try:
@@ -217,7 +225,9 @@ class AllRegressionModels:
             elapsed_time = end_time - start_time
 
             self._regression_models["LinearSVR"] = [r2_score, elapsed_time]
-        except Exception:
+        except Exception as e:
+            print("\nLinearSVR failed. Exception message:")
+            print(e, "\n")
             self._failures.append("LinearSVR")
 
         try:
@@ -229,14 +239,15 @@ class AllRegressionModels:
             elapsed_time = end_time - start_time
 
             self._regression_models["XGBRegressor"] = [r2_score, elapsed_time]
-        except Exception:
+        except Exception as e:
+            print("\nXGBRegressor failed. Exception message:")
+            print(e, "\n")
             self._failures.append("XGBRegressor")
 
     def _print_results(self):
         """Helper method that prints results of
         _all_regression_models_runner() in tabular form.
         """
-
         # Print models that didn't fail
         print("\n===========")
         print("= Results =")

@@ -175,7 +175,9 @@ class AllClassificationModels:
 
             self._classification_models["LogisticRegression"] = \
                 [accuracy, cv_score, elapsed_time]
-        except Exception:
+        except Exception as e:
+            print("\nLogisticRegression failed. Exception message:")
+            print(e, "\n")
             self._failures.append("LogisticRegression")
 
         try:
@@ -191,7 +193,9 @@ class AllClassificationModels:
 
             self._classification_models["RandomForest"] = \
                 [accuracy, cv_score, elapsed_time]
-        except Exception:
+        except Exception as e:
+            print("\nRandomForest failed. Exception message:")
+            print(e, "\n")
             self._failures.append("RandomForest")
 
         try:
@@ -206,7 +210,9 @@ class AllClassificationModels:
 
             self._classification_models["SVC"] = \
                 [accuracy, cv_score, elapsed_time]
-        except Exception:
+        except Exception as e:
+            print("\nSVC failed. Exception message:")
+            print(e, "\n")
             self._failures.append("SVC")
 
         try:
@@ -221,7 +227,9 @@ class AllClassificationModels:
 
             self._classification_models["NuSVC"] = \
                 [accuracy, cv_score, elapsed_time]
-        except Exception:
+        except Exception as e:
+            print("\nNuSVC failed. Exception message:")
+            print(e, "\n")
             self._failures.append("NuSVC")
 
         try:
@@ -236,7 +244,9 @@ class AllClassificationModels:
 
             self._classification_models["LinearSVC"] = \
                 [accuracy, cv_score, elapsed_time]
-        except Exception:
+        except Exception as e:
+            print("\nLinearSVc failed. Exception message:")
+            print(e, "\n")
             self._failures.append("LinearSVC")
 
         try:
@@ -252,7 +262,9 @@ class AllClassificationModels:
 
             self._classification_models["XGBClassifier"] = \
                 [accuracy, cv_score, elapsed_time]
-        except Exception:
+        except Exception as e:
+            print("\nXGBClassifier failed. Exception message:")
+            print(e, "\n")
             self._failures.append("XGBClassifier")
 
     def _print_results(self):
