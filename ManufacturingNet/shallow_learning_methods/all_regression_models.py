@@ -1,26 +1,30 @@
-from contextlib import redirect_stderr, redirect_stdout
+"""AllRegressionModels runs every available regression algorithm on the
+given dataset and outputs the coefficient of determination and
+execution time of each successful model when run() is called.
+
+View the documentation at https://manufacturingnet.readthedocs.io/.
+"""
+
 import io
-from sklearn.linear_model import LinearRegression
+import time
+from contextlib import redirect_stderr, redirect_stdout
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVR, NuSVR, LinearSVR
-import time
 from xgboost import XGBRegressor
 
 class AllRegressionModels:
-    """
-    Wrapper class around all supported regression models: LinearRegression, RandomForest, SVR, NuSVR, LinearSVR, and
+    """Wrapper class around all supported regression models:
+    LinearRegression, RandomForest, SVR, NuSVR, LinearSVR, and
     XGBRegressor.
-
-    AllRegressionModels runs every available regression algorithm on the given dataset and outputs the coefficient of
-    determination and execution time of each successful model when run() is run.
     """
+
     def __init__(self, attributes=None, labels=None):
-        """
-        Initializes an AllRegressionModels object.
-        """
+        """Initializes an AllRegressionModels object."""
         self.attributes = attributes
         self.labels = labels
+
         self.test_size = None
         self.verbose = None
 
@@ -37,98 +41,79 @@ class AllRegressionModels:
     # Accessor methods
 
     def get_attributes(self):
-        """
-        Accessor method for attributes.
-        """
+        """Accessor method for attributes."""
         return self.attributes
 
     def get_labels(self):
-        """
-        Accessor method for labels.
-        """
+        """Accessor method for labels."""
         return self.labels
 
     def get_all_regression_models(self):
-        """
-        Accessor method that returns a list of all models.
-        """
-        return [self.linear_regression, self.random_forest, self.SVR, self.nu_SVR, self.linear_SVR, self.XGB_regressor]
+        """Accessor method that returns a list of all models."""
+        return [self.linear_regression, self.random_forest, self.SVR,
+                self.nu_SVR, self.linear_SVR, self.XGB_regressor]
 
     def get_linear_regression(self):
-        """
-        Accessor method for linear_regression.
-        """
+        """Accessor method for linear_regression."""
         return self.linear_regression
 
     def get_random_forest(self):
-        """
-        Accessor method for random_forest.
-        """
+        """Accessor method for random_forest."""
         return self.random_forest
 
     def get_SVR(self):
-        """
-        Accessor method for SVR.
-        """
+        """Accessor method for SVR."""
         return self.SVR
 
     def get_nu_SVR(self):
-        """
-        Accessor method for nu_SVR.
-        """
+        """Accessor method for nu_SVR."""
         return self.nu_SVR
 
     def get_linear_SVR(self):
-        """
-        Accessor method for linear_SVR.
-        """
+        """Accessor method for linear_SVR."""
         return self.linear_SVR
 
     def get_XGB_regressor(self):
-        """
-        Accessor method for XGB_regressor.
-        """
+        """Accessor method for XGB_regressor."""
         return self.XGB_regressor
 
     # Modifier methods
 
     def set_attributes(self, new_attributes=None):
-        """
-        Modifier method for attributes.
-        """
+        """Modifier method for attributes."""
         self.attributes = new_attributes
 
     def set_labels(self, new_labels=None):
-        """
-        Modifier method for labels.
-        """
+        """Modifier method for labels."""
         self.labels = new_labels
 
     # Regression functionality
 
     def run(self):
-        """
-        Driver method for running all regression models with given attributes and labels.
+        """Driver method for running all regression models with given
+        attributes and labels.
         """
         # Get parameters; create models
         self._create_models()
 
-        # Call helper method for running all regression models; suppress output, if needed
+        # Call helper method for running all regression models
+        # Suppress output, if needed
         if not self.verbose:
             suppress_output = io.StringIO()
-            with redirect_stderr(suppress_output), redirect_stdout(suppress_output):
+            with redirect_stderr(suppress_output), \
+                 redirect_stdout(suppress_output):
                 self._all_regression_models_runner()
         else:
             self._all_regression_models_runner()
-        
+
         # Print results
         self._print_results()
-        
+
     # Helper methods
 
     def _create_models(self):
-        """
-        Prompts user for parameter input and instantiates all the regressor models.
+        """Prompts user for parameter input and instantiates all the
+        regressor models.
         """
         print("\n==========================================")
         print("= All Regression Models Parameter Inputs =")
@@ -141,17 +126,18 @@ class AllRegressionModels:
             self.verbose = True
         else:
             self.verbose = False
-        
-        user_input = input("What fraction of the dataset should be used for testing? Enter a decimal: ")
+
+        user_input = input("\nWhat fraction of the dataset should be used for "
+                           + "testing? Enter a decimal: ")
 
         try:
             self.test_size = float(user_input)
-        except:
+        except Exception:
             self.test_size = 0.25
-        
-        print("\n=======================================================")
-        print("= End of parameter inputs; press any key to continue. =")
-        input("=======================================================\n")
+
+        print("\n=============================================")
+        print("= End of inputs; press any key to continue. =")
+        input("=============================================\n")
 
         # Create models
         self.linear_regression = LinearRegression()
@@ -162,70 +148,93 @@ class AllRegressionModels:
         self.XGB_regressor = XGBRegressor(verbosity=int(self.verbose))
 
     def _all_regression_models_runner(self):
-        """
-        Helper method that runs all models using the given dataset and all default parameters.
+        """Helper method that runs all models using the given dataset
+        and all default parameters.
         """
 
         # Split dataset
-        dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test =\
-            train_test_split(self.attributes, self.labels, test_size=self.test_size)
+        dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = \
+            train_test_split(self.attributes, self.labels,
+                             test_size=self.test_size)
 
         # Run and time all models; identify each as success or failure
         try:
             start_time = time.time()
             self.linear_regression.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
-            self._regression_models["LinearRegression"] =\
-                [self.linear_regression.score(dataset_X_test, dataset_y_test), end_time - start_time]
-        except:
+
+            r2_score = self.linear_regression.score(dataset_X_test,
+                                                    dataset_y_test)
+            elapsed_time = end_time - start_time
+
+            self._regression_models["LinearRegression"] = \
+                [r2_score, elapsed_time]
+        except Exception:
             self._failures.append("LinearRegression")
 
         try:
             start_time = time.time()
             self.random_forest.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
-            self._regression_models["RandomForest"] =\
-                [self.random_forest.score(dataset_X_test, dataset_y_test), end_time - start_time]
-        except:
+
+            r2_score = self.random_forest.score(dataset_X_test, dataset_y_test)
+            elapsed_time = end_time - start_time
+
+            self._regression_models["RandomForest"] = [r2_score, elapsed_time]
+        except Exception:
             self._failures.append("RandomForest")
 
-        try:        
+        try:
             start_time = time.time()
             self.SVR.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
-            self._regression_models["SVR"] = [self.SVR.score(dataset_X_test, dataset_y_test), end_time - start_time]
-        except:
+
+            r2_score = self.SVR.score(dataset_X_test, dataset_y_test)
+            elapsed_time = end_time - start_time
+
+            self._regression_models["SVR"] = [r2_score, elapsed_time]
+        except Exception:
             self._failures.append("SVR")
-        
+
         try:
             start_time = time.time()
             self.nu_SVR.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
-            self._regression_models["NuSVR"] = [self.nu_SVR.score(dataset_X_test, dataset_y_test), end_time - start_time]
-        except:
+
+            r2_score = self.nu_SVR.score(dataset_X_test, dataset_y_test)
+            elapsed_time = end_time - start_time
+
+            self._regression_models["NuSVR"] = [r2_score, elapsed_time]
+        except Exception:
             self._failures.append("NuSVR")
 
         try:
             start_time = time.time()
             self.linear_SVR.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
-            self._regression_models["LinearSVR"] =\
-                [self.linear_SVR.score(dataset_X_test, dataset_y_test), end_time - start_time]
-        except:
+
+            r2_score = self.linear_SVR.score(dataset_X_test, dataset_y_test)
+            elapsed_time = end_time - start_time
+
+            self._regression_models["LinearSVR"] = [r2_score, elapsed_time]
+        except Exception:
             self._failures.append("LinearSVR")
 
         try:
             start_time = time.time()
             self.XGB_regressor.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
-            self._regression_models["XGBRegressor"] =\
-                [self.XGB_regressor.score(dataset_X_test, dataset_y_test), end_time - start_time]
-        except:
+
+            r2_score = self.XGB_regressor.score(dataset_X_test, dataset_y_test)
+            elapsed_time = end_time - start_time
+
+            self._regression_models["XGBRegressor"] = [r2_score, elapsed_time]
+        except Exception:
             self._failures.append("XGBRegressor")
-        
+
     def _print_results(self):
-        """
-        Helper method that prints results of _all_regression_models_runner() in tabular form.
+        """Helper method that prints results of
+        _all_regression_models_runner() in tabular form.
         """
 
         # Print models that didn't fail
@@ -244,5 +253,5 @@ class AllRegressionModels:
 
             for entry in self._failures:
                 print(entry)
-        
+
         print()

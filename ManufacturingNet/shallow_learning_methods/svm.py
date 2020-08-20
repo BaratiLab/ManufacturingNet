@@ -1,46 +1,51 @@
-from math import sqrt
-from sklearn.metrics import mean_squared_error, roc_auc_score
-from sklearn.model_selection import cross_val_score, train_test_split
-from sklearn.metrics import make_scorer, accuracy_score, r2_score, roc_curve, roc_auc_score, confusion_matrix
-from sklearn.model_selection import GridSearchCV
-from sklearn.svm import SVC, NuSVC, LinearSVC, SVR, NuSVR, LinearSVR
-import matplotlib.pyplot as plt
-import numpy as np
+"""SVM can train SVC, NuSVC, LinearSVC, SVR, NuSVR, and LinearSVR
+models implemented by Scikit-Learn on the given dataset. Before
+training, the user is prompted for parameter input. After training,
+model metrics are displayed, and the user can make new predictions.
+Classification and regression are both supported.
 
+View the documentation at https://manufacturingnet.readthedocs.io/.
+"""
+
+from math import sqrt
+import matplotlib.pyplot as plt
+from sklearn.metrics import make_scorer, accuracy_score, roc_curve, \
+    roc_auc_score, confusion_matrix, mean_squared_error
+from sklearn.model_selection import GridSearchCV, cross_val_score, \
+    train_test_split
+from sklearn.svm import SVC, NuSVC, LinearSVC, SVR, NuSVR, LinearSVR
 
 class SVM:
-    """
-    Class model for support vector machine (SVM) models.
-    """
+    """Class model for support vector machine (SVM) models."""
 
     def __init__(self, attributes=None, labels=None):
-        """
-        Initializes a SVM object.
-        """
+        """Initializes a SVM object."""
         self.attributes = attributes
         self.labels = labels
+
         self.test_size = None
         self.cv = None
+        self.graph_results = None
+        self.fpr = None
+        self.tpr = None
+        self.bin = False
+        self.gridsearch = False
+        self.gs_params = None
+        self.gs_result = None
 
         self.classifier_SVC = None
         self.accuracy_SVC = None
         self.roc_auc_SVC = None
+        self.confusion_matrix_SVC = None
         self.cross_val_scores_SVC = None
         self.classifier_nu_SVC = None
         self.accuracy_nu_SVC = None
         self.roc_auc_nu_SVC = None
+        self.confusion_matrix_nu_SVC = None
         self.cross_val_scores_nu_SVC = None
         self.classifier_linear_SVC = None
         self.accuracy_linear_SVC = None
         self.cross_val_scores_linear_SVC = None
-
-        self.fpr = None
-        self.tpr = None
-        self.bin = False
-
-        self.gridsearch = False
-        self.gs_params = None
-        self.gs_result = None
 
         self.regressor_SVR = None
         self.mean_squared_error_SVR = None
@@ -58,7 +63,8 @@ class SVM:
         self.r_score_linear_SVR = None
         self.cross_val_scores_linear_SVR = None
 
-        # References to training and testing subsets of dataset; instance data for re-use purposes
+        # References to training and testing subsets of dataset
+        # For re-use purposes
         self.dataset_X_train = None
         self.dataset_y_train = None
         self.dataset_X_test = None
@@ -67,406 +73,364 @@ class SVM:
     # Accessor Methods
 
     def get_attributes(self):
-        """
-        Accessor method for attributes.
-        """
+        """Accessor method for attributes."""
         return self.attributes
 
     def get_labels(self):
-        """
-        Accessor method for labels.
-        """
+        """Accessor method for labels."""
         return self.labels
 
     def get_classifier_SVC(self):
-        """
-        Accessor method for classifier_SVC.
-        """
+        """Accessor method for classifier_SVC."""
         return self.classifier_SVC
 
     def get_accuracy_SVC(self):
-        """
-        Accessor method for accuracy_SVC.
-        """
+        """Accessor method for accuracy_SVC."""
         return self.accuracy_SVC
 
     def get_roc_auc_SVC(self):
-        """
-        Accessor method for roc_auc_SVC.
-        """
+        """Accessor method for roc_auc_SVC."""
         return self.roc_auc_SVC
-    
+
+    def get_confusion_matrix_SVC(self):
+        """Accessor method for confusion_matrix_SVC."""
+        return self.confusion_matrix_SVC
+
     def get_cross_val_scores_SVC(self):
-        """
-        Accessor method for cross_val_scores_SVC.
-        """
+        """Accessor method for cross_val_scores_SVC."""
         return self.cross_val_scores_SVC
 
     def get_classifier_nu_SVC(self):
-        """
-        Accessor method for classifier_nu_SVC.
-        """
+        """Accessor method for classifier_nu_SVC."""
         return self.classifier_nu_SVC
 
     def get_accuracy_nu_SVC(self):
-        """
-        Accessor method for accuracy_nu_SVC.
-        """
+        """Accessor method for accuracy_nu_SVC."""
         return self.accuracy_nu_SVC
 
     def get_roc_auc_nu_SVC(self):
-        """
-        Accessor method for roc_auc_nu_SVC.
-        """
+        """Accessor method for roc_auc_nu_SVC."""
         return self.roc_auc_nu_SVC
-    
+
+    def get_confusion_matrix_nu_SVC(self):
+        """Accessor method for confusion_matrix_nu_SVC."""
+        return self.confusion_matrix_nu_SVC
+
     def get_cross_val_scores_nu_SVC(self):
-        """
-        Accessor method for cross_val_scores_nu_SVC.
-        """
+        """Accessor method for cross_val_scores_nu_SVC."""
         return self.cross_val_scores_nu_SVC
 
     def get_classifier_linear_SVC(self):
-        """
-        Accessor method for classifier_linear_SVC.
-        """
+        """Accessor method for classifier_linear_SVC."""
         return self.classifier_linear_SVC
 
     def get_accuracy_linear_SVC(self):
-        """
-        Accessor method for accuracy_linear_SVC.
-        """
+        """Accessor method for accuracy_linear_SVC."""
         return self.accuracy_linear_SVC
-    
+
     def get_cross_val_scores_linear_SVC(self):
-        """
-        Accessor method for cross_val_scores_linear_SVC.
-        """
+        """Accessor method for cross_val_scores_linear_SVC."""
         return self.cross_val_scores_linear_SVC
 
     def get_regressor_SVR(self):
-        """
-        Accessor method for regressor_SVR.
-        """
+        """Accessor method for regressor_SVR."""
         return self.regressor_SVR
-    
+
     def get_mean_squared_error_SVR(self):
-        """
-        Accessor method for mean_squared_error_SVR.
-        """
+        """Accessor method for mean_squared_error_SVR."""
         return self.mean_squared_error_SVR
 
     def get_r2_score_SVR(self):
-        """
-        Accessor method for r2_score_SVR.
-        """
+        """Accessor method for r2_score_SVR."""
         return self.r2_score_SVR
 
     def get_r_score_SVR(self):
-        """
-        Accessor method for r_score_SVR.
-        """
+        """Accessor method for r_score_SVR."""
         return self.r_score_SVR
-    
+
     def get_cross_val_scores_SVR(self):
-        """
-        Accessor method for cross_val_scores_SVR.
-        """
+        """Accessor method for cross_val_scores_SVR."""
         return self.cross_val_scores_SVR
 
     def get_regressor_nu_SVR(self):
-        """
-        Accessor method for regressor_nu_SVR.
-        """
+        """Accessor method for regressor_nu_SVR."""
         return self.regressor_nu_SVR
-    
+
     def get_mean_squared_error_nu_SVR(self):
-        """
-        Accessor method for mean_squared_error_nu_SVR.
-        """
+        """Accessor method for mean_squared_error_nu_SVR."""
         return self.mean_squared_error_nu_SVR
 
     def get_r2_score_nu_SVR(self):
-        """
-        Accessor method for r2_score_nu_SVR.
-        """
+        """Accessor method for r2_score_nu_SVR."""
         return self.r2_score_nu_SVR
 
     def get_r_score_nu_SVR(self):
-        """
-        Accessor method for r_score_nu_SVR.
-        """
+        """Accessor method for r_score_nu_SVR."""
         return self.r_score_nu_SVR
-    
+
     def get_cross_val_scores_nu_SVR(self):
-        """
-        Accessor method for cross_val_scores_nu_SVR.
-        """
+        """Accessor method for cross_val_scores_nu_SVR."""
         return self.cross_val_scores_nu_SVR
 
     def get_regressor_linear_SVR(self):
-        """
-        Accessor method for regressor_linear_SVR.
-        """
+        """Accessor method for regressor_linear_SVR."""
         return self.regressor_linear_SVR
-    
+
     def get_mean_squared_error_linear_SVR(self):
-        """
-        Accessor method for mean_squared_error_linear_SVR.
-        """
+        """Accessor method for mean_squared_error_linear_SVR."""
         return self.mean_squared_error_linear_SVR
 
     def get_r2_score_linear_SVR(self):
-        """
-        Accessor method for r2_score_linear_SVR.
-        """
+        """Accessor method for r2_score_linear_SVR."""
         return self.r2_score_linear_SVR
 
     def get_r_score_linear_SVR(self):
-        """
-        Accessor method for r_score_linear_SVR.
-        """
+        """Accessor method for r_score_linear_SVR."""
         return self.r_score_linear_SVR
-    
+
     def get_cross_val_scores_linear_SVR(self):
-        """
-        Accessor method for cross_val_scores_linear_SVR.
-        """
+        """Accessor method for cross_val_scores_linear_SVR."""
         return self.cross_val_scores_linear_SVR
 
     # Modifier Methods
 
     def set_attributes(self, new_attributes=None):
-        """
-        Modifier method for attributes.
-        """
+        """Modifier method for attributes."""
         self.attributes = new_attributes
 
     def set_labels(self, new_labels=None):
-        """
-        Modifier method for labels.
-        """
+        """Modifier method for labels."""
         self.labels = new_labels
 
     # Wrappers for SVM classification classes
 
     def run_SVC(self):
-        """
-        Runs SVC model.
-        """
+        """Runs SVC model."""
         if self._check_inputs():
             # Initialize classifier
             self.classifier_SVC = self._create_SVC_model(is_nu=False)
 
-            # Split data, if needed; if testing/training sets are still None, call _split_data()
+            # Split data, if needed
+            # If testing/training sets are still None, call _split_data()
             if self.dataset_X_test is None:
                 self._split_data()
 
-            # Train classifier; handle exception if arguments are incorrect
+            # Train classifier
+            # Handle exception if arguments are incorrect
             try:
-                self.classifier_SVC.fit(self.dataset_X_train, self.dataset_y_train)
+                self.classifier_SVC.fit(self.dataset_X_train,
+                                        self.dataset_y_train)
             except Exception as e:
-                print("An exception occurred while training the SVC model. Check your arguments and try again.")
+                print("An exception occurred while training the SVC model.",
+                      "Check your arguments and try again.")
                 print("Here is the exception message:")
                 print(e)
                 self.classifier_SVC = None
                 return
 
-            # Evaluate metrics of model
-            self.accuracy_SVC = self.classifier_SVC.score(self.dataset_X_test, self.dataset_y_test)
-
+            # Metrics
+            self.accuracy_SVC = self.classifier_SVC.score(self.dataset_X_test,
+                                                          self.dataset_y_test)
             y_prediction = self.classifier_SVC.predict(self.dataset_X_test)
-
-
             probas = self.classifier_SVC.predict_proba(self.dataset_X_test)
 
-
+            # If classification is binary, calculate roc_auc
             if probas.shape[1] == 2:
                 self.bin = True
-                self.roc_auc = roc_auc_score(self.classifier_SVC.predict(self.dataset_X_test), probas[::, 1])
-                self.fpr, self.tpr, _ = roc_curve(self.dataset_y_test, probas[::, 1])
-            
+                self.roc_auc_SVC = roc_auc_score(y_prediction, probas[::, 1])
+                self.fpr, self.tpr, _ = roc_curve(self.dataset_y_test,
+                                                  probas[::, 1])
+            # Else, calculate confusion matrix
             else:
-                self.confusion_matrix = confusion_matrix(self.dataset_y_test, y_prediction)
+                self.confusion_matrix_SVC = confusion_matrix(self.dataset_y_test,
+                                                             y_prediction)
 
 
-            self.cross_val_scores_SVC = cross_val_score(self.classifier_SVC, self.attributes, self.labels, cv=self.cv)
-
-            #self.roc_auc_SVC = roc_auc_score(self.classifier_SVC.predict(self.dataset_X_test),
-                                             #self.classifier_SVC.predict_proba(self.dataset_X_test)[::, 1])
+            self.cross_val_scores_SVC = \
+                cross_val_score(self.classifier_SVC, self.attributes,
+                                self.labels, cv=self.cv)
 
             # Output results
             self._output_classifier_results(model="SVC")
 
     def predict_SVC(self, dataset_X=None):
-        """
-        Classifies each datapoint in dataset_X using the SVC model. Returns the predicted classifications.
+        """Classifies each datapoint in dataset_X using the SVC model.
+        Returns the predicted classifications.
         """
         # Check that run_SVC() has already been called
         if self.classifier_SVC is None:
-            print("The SVC model seems to be missing. Have you called run_SVC() yet?")
-            return
-        
-        # Try to make the prediction; handle exception if dataset_X isn't a valid input
+            print("The SVC model seems to be missing. Have you called",
+                  "run_SVC() yet?")
+            return None
+
+        # Try to make the prediction
+        # Handle exception if dataset_X isn't a valid input
         try:
             y_prediction = self.classifier_SVC.predict(dataset_X)
         except Exception as e:
-            print("The SVC model failed to run. Check your inputs and try again.")
+            print("The SVC model failed to run.",
+                  "Check your inputs and try again.")
             print("Here is the exception message:")
             print(e)
-            return
-        
-        print("\nSVC predictions:\n", y_prediction, "\n")
+            return None
+
+        print("\nSVC Predictions:\n", y_prediction, "\n")
         return y_prediction
 
     def run_nu_SVC(self):
-        """
-        Runs NuSVC model.
-        """
+        """Runs NuSVC model."""
         if self._check_inputs():
             # Initialize classifier
             self.classifier_nu_SVC = self._create_SVC_model(is_nu=True)
-            
-            # Split data, if needed; if testing/training sets are still None, call _split_data()
+
+            # Split data, if needed
+            # If testing/training sets are still None, call _split_data()
             if self.dataset_X_test is None:
                 self._split_data()
 
-            # Train classifier; handle exception if arguments are incorrect
+            # Train classifier
+            # Handle exception if arguments are incorrect
             try:
-                self.classifier_nu_SVC.fit(self.dataset_X_train, self.dataset_y_train)
+                self.classifier_nu_SVC.fit(self.dataset_X_train,
+                                           self.dataset_y_train)
             except Exception as e:
-                print("An exception occurred while training the NuSVC model. Check your arguments and try again.")
+                print("An exception occurred while training the NuSVC model.",
+                      "Check your arguments and try again.")
                 print("Here is the exception message:")
                 print(e)
                 self.classifier_nu_SVC = None
                 return
 
-            # Evaluate metrics of model
-            self.accuracy_nu_SVC = self.classifier_nu_SVC.score(self.dataset_X_test, self.dataset_y_test)
-
+            # Metrics
+            self.accuracy_nu_SVC =\
+                self.classifier_nu_SVC.score(self.dataset_X_test,
+                                             self.dataset_y_test)
             y_prediction = self.classifier_nu_SVC.predict(self.dataset_X_test)
-
             probas = self.classifier_nu_SVC.predict_proba(self.dataset_X_test)
 
-
+            # If classification is binary, calculate roc_auc
             if probas.shape[1] == 2:
                 self.bin = True
-                self.roc_auc = roc_auc_score(self.classifier_nu_SVC.predict(self.dataset_X_test), probas[::, 1])
-                self.fpr, self.tpr, _ = roc_curve(self.dataset_y_test, probas[::, 1])
-            
+                self.roc_auc_nu_SVC = roc_auc_score(y_prediction, probas[::, 1])
+                self.fpr, self.tpr, _ = \
+                    roc_curve(self.dataset_y_test, probas[::, 1])
+            # Else, calculate confusion matrix
             else:
-                self.confusion_matrix = confusion_matrix(self.dataset_y_test, y_prediction)
-                
-            self.cross_val_scores_nu_SVC = cross_val_score(self.classifier_nu_SVC, self.attributes, self.labels, cv=self.cv)
+                self.confusion_matrix_nu_SVC = \
+                    confusion_matrix(self.dataset_y_test, y_prediction)
 
-            print('Done!')
-            
+            self.cross_val_scores_nu_SVC = \
+                cross_val_score(self.classifier_nu_SVC, self.attributes,
+                                self.labels, cv=self.cv)
+
             # Output results
             self._output_classifier_results(model="NuSVC")
 
     def predict_nu_SVC(self, dataset_X=None):
-        """
-        Classifies each datapoint in dataset_X using the NuSVC model. Returns the predicted classifications.
+        """Classifies each datapoint in dataset_X using the NuSVC model.
+        Returns the predicted classifications.
         """
         # Check that run_nu_SVC() has already been called
         if self.classifier_nu_SVC is None:
-            print("The NuSVC model seems to be missing. Have you called run_nu_SVC() yet?")
-            return
-        
-        # Try to make the prediction; handle exception if dataset_X isn't a valid input
+            print("The NuSVC model seems to be missing.",
+                  "Have you called run_nu_SVC() yet?")
+            return None
+
+        # Try to make the prediction
+        # Handle exception if dataset_X isn't a valid input
         try:
             y_prediction = self.classifier_nu_SVC.predict(dataset_X)
         except Exception as e:
-            print("The NuSVC model failed to run. Check your inputs and try again.")
+            print("The NuSVC model failed to run.",
+                  "Check your inputs and try again.")
             print("Here is the exception message:")
             print(e)
-            return
-        
-        print("\nNuSVC predictions:\n", y_prediction, "\n")
+            return None
+
+        print("\nNuSVC Predictions:\n", y_prediction, "\n")
         return y_prediction
-    
+
     def run_linear_SVC(self):
-        """
-        Runs LinearSVC model.
-        """
+        """Runs LinearSVC model."""
         if self._check_inputs():
             # Initialize classifier
             self.classifier_linear_SVC = self._create_linear_SVC_model()
 
-            # Split data, if needed; if testing/training sets are still None, call _split_data()
+            # Split data, if needed
+            # If testing/training sets are still None, call _split_data()
             if self.dataset_X_test is None:
                 self._split_data()
 
-            # Train classifier; handle exception if arguments are incorrect
+            # Train classifier
+            # Handle exception if arguments are incorrect
             try:
-                self.classifier_linear_SVC.fit(self.dataset_X_train, self.dataset_y_train)
+                self.classifier_linear_SVC.fit(self.dataset_X_train,
+                                               self.dataset_y_train)
             except Exception as e:
-                print("An exception occurred while training the LinearSVC model. Check your arguments and try again.")
+                print("An exception occurred while training the LinearSVC",
+                      "model. Check your arguments and try again.")
                 print("Here is the exception message:")
                 print(e)
                 self.classifier_linear_SVC = None
                 return
 
-            # Evaluate metrics of model
-            self.accuracy_linear_SVC = self.classifier_linear_SVC.score(self.dataset_X_test, self.dataset_y_test)
-
-            '''probas = self.classifier.predict_proba(dataset_X_test)
-
-            if probas.shape[1] == 2:
-                self.bin = True
-                self.roc_auc = roc_auc_score(self.classifier.predict(dataset_X_test), probas[::, 1])
-                self.fpr, self.tpr, _ = roc_curve(dataset_y_test, probas[::, 1])
-
-            else:
-                self.roc_auc = roc_auc_score(self.classifier.predict(dataset_X_test), probas, multi_class='ovo')'''
-
+            # Metrics
+            self.accuracy_linear_SVC = \
+                self.classifier_linear_SVC.score(self.dataset_X_test,
+                                                 self.dataset_y_test)
             self.cross_val_scores_linear_SVC =\
-                cross_val_score(self.classifier_linear_SVC, self.attributes, self.labels, cv=self.cv)
-            
+                cross_val_score(self.classifier_linear_SVC, self.attributes,
+                                self.labels, cv=self.cv)
+
             # Output results
             self._output_classifier_results(model="LinearSVC")
 
     def predict_linear_SVC(self, dataset_X=None):
-        """
-        Classifies each datapoint in dataset_X using the LinearSVC model. Returns the predicted classifications.
+        """Classifies each datapoint in dataset_X using the LinearSVC
+        model. Returns the predicted classifications.
         """
         # Check that run_linear_SVC() has already been called
         if self.classifier_linear_SVC is None:
-            print("The LinearSVC model seems to be missing. Have you called run_linear_SVC() yet?")
-            return
-        
-        # Try to make the prediction; handle exception if dataset_X isn't a valid input
+            print("The LinearSVC model seems to be missing.",
+                  "Have you called run_linear_SVC() yet?")
+            return None
+
+        # Try to make the prediction
+        # Handle exception if dataset_X isn't a valid input
         try:
             y_prediction = self.classifier_linear_SVC.predict(dataset_X)
         except Exception as e:
-            print("The LinearSVC model failed to run. Check your inputs and try again.")
+            print("The LinearSVC model failed to run.",
+                  "Check your inputs and try again.")
             print("Here is the exception message:")
             print(e)
-            return
-        
-        print("\nLinearSVC predictions:\n", y_prediction, "\n")
+            return None
+
+        print("\nLinearSVC Predictions:\n", y_prediction, "\n")
         return y_prediction
 
     # Wrappers for SVM regression classes
 
     def run_SVR(self):
-        """
-        Runs SVR model.
-        """
+        """Runs SVR model."""
         if self._check_inputs():
             # Initialize regression model
             self.regressor_SVR = self._create_SVR_model(is_nu=False)
 
-                # Split data, if needed; if testing/training sets are still None, call _split_data()
+            # Split data, if needed
+            # If testing/training sets are still None, call _split_data()
             if self.dataset_X_test is None:
                 self._split_data()
 
-            # Train regression model; handle exception if arguments are incorrect and/or if labels isn't
+            # Train regression model
+            # Handle exception if arguments are incorrect and/or if labels isn't
             # quantitative data
             try:
-                self.regressor_SVR.fit(self.dataset_X_train, self.dataset_y_train)
+                self.regressor_SVR.fit(self.dataset_X_train,
+                                       self.dataset_y_train)
             except Exception as e:
-                print("An exception occurred while training the SVR model. Check you arguments and try again.")
+                print("An exception occurred while training the SVR model.",
+                      "Check you arguments and try again.")
                 print("Does labels only contain quantitative data?")
                 print("Here is the exception message:")
                 print(e)
@@ -474,186 +438,215 @@ class SVM:
                 return
 
             # Evaluate metrics of model
-            self.mean_squared_error_SVR =\
-                mean_squared_error(self.dataset_y_test, self.regressor_SVR.predict(self.dataset_X_test))
-            self.r2_score_SVR = self.regressor_SVR.score(self.dataset_X_test, self.dataset_y_test)
+            y_prediction = self.regressor_SVR.predict(self.dataset_X_test)
+            self.mean_squared_error_SVR = \
+                mean_squared_error(self.dataset_y_test, y_prediction)
+            self.r2_score_SVR = self.regressor_SVR.score(self.dataset_X_test,
+                                                         self.dataset_y_test)
             self.r_score_SVR = sqrt(self.r2_score_SVR)
-            self.cross_val_scores_SVR = cross_val_score(self.regressor_SVR, self.attributes, self.labels, cv=self.cv)
+            self.cross_val_scores_SVR = \
+                cross_val_score(self.regressor_SVR, self.attributes,
+                                self.labels, cv=self.cv)
 
             # Output results
             self._output_regressor_results(model="SVR")
 
     def predict_SVR(self, dataset_X=None):
-        """
-        Predicts the output of each datapoint in dataset_X using the SVR model. Returns the predictions.
+        """Predicts the output of each datapoint in dataset_X using the
+        SVR model. Returns the predictions.
         """
         # Check that run_SVR() has already been called
         if self.regressor_SVR is None:
-            print("The SVR model seems to be missing. Have you called run_SVR() yet?")
-            return
-        
-        # Try to make the prediction; handle exception if dataset_X isn't a valid input
+            print("The SVR model seems to be missing.",
+                  "Have you called run_SVR() yet?")
+            return None
+
+        # Try to make the prediction
+        # Handle exception if dataset_X isn't a valid input
         try:
             y_prediction = self.regressor_SVR.predict(dataset_X)
         except Exception as e:
-            print("The SVR model failed to run. Check your inputs and try again.")
+            print("The SVR model failed to run.",
+                  "Check your inputs and try again.")
             print("Here is the exception message:")
             print(e)
-            return
-        
-        print("\nSVR predictions:\n", y_prediction, "\n")
+            return None
+
+        print("\nSVR Predictions:\n", y_prediction, "\n")
         return y_prediction
 
     def run_nu_SVR(self):
-        """
-        Runs NuSVR model.
-        """
+        """Runs NuSVR model."""
         if self._check_inputs():
             # Initialize regression model
             self.regressor_nu_SVR = self._create_SVR_model(is_nu=True)
-            
-            # Split data, if needed; if testing/training sets are still None, call _split_data()
+
+            # Split data, if needed
+            # If testing/training sets are still None, call _split_data()
             if self.dataset_X_test is None:
                 self._split_data()
 
-            # Train regression model; handle exception if arguments are incorrect and/or if labels isn't
+            # Train regression model
+            # Handle exception if arguments are incorrect and/or if labels isn't
             # quantitative data
             try:
-                self.regressor_nu_SVR.fit(self.dataset_X_train, self.dataset_y_train)
+                self.regressor_nu_SVR.fit(self.dataset_X_train,
+                                          self.dataset_y_train)
             except Exception as e:
-                print("An exception occurred while training the NuSVR model. Check you arguments and try again.")
+                print("An exception occurred while training the NuSVR model.",
+                      "Check you arguments and try again.")
                 print("Does labels only contain quantitative data?")
                 print("Here is the exception message:")
                 print(e)
                 self.regressor_nu_SVR = None
                 return
 
-            # Evaluate metrics of model
-            self.mean_squared_error_nu_SVR =\
-                mean_squared_error(self.dataset_y_test, self.regressor_nu_SVR.predict(self.dataset_X_test))
-            self.r2_score_nu_SVR = self.regressor_nu_SVR.score(self.dataset_X_test, self.dataset_y_test)
+            # Metrics
+            y_prediction = self.regressor_nu_SVR.predict(self.dataset_X_test)
+            self.mean_squared_error_nu_SVR = \
+                mean_squared_error(self.dataset_y_test, y_prediction)
+            self.r2_score_nu_SVR = \
+                self.regressor_nu_SVR.score(self.dataset_X_test,
+                                            self.dataset_y_test)
             self.r_score_nu_SVR = sqrt(self.r2_score_nu_SVR)
-            self.cross_val_scores_nu_SVR = cross_val_score(self.regressor_nu_SVR, self.attributes, self.labels, cv=self.cv)
+            self.cross_val_scores_nu_SVR = \
+                cross_val_score(self.regressor_nu_SVR, self.attributes,
+                                self.labels, cv=self.cv)
 
             # Output results
             self._output_regressor_results(model="NuSVR")
 
     def predict_nu_SVR(self, dataset_X=None):
-        """
-        Predicts the output of each datapoint in dataset_X using the NuSVR model. Returns the predictions.
+        """Predicts the output of each datapoint in dataset_X using the
+        NuSVR model. Returns the predictions.
         """
         # Check that run_nu_SVR() has already been called
         if self.regressor_nu_SVR is None:
-            print("The NuSVR model seems to be missing. Have you called run_nu_SVR() yet?")
-            return
-        
+            print("The NuSVR model seems to be missing.",
+                  "Have you called run_nu_SVR() yet?")
+            return None
+
         # Try to make the prediction; handle exception if dataset_X isn't a valid input
         try:
             y_prediction = self.regressor_nu_SVR.predict(dataset_X)
         except Exception as e:
-            print("The NuSVR model failed to run. Check your inputs and try again.")
+            print("The NuSVR model failed to run.",
+                  "Check your inputs and try again.")
             print("Here is the exception message:")
             print(e)
-            return
-        
-        print("\nNuSVR predictions:\n", y_prediction, "\n")
+            return None
+
+        print("\nNuSVR Predictions:\n", y_prediction, "\n")
         return y_prediction
 
     def run_linear_SVR(self):
-        """
-        Runs LinearSVR model.
-        """
+        """Runs LinearSVR model."""
         if self._check_inputs():
             # Initialize regression model
             self.regressor_linear_SVR = self._create_linear_SVR_model()
 
-            # Split data, if needed; if testing/training sets are still None, call _split_data()
+            # Split data, if needed
+            # If testing/training sets are still None, call _split_data()
             if self.dataset_X_test is None:
                 self._split_data()
 
-            # Train regression model; handle exception if arguments are incorrect and/or labels isn't
+            # Train regression model
+            # Handle exception if arguments are incorrect and/or labels isn't
             # quantitative data
             try:
-                self.regressor_linear_SVR.fit(self.dataset_X_train, self.dataset_y_train)
+                self.regressor_linear_SVR.fit(self.dataset_X_train,
+                                              self.dataset_y_train)
             except Exception as e:
-                print("An exception occurred while training the LinearSVR model. Check you arguments and try again.")
+                print("An exception occurred while training the LinearSVR",
+                      "model. Check you arguments and try again.")
                 print("Does labels only contain quantitative data?")
                 print("Here is the exception message:")
                 print(e)
                 self.regressor_linear_SVR = None
                 return
-            
-            # Evaluate metrics of model
-            self.mean_squared_error_linear_SVR =\
-                mean_squared_error(self.dataset_y_test, self.regressor_linear_SVR.predict(self.dataset_X_test))
-            self.r2_score_linear_SVR = self.regressor_linear_SVR.score(self.dataset_X_test, self.dataset_y_test)
+
+            # Metrics
+            y_prediction = self.regressor_linear_SVR.predict(self.dataset_X_test)
+            self.mean_squared_error_linear_SVR = \
+                mean_squared_error(self.dataset_y_test, y_prediction)
+            self.r2_score_linear_SVR = \
+                self.regressor_linear_SVR.score(self.dataset_X_test,
+                                                self.dataset_y_test)
             self.r_score_linear_SVR = sqrt(self.r2_score_linear_SVR)
-            self.cross_val_scores_linear_SVR =\
-                cross_val_score(self.regressor_linear_SVR, self.attributes, self.labels, cv=self.cv)
-            
+            self.cross_val_scores_linear_SVR = \
+                cross_val_score(self.regressor_linear_SVR, self.attributes,
+                                self.labels, cv=self.cv)
+
             # Output results
             self._output_regressor_results(model="LinearSVR")
 
     def predict_linear_SVR(self, dataset_X=None):
-        """
-        Predicts the output of each datapoint in dataset_X using the LinearSVR model. Returns the predictions.
+        """Predicts the output of each datapoint in dataset_X using the
+        LinearSVR model. Returns the predictions.
         """
         # Check that run_linear_SVR() has already been called
         if self.regressor_linear_SVR is None:
-            print("The LinearSVR model seems to be missing. Have you called run_linear_SVR() yet?")
-            return
-        
-        # Try to make the prediction; handle exception if dataset_X isn't a valid input
+            print("The LinearSVR model seems to be missing.",
+                  "Have you called run_linear_SVR() yet?")
+            return None
+
+        # Try to make the prediction
+        # Handle exception if dataset_X isn't a valid input
         try:
             y_prediction = self.regressor_linear_SVR.predict(dataset_X)
         except Exception as e:
-            print("The LinearSVR model failed to run. Check your inputs and try again.")
+            print("The LinearSVR model failed to run.",
+                  "Check your inputs and try again.")
             print("Here is the exception message:")
             print(e)
-            return
-        
-        print("\nLinearSVR predictions:\n", y_prediction, "\n")
+            return None
+
+        print("\nLinearSVR Predictions:\n", y_prediction, "\n")
         return y_prediction
 
     # Helper methods
 
     def _create_SVC_model(self, is_nu):
-        """
-        Runs UI for getting parameters and creating SVC or NuSVC model.
+        """Runs UI for getting parameters and creating SVC or NuSVC
+        model.
         """
         if is_nu:
-            print("\n==============================")
-            print("= Parameter inputs for NuSVC =")
-            print("==============================\n")
+            print("\n==========================")
+            print("= NuSVC Parameter Inputs =")
+            print("==========================\n")
         else:
-            print("\n============================")
-            print("= Parameter inputs for SVC =")
-            print("============================\n")
-        
+            print("\n========================")
+            print("= SVC Parameter Inputs =")
+            print("========================\n")
+
         if input("Use default parameters (Y/n)? ").lower() != "n":
             self.test_size = 0.25
             self.cv = None
-            print("\n=======================================================")
-            print("= End of parameter inputs; press any key to continue. =")
-            input("=======================================================\n")
+            print("\n=============================================")
+            print("= End of inputs; press any key to continue. =")
+            input("=============================================\n")
 
             if is_nu:
                 return NuSVC(probability=True)
-            else:
-                return SVC(probability=True)
-        
-        print("\nIf you are unsure about a parameter, press enter to use its default value.")
-        print("Invalid parameter inputs will be replaced with their default values.")
-        print("If you finish entering parameters early, enter 'q' to skip ahead.\n")
+
+            return SVC(probability=True)
+
+        print("\nIf you are unsure about a parameter, press enter to use its",
+              "default value.")
+        print("Invalid parameter inputs will be replaced with their default",
+              "values.")
+        print("If you finish entering parameters early, enter 'q' to skip",
+              "ahead.\n")
 
         # Set defaults
         if is_nu:
             nu = 0.5
         else:
             C = 1.0
-        
+
         self.test_size = 0.25
         self.cv = None
+        self.graph_results = False
         kernel = "rbf"
         degree = 3
         gamma = "scale"
@@ -671,89 +664,136 @@ class SVM:
 
         # Get user parameter input
         while True:
-            user_input = input("What fraction of the dataset should be the testing set? Input a decimal: ")
+            user_input = input("What fraction of the dataset should be the "
+                               + "testing set? Input a decimal: ")
 
             try:
                 self.test_size = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            #kernel type
-            #gamma
-            #C
 
-            print('\n')
-            user_input = input("Use Grid Search to find the best parameters? Enter y/N: ").lower()
+            user_input = input("\n\nUse GridSearch to find the best "
+                               + "hyperparameters (y/N)? ").lower()
+
             if user_input == "q":
-            	break
-            elif user_input == "y":
+                break
+
+            while user_input == "y":
+                print("\n= GridSearch Parameter Inputs =\n")
+                print("Note: All parameters are required. Skipping ahead",
+                      "will quit GridSearch.")
+                print("Press 'q' to skip GridSearch.")
                 self.gridsearch = True
                 params = {}
-                print("Enter the kernels to try out: ")
-                user_input = input( "Options: 1-linear, 2-poly, 3-rbf, 4-sigmoid. Enter 'all' for all options (Example input: 1,2,3) : ")
-                if user_input == 'q':
+
+                print("\nEnter the kernels to try out.")
+                print("Options: 1-'linear', 2-'poly', 3-'rbf', 4-'sigmoid'.",
+                      "Enter 'all' for all options.")
+                print("Example input: 1,2,3")
+                user_input = input().lower()
+
+                if user_input == "q":
                     self.gridsearch = False
                     break
                 elif user_input == "all":
-                    kern_params = ['linear', 'poly', 'rbf', 'sigmoid']
+                    kern_params = ["linear", "poly", "rbf", "sigmoid"]
                 else:
-                    kern_dict = {1:'linear', 2:'poly', 3:'rbf', 4:'sigmoid'}
-                    kern_params_int = list(map(int, list(user_input.split(","))))
-                    kern_params = []
-                    for each in kern_params_int:
-                        kern_params.append(kern_dict.get(each))
-                    kern_params = list(user_input.split(","))
-                params['kernel'] = kern_params
+                    kern_dict = {1: "linear", 2: "poly", 3: "rbf", 4: "sigmoid"}
 
-                user_input = input("Enter the list of kernel coefficient/gamma values to try out. (Example input: 0.001,0.0001): ")
+                    try:
+                        kern_params_int = \
+                            list(map(int, list(user_input.split(","))))
+                        kern_params = []
+                        for each in kern_params_int:
+                            kern_params.append(kern_dict.get(each))
+                    except Exception:
+                        print("\nInput not recognized. Skipping GridSearch...")
+                        self.gridsearch = False
+                        break
+
+                params["kernel"] = kern_params
+
+                print("\nEnter the list of kernel coefficients/gamma values",
+                      "to try out.")
+                print("Example input: 0.001,0.0001")
+                user_input = input().lower()
+
                 if user_input == "q":
+                    self.gridsearch = False
                     break
-                gamma_params = list(map(float, list(user_input.split(","))))
-                params['gamma'] = gamma_params
+
+                try:
+                    gamma_params = list(map(float, list(user_input.split(","))))
+                except Exception:
+                    print("\nInput not recognized. Skipping GridSearch...")
+                    self.gridsearch = False
+                    break
+
+                params["gamma"] = gamma_params
 
                 if not is_nu:
-                    user_input = input("Enter the list of regularization parameters to try out. (Example input: 1,10,100): ")
+                    print("\nEnter the list of regularization parameters to",
+                          "try out.")
+                    print("Example input: 1,10,100")
+                    user_input = input().lower()
+
                     if user_input == "q":
+                        self.gridsearch = False
                         break
-                    gamma_params = list(map(int, list(user_input.split(","))))
+
+                    try:
+                        gamma_params = \
+                            list(map(int, list(user_input.split(","))))
+                    except Exception:
+                        print("\nInput not recognized. Skipping GridSearch...")
+                        self.gridsearch = False
+                        break
+
                     params['C'] = gamma_params
 
                 self.gs_params = params
+                print("\n= End of GridSearch inputs. =")
+                break
 
-
-
-            #print(params)
-            print('\n')
-
-
-            user_input = input("Input the number of folds for cross validation: ")
+            user_input = \
+                input("\n\nInput the number of folds for cross validation: ")
 
             try:
                 self.cv = int(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
+
+            user_input = \
+                input("\nGraph the ROC curve? Only binary classification "
+                      + "is supported (y/N): ").lower()
+
+            if user_input == "y":
+                self.graph_results = True
+            elif user_input == "q":
+                break
+
             if is_nu:
-                user_input = input("Enter a decimal for nu: ")
+                user_input = input("\nEnter a decimal for nu: ")
                 try:
                     nu = float(user_input)
-                except:
+                except Exception:
                     if user_input.lower() == "q":
                         break
             else:
-                user_input = input("Enter the regularization parameter: ")
+                user_input = input("\nEnter the regularization parameter: ")
                 try:
                     C = float(user_input)
-                except:
+                except Exception:
                     if user_input.lower() == "q":
                         break
-            
-            print("Which kernel type should be used?")
-            user_input =\
-                input("Enter 1 for 'linear', 2 for 'poly', 3 for 'rbf', 4 for 'sigmoid', or 5 for 'precomputed': ")
-            
+
+            print("\nWhich kernel type should be used?")
+            user_input = \
+                input("Enter 1 for 'linear', 2 for 'poly', 3 for 'rbf', 4 "
+                      + "for 'sigmoid', or 5 for 'precomputed': ")
+
             if user_input.lower() == "q":
                 break
             elif user_input == "1":
@@ -764,176 +804,191 @@ class SVM:
                 kernel = "sigmoid"
             elif user_input == "5":
                 kernel = "recomputed"
-            
+
             if kernel == "poly":
-                user_input = input("Enter the degree of the kernel function: ")
+                user_input = input("\nEnter the degree of the kernel function: ")
                 try:
                     degree = int(user_input)
-                except:
+                except Exception:
                     if user_input.lower() == "q":
                         break
-            
+
             if kernel == "rbf" or kernel == "poly" or kernel == "sigmoid":
-                print("Set the kernel coefficient.")
+                print("\nSet the kernel coefficient.")
                 user_input = input("Enter 1 for 'scale', or 2 for 'auto': ")
                 if user_input.lower() == "q":
                     break
                 elif user_input == "2":
                     gamma = "auto"
-            
-            user_input = input("Enter the independent term in the kernel function: ")
+
+            user_input = \
+                input("\nEnter the independent term in the kernel function: ")
 
             try:
                 coef0 = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Use the shrinking heuristic (Y/n)? ").lower()
+
+            user_input = input("\nUse the shrinking heuristic (Y/n)? ").lower()
 
             if user_input == "q":
                 break
             elif user_input == "n":
                 shrinking = False
-            
-            user_input = input("Enter the tolerance for stopping criterion: ")
+
+            user_input = input("\nEnter the tolerance for stopping criterion: ")
 
             try:
                 tol = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enter the kernel cache size in MB: ")
+
+            user_input = input("\nEnter the kernel cache size in MB: ")
 
             try:
                 cache_size = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Automatically adjust class weights (y/N)? ").lower()
+
+            user_input = \
+                input("\nAutomatically adjust class weights (y/N)? ").lower()
 
             if user_input == "q":
                 break
             elif user_input == "y":
                 class_weight = "balanced"
-            
-            user_input = input("Enter the maximum number of iterations, or press enter for no limit: ")
+
+            user_input = \
+                input("\nEnter the maximum number of iterations, or press "
+                      + "enter for no limit: ")
 
             try:
                 max_iter = int(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            print("Set the decision function.")
+
+            print("\nSet the decision function.")
             user_input = input("Enter 1 for one-vs-rest, or 2 for one-vs-one: ")
 
             if user_input.lower() == "q":
                 break
             elif user_input == "2":
                 decision_function_shape = "ovo"
-            
-            user_input = input("Enable tie-breaking (y/N)? ").lower()
+
+            user_input = input("\nEnable tie-breaking (y/N)? ").lower()
 
             if user_input == "q":
                 break
             elif user_input == "y":
                 break_ties = True
-            
-            user_input = input("Enter a seed for the random number generator: ")
+
+            user_input = \
+                input("\nEnter a seed for the random number generator: ")
 
             try:
                 random_state = int(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enable verbose logging (y/N)? ").lower()
+
+            user_input = input("\nEnable verbose logging (y/N)? ").lower()
 
             if user_input == "q":
                 break
             elif user_input == "y":
                 verbose = True
-            
+
             break
 
-        print("\n=======================================================")
-        print("= End of parameter inputs; press any key to continue. =")
-        input("=======================================================\n")
+        print("\n=============================================")
+        print("= End of inputs; press any key to continue. =")
+        input("=============================================\n")
 
         if is_nu:
+            # If GridSearch is enabled
             if self.gridsearch:
                 acc_scorer = make_scorer(accuracy_score)
-
                 clf = NuSVC()
-                dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
-                
-                #Run the grid search
-                grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
-                grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
 
-                #Set the clf to the best combination of parameters
+                if self.dataset_X_test is None:
+                    self._split_data()
+
+                # Run GridSearch
+                grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
+                grid_obj = grid_obj.fit(self.dataset_X_train,
+                                        self.dataset_y_train)
+
+                # Set the clf to the best combination of parameters
                 clf = grid_obj.best_estimator_
 
-                print('Best Grid Search Parameters: ')
-                print(clf)
+                print("Best GridSearch Parameters:\n", clf)
 
-                # Fit the best algorithm to the data. 
-                clf.fit(dataset_X_train, dataset_y_train)
-                predictions = clf.predict(dataset_X_test)
-                self.gs_result = accuracy_score(dataset_y_test, predictions)
-            return NuSVC(nu=nu, kernel=kernel, degree=degree, gamma=gamma, coef0=coef0, shrinking=shrinking,
-                         probability=probability, tol=tol, cache_size=cache_size, class_weight=class_weight,
-                         verbose=verbose, max_iter=max_iter, decision_function_shape=decision_function_shape,
+                # Fit the best algorithm to the data
+                clf.fit(self.dataset_X_train, self.dataset_y_train)
+                predictions = clf.predict(self.dataset_X_test)
+                self.gs_result = accuracy_score(self.dataset_y_test, predictions)
+
+            return NuSVC(nu=nu, kernel=kernel, degree=degree, gamma=gamma,
+                         coef0=coef0, shrinking=shrinking,
+                         probability=probability, tol=tol, cache_size=cache_size,
+                         class_weight=class_weight, verbose=verbose,
+                         max_iter=max_iter,
+                         decision_function_shape=decision_function_shape,
                          break_ties=break_ties, random_state=random_state)
-        else:
-        	if self.gridsearch:
-        		acc_scorer = make_scorer(accuracy_score)
 
-        		clf = SVC()
-        		dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
-        		
-        		#Run the grid search
-        		grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
-        		grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+        # If GridSearch is enabled
+        if self.gridsearch:
+            acc_scorer = make_scorer(accuracy_score)
+            clf = SVC()
 
-        		#Set the clf to the best combination of parameters
-        		clf = grid_obj.best_estimator_
+            if self.dataset_X_test is None:
+                self._split_data()
 
-        		print('Best Grid Search Parameters: ')
-        		print(clf)
+            # Run GridSearch
+            grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
+            grid_obj = grid_obj.fit(self.dataset_X_train, self.dataset_y_train)
 
-        		# Fit the best algorithm to the data. 
-        		clf.fit(dataset_X_train, dataset_y_train)
-        		predictions = clf.predict(dataset_X_test)
-        		self.gs_result = accuracy_score(dataset_y_test, predictions)
+            # Set the clf to the best combination of parameters
+            clf = grid_obj.best_estimator_
 
-        	return SVC(C=C, kernel=kernel, degree=degree, gamma=gamma, coef0=coef0, shrinking=shrinking,
-                       probability=probability, tol=tol, cache_size=cache_size, class_weight=class_weight,
-                       verbose=verbose, max_iter=max_iter, decision_function_shape=decision_function_shape,
-                       break_ties=break_ties, random_state=random_state)
+            print("Best GridSearch Parameters:\n", clf)
+
+            # Fit the best algorithm to the data
+            clf.fit(self.dataset_X_train, self.dataset_y_train)
+            predictions = clf.predict(self.dataset_X_test)
+            self.gs_result = accuracy_score(self.dataset_y_test, predictions)
+
+        return SVC(C=C, kernel=kernel, degree=degree, gamma=gamma, coef0=coef0,
+                   shrinking=shrinking, probability=probability, tol=tol,
+                   cache_size=cache_size, class_weight=class_weight,
+                   verbose=verbose, max_iter=max_iter,
+                   decision_function_shape=decision_function_shape,
+                   break_ties=break_ties, random_state=random_state)
 
     def _create_linear_SVC_model(self):
-        """
-        Runs UI for getting parameters and creating LinearSVC model.
-        """
-        print("\n==================================")
-        print("= Parameter inputs for LinearSVC =")
-        print("==================================\n")
+        """Runs UI for getting parameters and creating LinearSVC model."""
+        print("\n==============================")
+        print("= LinearSVC Parameter Inputs =")
+        print("==============================\n")
 
         if input("Use default parameters (Y/n)? ").lower() != "n":
             self.test_size = 0.25
             self.cv = None
-            print("\n=======================================================")
-            print("= End of parameter inputs; press any key to continue. =")
-            input("=======================================================\n")
+            print("\n=============================================")
+            print("= End of inputs; press any key to continue. =")
+            input("=============================================\n")
             return LinearSVC()
-        
-        print("\nIf you are unsure about a parameter, press enter to use its default value.")
-        print("Invalid parameter inputs will be replaced with their default values.")
-        print("If you finish entering parameters early, enter 'q' to skip ahead.\n")
+
+        print("\nIf you are unsure about a parameter, press enter to use its",
+              "default value.")
+        print("Invalid parameter inputs will be replaced with their default",
+              "values.")
+        print("If you finish entering parameters early, enter 'q' to skip",
+              "ahead.\n")
 
         # Set defaults
         self.test_size = 0.25
@@ -953,227 +1008,168 @@ class SVM:
 
         # Get user parameter input
         while True:
-            user_input = input("What fraction of the dataset should be the testing set? Input a decimal: ")
+            user_input = input("What fraction of the dataset should be the "
+                               + "testing set? Input a decimal: ")
 
             try:
                 self.test_size = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
 
-            '''user_input = input("Use Grid Search to find the best parameters? Enter y/N: ").lower()
-            if user_input == "q":
-                break
-            elif user_input == "y":
-                self.gridsearch = True
-                params = {}
-                print("Enter the penalties to try out: ")
-                user_input = input( "Options: 1-l1, 2-l2. Enter 'all' for all options (Example input: 1,2) : ")
-                if user_input == 'q':
-                    self.gridsearch = False
-                    break
-                elif user_input == "all":
-                    pen_params = ['l1', 'l2']
-                else:
-                    pen_dict = {1:'l1', 2:'l2'}
-                    pen_params_int = list(map(int, list(user_input.split(","))))
-                    pen_params = []
-                    for each in pen_params_int:
-                        pen_params.append(pen_dict.get(each))
-                    pen_params = list(user_input.split(","))
-                params['penalty'] = pen_params
-
-
-                print("Enter the loss functions to try out: ")
-                user_input = input( "Options: 1-hinge, 2-squared_hinge. Enter 'all' for all options (Example input: 1,2) : ")
-                if user_input == 'q':
-                    self.gridsearch = False
-                    break
-                elif user_input == "all":
-                    loss_params = ['hinge', 'squared_hinge']
-                else:
-                    loss_dict = {1:'hinge', 2:'squared_hinge'}
-                    loss_params_int = list(map(int, list(user_input.split(","))))
-                    loss_params = []
-                    for each in loss_params_int:
-                        loss_params.append(loss_dict.get(each))
-                    loss_params = list(user_input.split(","))
-                params['loss'] = loss_params
-
-
-                user_input = input("Enter the list of regularization parameters to try out. (Example input: 1,10,100): ")
-                if user_input == "q":
-                    break
-                reg_params = list(map(float, list(user_input.split(","))))
-                params['C'] = reg_params
-
-                self.params = params'''
-
-            user_input = input("Input the number of folds for cross validation: ")
+            user_input = \
+                input("\nInput the number of folds for cross validation: ")
 
             try:
                 self.cv = int(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
 
-            user_input = input("Calculate a y-intercept (Y/n)? ").lower()
+            user_input = input("\nCalculate a y-intercept (Y/n)? ").lower()
 
             if user_input == "q":
                 break
             elif user_input == "n":
                 fit_intercept = False
-            
+
             if fit_intercept:
-                user_input = input("Enter a value for intercept scaling: ")
+                user_input = input("\nEnter a value for intercept scaling: ")
                 try:
                     intercept_scaling = float(user_input)
-                except:
+                except Exception:
                     if user_input.lower() == "q":
                         break
-            
-            print("Set the norm used in penalization.")
+
+            print("\nSet the norm used in penalization.")
             user_input = input("Enter 1 for 'l1', or 2 for 'l2': ")
 
             if user_input.lower() == "q":
                 break
             elif user_input == "1":
                 penalty = "l1"
-            
-            print("Choose a loss function.")
+
+            print("\nChoose a loss function.")
             user_input = input("Enter 1 for 'hinge', or 2 for 'squared_hinge': ")
 
             if user_input.lower() == "q":
                 break
             elif user_input == "1":
                 loss = "hinge"
-            
-            print("Should the algorithm solve the duel or primal optimization problem?")
+
+            print("\nShould the algorithm solve the duel or primal",
+                  "optimization problem?")
             user_input = input("Enter 1 for dual, or 2 for primal: ")
 
             if user_input.lower() == "q":
                 break
             elif user_input == "2":
                 dual = False
-            
-            user_input = input("Enter the tolerance for stopping criterion: ")
+
+            user_input = input("\nEnter the tolerance for stopping criterion: ")
 
             try:
                 tol = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enter the regularization parameter: ")
-            
+
+            user_input = input("\nEnter the regularization parameter: ")
+
             try:
                 C = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            print("Set the multi-class strategy if there are more than two classes.")
-            user_input = input("Enter 1 for one-vs-rest, or 2 for Crammer-Singer: ")
+
+            print("\nSet the multi-class strategy if there are more than",
+                  "two classes.")
+            user_input = \
+                input("Enter 1 for one-vs-rest, or 2 for Crammer-Singer: ")
 
             if user_input.lower() == "q":
                 break
             elif user_input == "2":
                 multi_class = "crammer_singer"
-            
-            user_input = input("Automatically adjust class weights (y/N)? ").lower()
+
+            user_input = \
+                input("\nAutomatically adjust class weights (y/N)? ").lower()
 
             if user_input == "q":
                 break
             elif user_input == "y":
                 class_weight = "balanced"
-            
-            user_input = input("Enter the maximum number of iterations: ")
+
+            user_input = input("\nEnter the maximum number of iterations: ")
 
             try:
                 max_iter = int(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enter a seed for the random number generator: ")
+
+            user_input = \
+                input("\nEnter a seed for the random number generator: ")
 
             try:
                 random_state = int(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enable verbose logging (y/N)? ").lower()
+
+            user_input = input("\nEnable verbose logging (y/N)? ").lower()
 
             if user_input == "y":
                 verbose = 1
-            
+
             break
-        
-        print("\n=======================================================")
-        print("= End of parameter inputs; press any key to continue. =")
-        input("=======================================================\n")
 
-        '''if self.gridsearch:
-            acc_scorer = make_scorer(accuracy_score)
-            clf = LinearSVC()
-            dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
+        print("\n=============================================")
+        print("= End of inputs; press any key to continue. =")
+        input("=============================================\n")
 
-            #Run the grid search
-            grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
-            grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
-
-            #Set the clf to the best combination of parameters
-            clf = grid_obj.best_estimator_
-
-            print('Best Grid Search Parameters: ')
-            print(clf)
-
-            # Fit the best algorithm to the data. 
-            clf.fit(dataset_X_train, dataset_y_train)
-            predictions = clf.predict(dataset_X_test)
-            self.gs_result = accuracy_score(dataset_y_test, predictions)'''
-
-
-        return LinearSVC(penalty=penalty, loss=loss, dual=dual, tol=tol, C=C, multi_class=multi_class,
-                         fit_intercept=fit_intercept, intercept_scaling=intercept_scaling, class_weight=class_weight,
-                         verbose=verbose, random_state=random_state, max_iter=max_iter)
+        return LinearSVC(penalty=penalty, loss=loss, dual=dual, tol=tol, C=C,
+                         multi_class=multi_class, fit_intercept=fit_intercept,
+                         intercept_scaling=intercept_scaling,
+                         class_weight=class_weight, verbose=verbose,
+                         random_state=random_state, max_iter=max_iter)
 
     def _create_SVR_model(self, is_nu):
-        """
-        Runs UI for getting parameters and creates SVR or NuSVR model.
-        """
+        """Runs UI for getting parameters and creates SVR or NuSVR model."""
         if is_nu:
-            print("\n==============================")
-            print("= Parameter inputs for NuSVR =")
-            print("==============================\n")
+            print("\n==========================")
+            print("= NuSVR Parameter Inputs =")
+            print("==========================\n")
         else:
-            print("\n============================")
-            print("= Parameter inputs for SVR =")
-            print("============================\n")
-        
+            print("\n========================")
+            print("= SVR Parameter Inputs =")
+            print("========================\n")
+
         if input("Use default parameters (Y/n)? ").lower() != "n":
             self.test_size = 0.25
             self.cv = None
-            print("\n=======================================================")
-            print("= End of parameter inputs; press any key to continue. =")
-            input("=======================================================\n")
+            print("\n=============================================")
+            print("= End of inputs; press any key to continue. =")
+            input("=============================================\n")
 
             if is_nu:
                 return NuSVR()
-            else:
-                return SVR()
-        
-        print("\nIf you are unsure about a parameter, press enter to use its default value.")
-        print("Invalid parameter inputs will be replaced with their default values.")
-        print("If you finish entering parameters early, enter 'q' to skip ahead.\n")
+
+            return SVR()
+
+        print("\nIf you are unsure about a parameter, press enter to use its",
+              "default value.")
+        print("Invalid parameter inputs will be replaced with their default",
+              "values.")
+        print("If you finish entering parameters early, enter 'q' to skip",
+              "ahead.\n")
 
         # Set defaults
         if is_nu:
             nu = 0.5
         else:
             epsilon = 0.1
-        
+
         self.test_size = 0.25
         self.cv = None
         kernel = "rbf"
@@ -1185,92 +1181,152 @@ class SVM:
         shrinking = True
         cache_size = 200
         verbose = False
-        max_iter=-1
+        max_iter = -1
 
         # Get user parameter input
         while True:
-            user_input = input("What fraction of the dataset should be the testing set? Input a decimal: ")
+            user_input = input("What fraction of the dataset should be the "
+                               + "testing set? Input a decimal: ")
 
             try:
                 self.test_size = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
 
-            user_input = input("Use Grid Search to find the best parameters? Enter y/N: ").lower()
+            user_input = input("\n\nUse GridSearch to find the best "
+                               + "hyperparameters (y/N)? ").lower()
+
             if user_input == "q":
                 break
-            elif user_input == "y":
+
+            while user_input == "y":
+                print("\n= GridSearch Parameter Inputs =\n")
+                print("Note: All parameters are required. Skipping ahead",
+                      "will quit GridSearch.")
+                print("Press 'q' to skip GridSearch.")
                 self.gridsearch = True
                 params = {}
-                print("Enter the kernels to try out: ")
-                user_input = input( "Options: 1-linear, 2-poly, 3-rbf, 4-sigmoid. Enter 'all' for all options (Example input: 1,2,3) : ")
-                if user_input == 'q':
+
+                print("\nEnter the kernels to try out: ")
+                print("\nOptions: 1-'linear', 2-'poly', 3-'rbf', 4-'sigmoid'.",
+                      "Enter 'all' for all options")
+                print("Example input: 1,2,3")
+                user_input = input().lower()
+
+                if user_input == "q":
                     self.gridsearch = False
                     break
                 elif user_input == "all":
-                    kern_params = ['linear', 'poly', 'rbf', 'sigmoid']
+                    kern_params = ["linear", "poly", "rbf", "sigmoid"]
                 else:
-                    kern_dict = {1:'linear', 2:'poly', 3:'rbf', 4:'sigmoid'}
-                    kern_params_int = list(map(int, list(user_input.split(","))))
-                    kern_params = []
-                    for each in kern_params_int:
-                        kern_params.append(kern_dict.get(each))
-                    kern_params = list(user_input.split(","))
-                params['kernel'] = kern_params
+                    kern_dict = {1: "linear", 2: "poly", 3: "rbf", 4: "sigmoid"}
+
+                    try:
+                        kern_params_int = \
+                            list(map(int, list(user_input.split(","))))
+                        kern_params = []
+                        for each in kern_params_int:
+                            kern_params.append(kern_dict.get(each))
+                    except Exception:
+                        print("\nInput not recognized. Skipping GridSearch...")
+                        self.gridsearch = False
+                        break
+
+                params["kernel"] = kern_params
 
                 if is_nu:
-                    user_input = input("Enter a list of decimals for nu (Example input: 0.1,0.2,0.3): ")
-                    if user_input.lower() == "q":
-                        break
-                    nu_params = list(map(float, list(user_input.split(","))))
-                    params['nu'] = nu_params
+                    print("\nEnter a list of decimals for nu.")
+                    print("Example input: 0.1,0.2,0.3")
+                    user_input = input().lower()
 
+                    if user_input == "q":
+                        self.gridsearch = False
+                        break
+
+                    try:
+                        nu_params = \
+                            list(map(float, list(user_input.split(","))))
+                    except Exception:
+                        print("\nInput not recognized. Skipping GridSearch...")
+                        self.gridsearch = False
+                        break
+
+                    params["nu"] = nu_params
                 else:
-                    user_input = input("Enter epsilon, the range from an actual value where penalties aren't applied (Example input: 0.1,0.2,0.3): ")
-                    if user_input.lower() == "q":
-                        break
-                    eps_params = list(map(float, list(user_input.split(","))))
-                    params['epsilon'] = eps_params
+                    print("\nEnter epsilon, the range from an actual value",
+                          "where penalties aren't applied.")
+                    print("Example input: 0.1,0.2,0.3")
+                    user_input = input().lower()
 
+                    if user_input == "q":
+                        self.gridsearch = False
+                        break
+
+                    try:
+                        eps_params = \
+                            list(map(float, list(user_input.split(","))))
+                    except Exception:
+                        print("\nInput not recognized. Skipping GridSearch...")
+                        self.gridsearch = False
+                        break
+
+                    params["epsilon"] = eps_params
 
                 if not is_nu:
-                    user_input = input("Enter the list of regularization parameters to try out. (Example input: 1,10,100): ")
+                    print("\nEnter the list of regularization parameters",
+                          "to try out.")
+                    print("Example input: 1,10,100")
+                    user_input = input().lower()
 
-                    gamma_params = list(map(int, list(user_input.split(","))))
-                    params['C'] = gamma_params
+                    if user_input == "q":
+                        self.gridsearch = False
+                        break
+
+                    try:
+                        gamma_params = \
+                            list(map(int, list(user_input.split(","))))
+                    except Exception:
+                        print("\nInput not recognized. Skipping GridSearch...")
+                        self.gridsearch = False
+                        break
+
+                    params["C"] = gamma_params
 
                 self.gs_params = params
+                print("\n= End of GridSearch inputs. =")
+                break
 
-
-
-            user_input = input("Input the number of folds for cross validation: ")
+            user_input = \
+                input("\n\nInput the number of folds for cross validation: ")
 
             try:
                 self.cv = int(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
+
             if is_nu:
-                user_input = input("Enter a decimal for nu: ")
+                user_input = input("\nEnter a decimal for nu: ")
                 try:
                     nu = float(user_input)
-                except:
+                except Exception:
                     if user_input.lower() == "q":
                         break
             else:
-                user_input = input("Enter epsilon, the range from an actual value where penalties aren't applied: ")
+                user_input = input("\nEnter epsilon, the range from an actual "
+                                   + "value where penalties aren't applied: ")
                 try:
                     epsilon = float(user_input)
-                except:
+                except Exception:
                     if user_input.lower() == "q":
                         break
-            
-            print("Which kernel type should be used?")
-            user_input =\
-                input("Enter 1 for 'linear', 2 for 'poly', 3 for 'rbf', 4 for 'sigmoid', or 5 for 'precomputed': ")
-            
+
+            print("\nWhich kernel type should be used?")
+            user_input = \
+                input("Enter 1 for 'linear', 2 for 'poly', 3 for 'rbf', 4 "
+                      + "for 'sigmoid', or 5 for 'precomputed': ")
+
             if user_input.lower() == "q":
                 break
             elif user_input == "1":
@@ -1281,147 +1337,158 @@ class SVM:
                 kernel = "sigmoid"
             elif user_input == "5":
                 kernel = "recomputed"
-            
+
             if kernel == "poly":
-                user_input = input("Enter the degree of the kernel function: ")
+                user_input = \
+                    input("\nEnter the degree of the kernel function: ")
                 try:
                     degree = int(user_input)
-                except:
+                except Exception:
                     if user_input.lower() == "q":
                         break
-            
+
             if kernel == "rbf" or kernel == "poly" or kernel == "sigmoid":
-                print("Set the kernel coefficient.")
+                print("\nSet the kernel coefficient.")
                 user_input = input("Enter 1 for 'scale', or 2 for 'auto': ")
                 if user_input.lower() == "q":
                     break
                 elif user_input == "2":
                     gamma = "auto"
-            
-            user_input = input("Enter the regularization parameter: ")
-            
+
+            user_input = input("\nEnter the regularization parameter: ")
+
             try:
                 C = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enter the independent term in the kernel function: ")
+
+            user_input = input("\nEnter the independent term in the kernel "
+                               + "function: ")
 
             try:
                 coef0 = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enter the tolerance for stopping criterion: ")
+
+            user_input = input("\nEnter the tolerance for stopping criterion: ")
 
             try:
                 tol = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Use the shrinking heuristic (Y/n)? ").lower()
+
+            user_input = input("\nUse the shrinking heuristic (Y/n)? ").lower()
 
             if user_input == "q":
                 break
             elif user_input == "n":
                 shrinking = False
-            
-            user_input = input("Enter the kernel cache size in MB: ")
+
+            user_input = input("\nEnter the kernel cache size in MB: ")
 
             try:
                 cache_size = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enter the maximum number of iterations, or press enter for no limit: ")
+
+            user_input = input("\nEnter the maximum number of iterations, or "
+                               + "press enter for no limit: ")
 
             try:
                 max_iter = int(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enable verbose logging (y/N)? ").lower()
+
+            user_input = input("\nEnable verbose logging (y/N)? ").lower()
 
             if user_input == "q":
                 break
             elif user_input == "y":
                 verbose = True
-            
+
             break
-        
-        print("\n=======================================================")
-        print("= End of parameter inputs; press any key to continue. =")
-        input("=======================================================\n")
+
+        print("\n=============================================")
+        print("= End of inputs; press any key to continue. =")
+        input("=============================================\n")
 
         if is_nu:
+            # If GridSearch is enabled
             if self.gridsearch:
                 clf = NuSVR()
-                dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
-                
-                #Run the grid search
-                grid_obj = GridSearchCV(clf, self.gs_params, scoring='r2')
-                grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
 
-                #Set the clf to the best combination of parameters
+                if self.dataset_X_test is None:
+                    self._split_data()
+
+                # Run GridSearch
+                grid_obj = GridSearchCV(clf, self.gs_params, scoring="r2")
+                grid_obj = grid_obj.fit(self.dataset_X_train,
+                                        self.dataset_y_train)
+
+                # Set the clf to the best combination of parameters
                 clf = grid_obj.best_estimator_
 
-                print('Best Grid Search Parameters: ')
-                print(grid_obj.best_params_)
+                print("Best GridSearch Parameters:\n", grid_obj.best_params_)
 
-                # Fit the best algorithm to the data. 
-                clf.fit(dataset_X_train, dataset_y_train)
-                predictions = clf.predict(dataset_X_test)
-                self.gs_result = r2_score(dataset_y_test, predictions)
+                # Fit the best algorithm to the data
+                clf.fit(self.dataset_X_train, self.dataset_y_train)
+                predictions = clf.predict(self.dataset_X_test)
+                self.gs_result = clf.score(self.dataset_X_test,
+                                           self.dataset_y_test)
 
-            return NuSVR(nu=nu, C=C, kernel=kernel, degree=degree, gamma=gamma, coef0=coef0, shrinking=shrinking,
-                         tol=tol, cache_size=cache_size, verbose=verbose, max_iter=max_iter)
-        else:
-            if self.gridsearch:
-                clf = SVR()
-                dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = train_test_split(self.attributes, self.labels, test_size=self.test_size)
-                
-                #Run the grid search
-                grid_obj = GridSearchCV(clf, self.gs_params, scoring='r2')
-                grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+            return NuSVR(nu=nu, C=C, kernel=kernel, degree=degree, gamma=gamma,
+                         coef0=coef0, shrinking=shrinking, tol=tol,
+                         cache_size=cache_size, verbose=verbose,
+                         max_iter=max_iter)
+        # If GridSearch is enabled
+        if self.gridsearch:
+            clf = SVR()
+            if self.dataset_X_test is None:
+                self._split_data()
 
-                #Set the clf to the best combination of parameters
-                clf = grid_obj.best_estimator_
+            # Run GridSearch
+            grid_obj = GridSearchCV(clf, self.gs_params, scoring="r2")
+            grid_obj = grid_obj.fit(self.dataset_X_train, self.dataset_y_train)
 
-                print('Best Grid Search Parameters: ')
-                print(grid_obj.best_params_)
+            # Set the clf to the best combination of parameters
+            clf = grid_obj.best_estimator_
 
-                # Fit the best algorithm to the data. 
-                clf.fit(dataset_X_train, dataset_y_train)
-                predictions = clf.predict(dataset_X_test)
-                self.gs_result = r2_score(dataset_y_test, predictions)
+            print("Best GridSearch Parameters:\n", grid_obj.best_params_)
 
-            return SVR(kernel=kernel, degree=degree, gamma=gamma, coef0=coef0, tol=tol, C=C, epsilon=epsilon,
-                       shrinking=shrinking, cache_size=cache_size, verbose=verbose, max_iter=max_iter)
+            # Fit the best algorithm to the data
+            clf.fit(self.dataset_X_train, self.dataset_y_train)
+            predictions = clf.predict(self.dataset_X_test)
+            self.gs_result = clf.score(self.dataset_X_test, self.dataset_y_test)
+
+        return SVR(kernel=kernel, degree=degree, gamma=gamma, coef0=coef0,
+                   tol=tol, C=C, epsilon=epsilon, shrinking=shrinking,
+                   cache_size=cache_size, verbose=verbose, max_iter=max_iter)
 
     def _create_linear_SVR_model(self):
-        """
-        Runs UI for getting parameters and creates LinearSVR model.
-        """
-        print("\n==================================")
-        print("= Parameter inputs for LinearSVR =")
-        print("==================================\n")
+        """Runs UI for getting parameters and creates LinearSVR model."""
+        print("\n==============================")
+        print("= LinearSVR Parameter Inputs =")
+        print("==============================\n")
 
         if input("Use default parameters (Y/n)? ").lower() != "n":
             self.test_size = 0.25
             self.cv = None
-            print("\n=======================================================")
-            print("= End of parameter inputs; press any key to continue. =")
-            input("=======================================================\n")
+            print("\n=============================================")
+            print("= End of inputs; press any key to continue. =")
+            input("=============================================\n")
             return LinearSVR()
-        
-        print("\nIf you are unsure about a parameter, press enter to use its default value.")
-        print("Invalid parameter inputs will be replaced with their default values.")
-        print("If you finish entering parameters early, enter 'q' to skip ahead.\n")
+
+        print("\nIf you are unsure about a parameter, press enter to use its",
+              "default value.")
+        print("Invalid parameter inputs will be replaced with their default",
+              "values.")
+        print("If you finish entering parameters early, enter 'q' to skip",
+              "ahead.\n")
 
         # Set defaults
         self.test_size = 0.25
@@ -1429,7 +1496,7 @@ class SVM:
         epsilon = 0.0
         tol = 0.0001
         C = 1.0
-        loss = 'epsilon_insensitive'
+        loss = "epsilon_insensitive"
         fit_intercept = True
         intercept_scaling = 1.0
         dual = True
@@ -1439,135 +1506,140 @@ class SVM:
 
         # Get user parameter input
         while True:
-            user_input = input("What fraction of the dataset should be the testing set? Input a decimal: ")
+            user_input = input("What fraction of the dataset should be the "
+                               + "testing set? Input a decimal: ")
 
             try:
                 self.test_size = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Input the number of folds for cross validation: ")
+
+            user_input = input("\nInput the number of folds for cross "
+                               + "validation: ")
 
             try:
                 self.cv = int(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enter epsilon, the range from an actual value where penalties aren't applied: ")
-            
+
+            user_input = input("\nEnter epsilon, the range from an actual "
+                               + "value where penalties aren't applied: ")
+
             try:
                 epsilon = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enter the tolerance for stopping criterion: ")
+
+            user_input = input("\nEnter the tolerance for stopping criterion: ")
 
             try:
                 tol = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enter the regularization parameter: ")
-            
+
+            user_input = input("\nEnter the regularization parameter: ")
+
             try:
                 C = float(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            print("Choose a loss function.")
-            user_input = input("Enter 1 for 'epsilon_insensitive', or 2 for 'squared_epsilon_insensitive': ")
+
+            print("\nChoose a loss function.")
+            user_input = input("\nEnter 1 for 'epsilon_insensitive', or 2 for "
+                               + "'squared_epsilon_insensitive': ")
 
             if user_input.lower() == "q":
                 break
             elif user_input == "2":
                 loss = "squared_epsilon_insensitive"
-            
-            user_input = input("Calculate a y-intercept (Y/n)? ").lower()
+
+            user_input = input("\nCalculate a y-intercept (Y/n)? ").lower()
 
             if user_input == "q":
                 break
             elif user_input == "n":
                 fit_intercept = False
-            
+
             if fit_intercept:
-                user_input = input("Enter a value for intercept scaling: ")
+                user_input = input("\nEnter a value for intercept scaling: ")
                 try:
                     intercept_scaling = float(user_input)
-                except:
+                except Exception:
                     if user_input.lower() == "q":
                         break
-            
-            print("Should the algorithm solve the duel or primal optimization problem?")
+
+            print("\nShould the algorithm solve the duel or primal",
+                  "optimization problem?")
             user_input = input("Enter 1 for dual, or 2 for primal: ")
 
             if user_input.lower() == "q":
                 break
             elif user_input == "2":
                 dual = False
-            
-            user_input = input("Enter the maximum number of iterations: ")
+
+            user_input = input("\nEnter the maximum number of iterations: ")
 
             try:
                 max_iter = int(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enter a seed for the random number generator: ")
+
+            user_input = input("\nEnter a seed for the random number generator: ")
 
             try:
                 random_state = int(user_input)
-            except:
+            except Exception:
                 if user_input.lower() == "q":
                     break
-            
-            user_input = input("Enable verbose logging (y/N)? ").lower()
+
+            user_input = input("\nEnable verbose logging (y/N)? ").lower()
 
             if user_input == "y":
                 verbose = 1
-            
-            break
-        
-        print("\n=======================================================")
-        print("= End of parameter inputs; press any key to continue. =")
-        input("=======================================================\n")
 
-        return LinearSVR(epsilon=epsilon, tol=tol, C=C, loss=loss, fit_intercept=fit_intercept,
-                         intercept_scaling=intercept_scaling, dual=dual, verbose=verbose, random_state=random_state,
+            break
+
+        print("\n=============================================")
+        print("= End of inputs; press any key to continue. =")
+        input("=============================================\n")
+
+        return LinearSVR(epsilon=epsilon, tol=tol, C=C, loss=loss,
+                         fit_intercept=fit_intercept,
+                         intercept_scaling=intercept_scaling, dual=dual,
+                         verbose=verbose, random_state=random_state,
                          max_iter=max_iter)
 
     def _output_classifier_results(self, model):
-        """
-        Outputs model metrics after a classifier model finishes running.
-        """
+        """Outputs model metrics after a classifier model finishes running."""
         if model == "SVC":
             print("\n===============")
             print("= SVC Results =")
             print("===============\n")
 
             print("{:<20} {:<20}".format("Accuracy:", self.accuracy_SVC))
+
             if self.bin:
-                print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+                print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc_SVC))
             else:
-                print("\nConfusion Matrix:\n", self.confusion_matrix)
+                print("\nConfusion Matrix:\n", self.confusion_matrix_SVC)
 
-            #if self.roc_auc_SVC is not None:
-                #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc_SVC))
-            
             print("\nCross Validation Scores:", self.cross_val_scores_SVC)
-            if self.gridsearch:
-            	print("\nGrid Search Score:", self.gs_result)
 
-            if self.bin:
-                plt.plot(self.fpr,self.tpr,label="data 1")
-                plt.xlabel('False Positive Rate')
-                plt.ylabel('True Positive Rate')
-                plt.title('ROC Curve')
+            if self.gridsearch:
+                print("\n{:<20} {:<20}".format("GridSearch Score:",
+                                               self.gs_result))
+
+            if self.bin and self.graph_results:
+                plt.plot(self.fpr, self.tpr, label="data 1")
+                plt.xlabel("False Positive Rate")
+                plt.ylabel("True Positive Rate")
+                plt.title("ROC Curve")
                 plt.legend(loc=4)
                 plt.show()
 
@@ -1579,110 +1651,124 @@ class SVM:
 
             print("{:<20} {:<20}".format("Accuracy:", self.accuracy_nu_SVC))
             if self.bin:
-                print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc))
+                print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc_nu_SVC))
             else:
-                print("\nConfusion Matrix:\n", self.confusion_matrix)            #if self.roc_auc_nu_SVC is not None:
-                #print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc_nu_SVC))
-            
+                print("\nConfusion Matrix:\n", self.confusion_matrix_nu_SVC)
+
             print("\nCross Validation Scores:", self.cross_val_scores_nu_SVC)
             if self.gridsearch:
-                print("\nGrid Search Score:", self.gs_result)
+                print("\n{:<20} {:<20}".format("GridSearch Score:",
+                                               self.gs_result))
 
-            if self.bin:
-                plt.plot(self.fpr,self.tpr,label="data 1")
-                plt.xlabel('False Positive Rate')
-                plt.ylabel('True Positive Rate')
-                plt.title('ROC Curve')
+            if self.bin and self.graph_results:
+                plt.plot(self.fpr, self.tpr, label="data 1")
+                plt.xlabel("False Positive Rate")
+                plt.ylabel("True Positive Rate")
+                plt.title("ROC Curve")
                 plt.legend(loc=4)
                 plt.show()
-            
+
             print("\n\nCall predict_nu_SVC() to make predictions for new data.")
         else:
             print("\n=====================")
             print("= LinearSVC Results =")
             print("=====================\n")
 
-            print("{:<20} {:<20}".format("Accuracy:", self.accuracy_linear_SVC))            
-            print("\nCross Validation Scores:", self.cross_val_scores_linear_SVC)
-            print("\n\nCall predict_linear_SVC() to make predictions for new data.")
-        
+            print("{:<20} {:<20}".format("Accuracy:", self.accuracy_linear_SVC))
+            print("\nCross Validation Scores:",
+                  self.cross_val_scores_linear_SVC)
+
+            print("\n\nCall predict_linear_SVC() to make predictions for",
+                  "new data.")
+
         print("\n===================")
         print("= End of results. =")
         print("===================\n")
 
     def _output_regressor_results(self, model):
-        """
-        Outputs model metrics after a regressor model finishes running.
-        """
+        """Outputs model metrics after a regressor model finishes running."""
         if model == "SVR":
             print("\n===============")
             print("= SVR Results =")
             print("===============\n")
 
-            print("{:<20} {:<20}".format("Mean Squared Error:", self.mean_squared_error_SVR))
+            print("{:<20} {:<20}".format("Mean Squared Error:",
+                                         self.mean_squared_error_SVR))
             print("\n{:<20} {:<20}".format("R2 Score:", self.r2_score_SVR))
             print("\n{:<20} {:<20}".format("R Score:", self.r_score_SVR))
             print("\nCross Validation Scores", self.cross_val_scores_SVR)
+
             if self.gridsearch:
-                print("\nGrid Search Score:", self.gs_result)
+                print("\n{:<20} {:<20}".format("GridSearch Score:",
+                                               self.gs_result))
+
             print("\n\nCall predict_SVR() to make predictions for new data.")
         elif model == "NuSVR":
             print("\n=================")
             print("= NuSVR Results =")
             print("=================\n")
 
-            print("{:<20} {:<20}".format("Mean Squared Error:", self.mean_squared_error_nu_SVR))
-            print("{:<20} {:<20}".format("R2 Score:", self.r2_score_nu_SVR))
+            print("{:<20} {:<20}".format("Mean Squared Error:",
+                                         self.mean_squared_error_nu_SVR))
+            print("\n{:<20} {:<20}".format("R2 Score:", self.r2_score_nu_SVR))
             print("\n{:<20} {:<20}".format("R Score:", self.r_score_nu_SVR))
             print("\nCross Validation Scores:", self.cross_val_scores_nu_SVR)
+
             if self.gridsearch:
-                print("\nGrid Search Score:", self.gs_result)
+                print("\n{:<20} {:<20}".format("GridSearch Score:",
+                                               self.gs_result))
+
             print("\n\nCall predict_nu_SVR() to make predictions for new data.")
         else:
             print("\n=====================")
             print("= LinearSVR Results =")
             print("=====================\n")
 
-            print("{:<20} {:<20}".format("Mean Squared Error:", self.mean_squared_error_linear_SVR))
-            print("{:<20} {:<20}".format("R2 Score:", self.r2_score_linear_SVR))
+            print("{:<20} {:<20}".format("Mean Squared Error:",
+                                         self.mean_squared_error_linear_SVR))
+            print("\n{:<20} {:<20}".format("R2 Score:",
+                  self.r2_score_linear_SVR))
             print("\n{:<20} {:<20}".format("R Score:", self.r_score_linear_SVR))
-            print("\nCross Validation Scores:\n", self.cross_val_scores_linear_SVR)
+            print("\nCross Validation Scores:\n",
+                  self.cross_val_scores_linear_SVR)
+
             print("\n\nCall predict_linear_SVR() to make predictions for new data.")
-        
+
         print("\n===================")
         print("= End of results. =")
         print("===================\n")
 
     def _split_data(self):
-        """
-        Helper method for splitting attributes and labels into training and testing sets.
+        """Helper method for splitting attributes and labels into
+        training and testing sets.
 
-        This method runs under the assumption that all relevant instance data has been checked for correctness.
+        This method runs under the assumption that all relevant instance
+        data has been checked for correctness.
         """
 
-        self.dataset_X_train, self.dataset_X_test, self.dataset_y_train, self.dataset_y_test =\
-            train_test_split(self.attributes, self.labels, test_size=self.test_size)
+        self.dataset_X_train, self.dataset_X_test, self.dataset_y_train, \
+            self.dataset_y_test = train_test_split(self.attributes, self.labels,
+                                                   test_size=self.test_size)
 
     def _check_inputs(self):
-        """
-        Verifies if instance data is ready for use in SVM model.
-        """
+        """Verifies if instance data is ready for use in SVM model."""
         # Check if attributes exists
         if self.attributes is None:
-            print("attributes is missing; call set_attributes(new_attributes) to fix this! new_attributes should be a",
-                  "populated dataset of independent variables.")
+            print("attributes is missing; call set_attributes(new_attributes)",
+                  "to fix this! new_attributes should be a populated dataset",
+                  "of independent variables.")
             return False
 
         # Check if labels exists
         if self.labels is None:
-            print("labels is missing; call set_labels(new_labels) to fix this! new_labels should be a populated dataset",
-                  "of classes.")
+            print("labels is missing; call set_labels(new_labels) to fix this!",
+                  "new_labels should be a populated dataset of classes.")
             return False
 
         # Check if attributes and labels have same number of rows (samples)
         if self.attributes.shape[0] != self.labels.shape[0]:
-            print("attributes and labels don't have the same number of rows. Make sure the number of samples in each",
-                  "dataset matches!")
+            print("attributes and labels don't have the same number of rows.",
+                  "Make sure the number of samples in each dataset matches!")
             return False
 
         return True
