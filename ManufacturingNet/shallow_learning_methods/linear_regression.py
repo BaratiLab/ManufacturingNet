@@ -161,23 +161,7 @@ class LinRegression:
         """Runs UI for getting parameters and creating model."""
         print("\n==================================")
         print("= LinRegression Parameter Inputs =")
-        print("==================================\n")
-
-        if input("Use default parameters (Y/n)? ").lower() != "n":
-            self.test_size = 0.25
-            self.cv = None
-            self.graph_results = False
-            print("\n=============================================")
-            print("= End of inputs; press any key to continue. =")
-            input("=============================================\n")
-            return LinearRegression()
-
-        print("\nIf you are unsure about a parameter, press enter to use its",
-              "default value.")
-        print("Invalid parameter inputs will be replaced with their default",
-              "values.")
-        print("If you finish entering parameters early, enter 'q' to skip",
-              "ahead.\n")
+        print("==================================")
 
         # Set defaults
         self.test_size = 0.25
@@ -188,68 +172,158 @@ class LinRegression:
         copy_X = True
         n_jobs = None
 
+        while True:
+            user_input = input("\nUse default parameters (Y/n)? ").lower()
+            if user_input == "y" or user_input == "":
+                print("\n===========================================")
+                print("= End of inputs; press enter to continue. =")
+                input("===========================================\n")
+                return LinearRegression()
+            elif user_input == "n":
+                break
+            else:
+                print("Invalid input.")
+
+        print("\nIf you are unsure about a parameter, press enter to use its",
+              "default value.")
+        print("If you finish entering parameters early, enter 'q' to skip",
+              "ahead.")
+
         # Get user parameter input
         while True:
-            user_input = input("What fraction of the dataset should be the "
-                               + "testing set? Input a decimal: ")
+            break_early = False
+            while True:
+                user_input = input("\nWhat fraction of the dataset should be the "
+                                   + "testing set? Enter a decimal: ")
+                try:
+                    if user_input.lower() == "q":
+                        break_early = True
+                        break
+                    elif user_input == "":
+                        break
+                    
+                    user_input = float(user_input)
+                    if user_input < 0 or user_input > 1:
+                        raise Exception
+                    else:
+                        self.test_size = user_input
+                        break
+                except Exception:
+                    print("Invalid input.")
+            
+            if break_early:
+                break
 
-            try:
-                self.test_size = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+            while True:
+                user_input = input("\nEnter the number of folds for cross "
+                                   + "validation [2,]: ")
+                try:
+                    if user_input.lower() == "q":
+                        break_early = True
+                        break
+                    elif user_input == "":
+                        break
+                    
+                    user_input = int(user_input)
+                    if user_input < 2:
+                        raise Exception
+                    else:
+                        self.cv = user_input
+                        break
+                except Exception:
+                    print("Invalid input.")
+            
+            if break_early:
+                break
+            
+            while self.attributes.shape[1] == 1:
+                user_input = input("\nGraph the results (y/N)? ").lower()
+
+                if user_input == "y":
+                    self.graph_results = True
                     break
-
-            user_input = input("\nInput the number of folds for cross "
-                               + "validation: ")
-
-            try:
-                self.cv = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                elif user_input == "n" or user_input == "":
                     break
-
-            user_input = input("\nGraph the results? Only univariate "
-                               + "regression is supported (y/N): ").lower()
-
-            if user_input == "y":
-                self.graph_results = True
-            elif user_input == "q":
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+            
+            if break_early:
                 break
 
-            user_input = input("\nInclude a y-intercept in the model "
-                               + "(Y/n)? ").lower()
-
-            if user_input == "n":
-                fit_intercept = False
-            elif user_input == "q":
+            while True:
+                user_input = input("\nInclude a y-intercept in the model "
+                                 + "(Y/n)? ").lower()
+                if user_input == "n":
+                    fit_intercept = False
+                    break
+                elif user_input == "y" or user_input == "":
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+            
+            if break_early:
                 break
 
-            user_input = input("\nNormalize the dataset (y/N)? ").lower()
+            while True:
+                user_input = input("\nNormalize the dataset (y/N)? ").lower()
 
-            if user_input == "y":
-                normalize = True
-            elif user_input == "q":
+                if user_input == "y":
+                    normalize = True
+                    break
+                elif user_input == "n" or user_input == "":
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+            
+            if break_early:
                 break
 
-            user_input = input("\nCopy the dataset's features (Y/n)? ").lower()
-
-            if user_input == "n":
-                copy_X = False
-            elif user_input == "q":
+            while True:
+                user_input = \
+                    input("\nCopy the dataset's features (Y/n)? ").lower()
+                if user_input == "n":
+                    copy_X = False
+                    break
+                elif user_input == "y" or user_input == "":
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+            
+            if break_early:
                 break
 
-            user_input = input("\nInput the number of jobs for computation: ")
-
-            try:
-                n_jobs = int(user_input)
-            except Exception:
-                break
-
+            while True:
+                user_input = \
+                    input("\nInput the number of jobs for computation [1,]: ")
+                try:
+                    if user_input.lower() == "q" or user_input == "":
+                        break
+                    
+                    user_input = int(user_input)
+                    if user_input < 1:
+                        raise Exception
+                    else:
+                        n_jobs = user_input
+                        break
+                except Exception:
+                    print("Invalid input.")
             break
 
-        print("\n=============================================")
-        print("= End of inputs; press any key to continue. =")
-        input("=============================================\n")
+        print("\n===========================================")
+        print("= End of inputs; press enter to continue. =")
+        input("===========================================\n")
 
         return LinearRegression(fit_intercept=fit_intercept,
                                 normalize=normalize, copy_X=copy_X,
@@ -282,10 +356,6 @@ class LinRegression:
         """
         if self.regression is None:
             print("The model isn't available. Have you called run() yet?")
-            return
-
-        if self.attributes.shape[1] > 1:
-            print("Graphing is supported for one feature only.")
             return
 
         plt.scatter(X_test, y_test, color="black")
