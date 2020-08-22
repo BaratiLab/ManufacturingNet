@@ -622,9 +622,9 @@ class SVM:
         if input("Use default parameters (Y/n)? ").lower() != "n":
             self.test_size = 0.25
             self.cv = None
-            print("\n=============================================")
-            print("= End of inputs; press any key to continue. =")
-            input("=============================================\n")
+            print("\n===========================================")
+            print("= End of inputs; press enter to continue. =")
+            input("===========================================\n")
 
             if is_nu:
                 return NuSVC(probability=True)
@@ -904,9 +904,9 @@ class SVM:
 
             break
 
-        print("\n=============================================")
-        print("= End of inputs; press any key to continue. =")
-        input("=============================================\n")
+        print("\n===========================================")
+        print("= End of inputs; press enter to continue. =")
+        input("===========================================\n")
 
         if is_nu:
             # If GridSearch is enabled
@@ -978,9 +978,9 @@ class SVM:
         if input("Use default parameters (Y/n)? ").lower() != "n":
             self.test_size = 0.25
             self.cv = None
-            print("\n=============================================")
-            print("= End of inputs; press any key to continue. =")
-            input("=============================================\n")
+            print("\n===========================================")
+            print("= End of inputs; press enter to continue. =")
+            input("===========================================\n")
             return LinearSVC()
 
         print("\nIf you are unsure about a parameter, press enter to use its",
@@ -1124,9 +1124,9 @@ class SVM:
 
             break
 
-        print("\n=============================================")
-        print("= End of inputs; press any key to continue. =")
-        input("=============================================\n")
+        print("\n===========================================")
+        print("= End of inputs; press enter to continue. =")
+        input("===========================================\n")
 
         return LinearSVC(penalty=penalty, loss=loss, dual=dual, tol=tol, C=C,
                          multi_class=multi_class, fit_intercept=fit_intercept,
@@ -1148,9 +1148,9 @@ class SVM:
         if input("Use default parameters (Y/n)? ").lower() != "n":
             self.test_size = 0.25
             self.cv = None
-            print("\n=============================================")
-            print("= End of inputs; press any key to continue. =")
-            input("=============================================\n")
+            print("\n===========================================")
+            print("= End of inputs; press enter to continue. =")
+            input("===========================================\n")
 
             if is_nu:
                 return NuSVR()
@@ -1413,9 +1413,9 @@ class SVM:
 
             break
 
-        print("\n=============================================")
-        print("= End of inputs; press any key to continue. =")
-        input("=============================================\n")
+        print("\n===========================================")
+        print("= End of inputs; press enter to continue. =")
+        input("===========================================\n")
 
         if is_nu:
             # If GridSearch is enabled
@@ -1478,9 +1478,9 @@ class SVM:
         if input("Use default parameters (Y/n)? ").lower() != "n":
             self.test_size = 0.25
             self.cv = None
-            print("\n=============================================")
-            print("= End of inputs; press any key to continue. =")
-            input("=============================================\n")
+            print("\n===========================================")
+            print("= End of inputs; press enter to continue. =")
+            input("===========================================\n")
             return LinearSVR()
 
         print("\nIf you are unsure about a parameter, press enter to use its",
@@ -1605,9 +1605,9 @@ class SVM:
 
             break
 
-        print("\n=============================================")
-        print("= End of inputs; press any key to continue. =")
-        input("=============================================\n")
+        print("\n===========================================")
+        print("= End of inputs; press enter to continue. =")
+        input("===========================================\n")
 
         return LinearSVR(epsilon=epsilon, tol=tol, C=C, loss=loss,
                          fit_intercept=fit_intercept,

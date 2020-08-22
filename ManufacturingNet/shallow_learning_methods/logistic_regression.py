@@ -189,9 +189,9 @@ class LogRegression:
         if input("Use default parameters (Y/n)? ").lower() != "n":
             self.test_size = 0.25
             self.cv = None
-            print("\n=============================================")
-            print("= End of inputs; press any key to continue. =")
-            input("=============================================\n")
+            print("\n===========================================")
+            print("= End of inputs; press enter to continue. =")
+            input("===========================================\n")
             return LogisticRegression()
 
         print("\nIf you are unsure about a parameter, press enter to use its",
@@ -468,9 +468,9 @@ class LogRegression:
 
             break
 
-        print("\n=============================================")
-        print("= End of inputs; press any key to continue. =")
-        input("=============================================\n")
+        print("\n===========================================")
+        print("= End of inputs; press enter to continue. =")
+        input("===========================================\n")
 
         # If GridSearch is enabled
         if self.gridsearch:

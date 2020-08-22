@@ -139,9 +139,9 @@ class AllClassificationModels:
         except Exception:
             self.test_size = 0.25
 
-        print("\n=============================================")
-        print("= End of inputs; press any key to continue. =")
-        input("=============================================\n")
+        print("\n===========================================")
+        print("= End of inputs; press enter to continue. =")
+        input("===========================================\n")
 
         # Create models
         self.logistic_regression = LogisticRegression(verbose=self.verbose)
