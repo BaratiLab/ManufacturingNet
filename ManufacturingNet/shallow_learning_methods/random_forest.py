@@ -261,9 +261,9 @@ class RandomForest:
         if input("Use default parameters (Y/n)? ").lower() != "n":
             self.test_size = 0.25
             self.cv = None
-            print("\n=============================================")
-            print("= End of inputs; press any key to continue. =")
-            input("=============================================\n")
+            print("\n===========================================")
+            print("= End of inputs; press enter to continue. =")
+            input("===========================================\n")
 
             if classifier:
                 return RandomForestClassifier()
@@ -657,9 +657,9 @@ class RandomForest:
 
             break
 
-        print("\n=============================================")
-        print("= End of inputs; press any key to continue. =")
-        input("=============================================\n")
+        print("\n===========================================")
+        print("= End of inputs; press enter to continue. =")
+        input("===========================================\n")
 
         if classifier:
             # If GridSearch is enabled
