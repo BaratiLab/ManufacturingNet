@@ -15,6 +15,7 @@ import torch.optim.lr_scheduler as scheduler
 import time
 import datetime
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 
 class MyDataset(data.Dataset):
     def __init__(self, X, Y):
@@ -73,11 +74,70 @@ class BasicBlock(nn.Module):
         print('Question: Pooling layer for this conv:')
         print('\n')
         gate=0
-        self.pooling_qtn= input('Do you want a pooling layer after this convolution layer (y/n): ')
+        
         while gate!=1:
+            self.pooling_qtn= input('Do you want a pooling layer after this convolution layer (y/n): ')
             if (self.pooling_qtn).lower()=='y':
                 self.pooling_input=True
-                self.pool=nn.MaxPool3d(kernel_size=3,stride=2) #kept constant for now
+
+                print('Question: Kernel Size for this pooling layer:')
+                print('\n')
+                gate=0
+                while gate!=1:
+                    self.pool_kernel=[]
+                    kernel_input=list(input('Please enter the kernel size (depth,heigth,width)\nFor example 3,3,3\nFor default size, please directly press enter without any input: '))
+                    if len(kernel_input)==0:
+                        print('Default Value selected')
+                        self.pool_kernel=tuple([3,3,3])
+                        gate=1
+                    elif len(kernel_input)==5:
+                        for i in range(len(kernel_input)):
+                            if kernel_input[i]!=',' and (1<= int(kernel_input[i]) <= 20): 
+                                self.pool_kernel.append(int(kernel_input[i]))
+                        self.pool_kernel=tuple(self.pool_kernel)
+                        gate=1
+                    else:
+                        print('Please enter valid input')
+                
+                print('Question: Stride value for this pooling layer:')
+                print('\n')
+                gate=0
+                while gate!=1:
+                    self.pool_stride=[]
+                    stride_input=list(input('Please enter the stride (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))
+                    if len(stride_input)==0:
+                        print('Default Value selected')
+                        self.pool_stride=tuple([2,2,2])
+                        gate=1
+                    elif len(stride_input)==5:
+                        for i in range(len(stride_input)):
+                            if stride_input[i]!=',' and (1<= int(stride_input[i]) <= 20): 
+                                self.pool_stride.append(int(stride_input[i]))
+                        self.pool_stride=tuple(self.pool_stride)
+                        gate=1
+                    else:
+                        print('Please enter valid input')
+                
+
+                print('Question: Padding value for this pooling layer:')
+                print('\n')
+                gate=0
+                while gate!=1:
+                    self.pool_padding=[]
+                    padding_input=list(input('Please enter the value of padding (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))
+                    if len(padding_input)==0:
+                        print('Default Value selected')
+                        self.pool_padding=tuple([0,0,0])
+                        gate=1
+                    elif len(padding_input)==5:
+                        for i in range(len(padding_input)):
+                            if padding_input[i]!=',' and (1<= int(padding_input[i]) <= 20): 
+                                self.pool_padding.append(int(padding_input[i]))
+                        self.pool_padding=tuple(self.pool_padding)
+                        gate=1
+                    else:
+                        print('Please enter valid input')
+                self.pool=nn.MaxPool3d(kernel_size=self.pool_kernel,stride=self.pool_stride, padding=self.pool_padding) #kept constant for now
                 gate=1
 
             elif (self.pooling_qtn).lower()=='n':
@@ -87,22 +147,30 @@ class BasicBlock(nn.Module):
                 print('Please enter valid input')
         spacing()
     
-    def get_dropout(self):
-        print('Question: Dropout value for this conv:')
-        print('\n')
-        # Method for getting dropout input for each hidden layer
-        gate = 0
-        while gate != 1:
-            self.dropout_value = input('Please enter the dropout value between 0 and 1 for this convolution. \n For default option of no dropout, please directly press enter without any input: ')
-            if self.dropout_value == '':               
-                print('Default value selected')
-                self.drop=nn.Dropout3d(p=0)
-                gate = 1
-            elif 0<= float(self.dropout_value) <= 1:
-                self.drop=nn.Dropout3d(p=float(self.dropout_value))
-                gate=1
+    def get_dropout(self): # Get input for dropout from the user
+        gate1 = 0 
+        value = input("Do you want default values for dropout(press y or n): ")
+        while gate1!=1:
+            if value!= "Y" or value!="y" or value!= 'n' or value!= 'N':
+                gate1 = 1
             else:
-               print('Please enter valid input')
+                print("Please enter valid input it should only be (y or n)")
+                value = input("Do you want default values for dropout(press y or n)")
+                gate1 =0 
+
+        gate  = 0    
+        if value == 'N' or value =='n':    
+            drop_out = (input(("Please input the dropout probability: ")))
+            while gate!=1:
+                if (float(drop_out) > 0 and float(drop_out)<1):
+                    self.drop = drop_out
+                    gate  = 1
+                else:
+                    print("Please enter the valid numeric values. The value should lie between 0 and 1")
+                    drop_out = (input(("Please input the dropout probability")))
+                    gate = 0
+        else:
+            self.drop = 0
         spacing()
         
     def get_channel_input(self):
@@ -110,9 +178,9 @@ class BasicBlock(nn.Module):
         print('\n')
         gate=0
         while gate!=1:
-            channel_input=int(input('Please enter the number of out channels: '))
-            if channel_input>0:
-                self.out_channel=channel_input
+            channel_input=(input('Please enter the number of out channels: '))
+            if channel_input.isnumeric() and int(channel_input) >0:
+                self.out_channel=int(channel_input)
                 gate=1
             else:
                 print('Please enter a valid input')
@@ -124,7 +192,7 @@ class BasicBlock(nn.Module):
         gate=0
         while gate!=1:
             self.kernel=[]
-            kernel_input=list(input('Please enter the kernel size as a list(depth,heigth,width)\nFor example 3,3,3\nFor default size, please directly press enter without any input: '))
+            kernel_input=list(input('Please enter the kernel size (depth,heigth,width)\nFor example 3,3,3\nFor default size, please directly press enter without any input: '))
             if len(kernel_input)==0:
                 print('Default Value selected')
                 self.kernel=tuple([3,3,3])
@@ -146,7 +214,7 @@ class BasicBlock(nn.Module):
         gate=0
         while gate!=1:
             self.stride=[]
-            stride_input=list(input('Please enter the stride as a list(depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))
+            stride_input=list(input('Please enter the stride (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))
             if len(stride_input)==0:
                 print('Default Value selected')
                 self.stride=tuple([1,1,1])
@@ -167,7 +235,7 @@ class BasicBlock(nn.Module):
         gate=0
         while gate!=1:
             self.padding=[]
-            padding_input=list(input('Please enter the value of padding as a list(depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))
+            padding_input=list(input('Please enter the value of padding (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))
             if len(padding_input)==0:
                 print('Default Value selected')
                 self.padding=tuple([1,1,1])
@@ -253,9 +321,9 @@ class Network(nn.Module):
         print('\n')
         gate=0
         while gate!=1:
-            conv_input=int(input('Please enter the number of conv_layers: '))
-            if conv_input>0:
-                self.num_conv_layers=conv_input
+            conv_input=(input('Please enter the number of conv_layers: '))
+            if conv_input.isnumeric() and int(conv_input)>0:
+                self.num_conv_layers=int(conv_input)
                 gate=1
             else:
                 print('Please enter a valid input')
@@ -276,24 +344,25 @@ class Network(nn.Module):
 
 class CNN3D():
 
-    def __init__(self,train_data,dev_data):
+    def __init__(self,X,Y,shuffle=True):
         
         #train_data
-        self.train_data=train_data
+        self.X=X
         #dev_data
-        self.dev_data=dev_data
+        self.Y=Y
+        self.shuffle=shuffle
         spacing()
         self.get_num_classes()
         
-        print('Question [2/7]: Design Architecture: ')
+        print('Question [2/9]: Design Architecture: ')
         print('\n')
 
 
-        self.net = (Network(self.train_data[0][0].shape,3)).double()
+        self.net = (Network(self.X[0].shape,3)).double()
         print(self.net)
 
         self._get_batchsize_input()             # getting a batch size for training and validation
-
+        self._get_valsize_input()
         self._get_loss_function()               # getting a loss function
 
         self._get_optimizer()               # getting an optimizer input
@@ -311,7 +380,7 @@ class CNN3D():
 
 
     def get_num_classes(self):
-        print('Question [1/7]: No of classes:')
+        print('Question [1/9]: No of classes:')
         print('\n')
 
         gate = 0
@@ -325,7 +394,7 @@ class CNN3D():
 
 
     def _get_batchsize_input(self):
-        print('Question [3/7]: Batchsize:')
+        print('Question [3/9]: Batchsize:')
         print('\n')
 
         # Method for getting batch size input
@@ -337,6 +406,22 @@ class CNN3D():
             else:
                 print('Please enter a valid input')
         spacing()
+    
+    def _get_valsize_input(self):
+        print('Question [4/9]: Validation_size:')
+        # Method for getting validation set size input
+        gate = 0
+        while gate!= 1:
+            self.valset_size = (input('Please enter the validation set size (size > 0 and size < 1) \n For default size, please directly press enter without any input: '))
+            if self.valset_size == '':              # handling default case for valsize
+                print('Default value selected')
+                self.valset_size = '0.2'
+            if self.valset_size.replace('.','').isdigit() :
+                if float(self.valset_size) >0 and float(self.valset_size) < 1 :
+                    self.valset_size = float(self.valset_size)
+                    gate = 1
+            else:
+                print('Please enter a valid numeric input')
     
     def _set_device(self):
 
@@ -350,7 +435,7 @@ class CNN3D():
             self.cuda=False
     
     def _get_loss_function(self):
-        print('Question [4/7]: Loss function:')
+        print('Question [5/9]: Loss function:')
         print('\n')
 
         # Method for getting a loss function for training
@@ -368,17 +453,22 @@ class CNN3D():
             
         self.criterion = self.criterion_list[int(self.criterion_input)]
 
+    
+
     def dataloader(self):
 
         #train and dev loader
-        train_dataset = MyDataset(self.train_data[:,0],self.train_data[:,1])
+
+        self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(self.X,self.Y,test_size=self.valset_size)
+
+        train_dataset = MyDataset(self.X_train,self.Y_train)
 
         train_loader_args = dict(shuffle=True, batch_size=self.batch_size)
 
         self.train_loader = data.DataLoader(train_dataset, **train_loader_args)
 
         
-        dev_dataset = MyDataset(self.dev_data[:,0],self.dev_data[:,1])
+        dev_dataset = MyDataset(self.X_test,self.Y_test)
 
         dev_loader_args = dict(shuffle=False, batch_size=self.batch_size)
 
@@ -386,7 +476,7 @@ class CNN3D():
     
 
     def _get_optimizer(self):
-        print('Question [5/7]: Optimizer:')
+        print('Question [6/9]: Optimizer:')
         print('\n')
 
         # Method for getting a optimizer input
@@ -403,7 +493,9 @@ class CNN3D():
             else:
                 print('Please enter a valid input')
         spacing()
-                
+        
+        print('Question [7/9]: Learning_Rate:')
+        print('\n')
         gate = 0
         while gate!= 1:
             self.user_lr = input('Please enter a required postive value for learning rate \n For default learning rate, please directly press enter without any input: ')
@@ -423,7 +515,7 @@ class CNN3D():
 
 #scheduler
     def _get_scheduler(self):
-        print('Question [6/7]: Scheduler:')
+        print('Question [8/9]: Scheduler:')
         print('\n')
 
         # Method for getting scheduler
@@ -459,7 +551,7 @@ class CNN3D():
         spacing()
     
     def _get_epoch(self):
-        print('Question [7/7]: Number of Epochs:')
+        print('Question [9/9]: Number of Epochs:')
         print('\n')
 
         # Method for getting number of epochs for training the model
@@ -644,9 +736,6 @@ class CNN3D():
 
         self.get_model_summary()        # printing summaray of the model
 
-        
-       
-
         self.train_model()          # training the model
 
         self.get_loss_graph()           # saving the loss graph
@@ -672,12 +761,3 @@ class CNN3D():
                 gate = 1
             else:
                 print('Please enter a valid input')
-        
-    
-
-
-
-
-        
-
-        
