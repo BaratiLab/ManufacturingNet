@@ -149,28 +149,25 @@ class BasicBlock(nn.Module):
     
     def get_dropout(self): # Get input for dropout from the user
         gate1 = 0 
-        value = input("Do you want default values for dropout(press y or n): ")
+        
         while gate1!=1:
-            if value!= "Y" or value!="y" or value!= 'n' or value!= 'N':
+            value = input("Do you want default values for dropout(press y or n): ")
+            if value.lower()=='y' or value.lower()=='n' :
                 gate1 = 1
             else:
                 print("Please enter valid input it should only be (y or n)")
-                value = input("Do you want default values for dropout(press y or n)")
-                gate1 =0 
 
         gate  = 0    
-        if value == 'N' or value =='n':    
-            drop_out = (input(("Please input the dropout probability: ")))
+        if value.lower() =='n':    
             while gate!=1:
-                if (float(drop_out) > 0 and float(drop_out)<1):
-                    self.drop = drop_out
+                drop_out = (input(("Please input the dropout probability: ")))
+                if drop_out.isnumeric() and (float(drop_out) > 0 and float(drop_out)<1):
+                    self.drop = nn.Dropout3d(drop_out)
                     gate  = 1
                 else:
                     print("Please enter the valid numeric values. The value should lie between 0 and 1")
-                    drop_out = (input(("Please input the dropout probability")))
-                    gate = 0
         else:
-            self.drop = 0
+            self.drop = nn.Dropout3d(p=0)
         spacing()
         
     def get_channel_input(self):
@@ -253,8 +250,6 @@ class BasicBlock(nn.Module):
     def forward(self, x):
         out=self.conv1(x)
         out = F.relu(self.batch(out),inplace=True)
-        
-
         if self.pooling_input:
             out=self.pool(out)
         out=self.drop(out)
@@ -298,10 +293,11 @@ class Network(nn.Module):
         print('Question: Default value:')
         print('\n')
 
-        self.default_input=input('Do you want default values for convolution layers (y/n): ')
+        
         gate=0
 
         while gate!=1:
+            self.default_input=input('Do you want default values for convolution layers (y/n): ')
             if (self.default_input).lower()=='y':
                 self.default_input=True
                 gate=1
@@ -385,8 +381,9 @@ class CNN3D():
 
         gate = 0
         while gate!= 1:
-            self.num_classes = int(input('Please enter the number of classes for classification: '))
-            if int(self.num_classes) >1 :
+            self.num_classes = (input('Please enter the number of classes for classification: '))
+            if (self.num_classes).isnumeric() and int(self.num_classes)>1 :
+                self.num_classes=int(self.num_classes)
                 gate =1
             else:
                 print('Please enter a valid input')
@@ -400,8 +397,9 @@ class CNN3D():
         # Method for getting batch size input
         gate = 0
         while gate!= 1:
-            self.batch_size = int(input('Please enter the batch size: '))
-            if int(self.batch_size) >0 :
+            self.batch_size = (input('Please enter the batch size: '))
+            if (self.batch_size).isnumeric() and int(self.batch_size) >0:
+                self.batch_size=int(self.batch_size)
                 gate =1
             else:
                 print('Please enter a valid input')
