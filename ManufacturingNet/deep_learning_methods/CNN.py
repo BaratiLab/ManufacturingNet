@@ -170,7 +170,7 @@ class CNN2D(nn.Module):
   def get_number_classes(self): # get number of classes
     gate = 0
     while gate!=1:
-      self.num_classes = (input("Please enter the number of classes: "))
+      self.num_classes = (input("Please enter the number of classes \n Enter 1 if you are dealing with a regression problem: "))
       if (self.num_classes.isnumeric() and int(self.num_classes) > 0):
         gate = 1
       else:
@@ -203,17 +203,29 @@ class CNN2D(nn.Module):
 
   def get_channels(self,n_conv):# Get the number of convolutions
     gate = 0
+    gate1 = 0
     self.channels = []
+    while gate1!=1:
+      channel_inp = ((input("enter the number of input channels: ")))
+      if (channel_inp.isnumeric() and int(channel_inp) > 0):
+        self.channels.append(int(channel_inp))
+        gate1 = 1
+      else:
+        print("Please enter valid number of channels.  The value must be an integer and greater than zero")
+        gate1 = 0
+
     while gate!=1:
-      for i in range(n_conv+1):
-        channel = ((input("enter the number of channels: ")))
+      for i in range(n_conv):
+        channel = ((input("enter the number of output channels for convolution {}: ".format(i+1))))
         if (channel.isnumeric() and int(channel) > 0) :
           self.channels.append(int(channel))
-          if i == n_conv:
+          if i == n_conv-1:
             gate = 1
         else:
           gate =0
           print("Please enter valid number of channels.  The value must be an integer and greater than zero")
+          self.channels = []
+          break
         
     return self.channels
 
@@ -221,7 +233,7 @@ class CNN2D(nn.Module):
     gate1 = 0 
     value = input("Do you want default values for kernel size(press y or n): ")
     while gate1!=1:
-      if value!= "Y" or value!="y" or value!= 'n' or value!= 'N':
+      if value == "Y" or value =="y" or value == 'n' or value == 'N':
         gate1 = 1
       else:
         print("Please enter valid input it should only be (y or n)")
@@ -233,7 +245,7 @@ class CNN2D(nn.Module):
     while gate2!=1:
       for i in range(n_conv):
         if value == 'N' or value =='n':
-          k_size = (((input("Enter the kernel size \n For Example: 3,3: "))))
+          k_size = (((input("Enter the kernel size for convolutional layer {} \n For Example: 3,3: ".format(i+1)))))
           k_split = k_size.split(",")
           if k_split[0].isnumeric() and int(k_split[0]) > 0 and k_split[1].isnumeric() and int(k_split[0]) > 0:
             self.kernel_list.append((int(k_split[0]),int(k_split[1])))
@@ -242,6 +254,7 @@ class CNN2D(nn.Module):
           else:
             gate2 = 0
             print("Please enter valid numeric values.  The value must be an integer and greater than zero")
+            self.kernel_list = []
             break
           
         else:
@@ -256,7 +269,7 @@ class CNN2D(nn.Module):
     gate1 = 0 
     value = input("Do you want default values for padding and stride (press y or n): ")
     while gate1!=1:
-      if (value!= "Y" or value!="y" or value!= 'n' or value!= 'N'):
+      if (value == "Y" or value =="y" or value == 'n' or value == 'N'):
         gate1 = 1
       else:
         print("Please enter valid input it should only be (y or n)")
@@ -267,7 +280,7 @@ class CNN2D(nn.Module):
     while gate2!=1:
       for i in range(n_conv):
         if value == 'N' or value =='n':
-          pad_size = input("Enter padding for the image \n For Example 2,2: ")
+          pad_size = input("Enter padding for the image for convolutional layer {}  \n For Example 2,2: ".format(i+1))
           pad_split = pad_size.split(",")
           if pad_split[0].isnumeric() and int(pad_split[0]) >= 0 and pad_split[1].isnumeric() and int(pad_split[0]) >= 0:
             self.padding.append((int(pad_split[0]),int(pad_split[1])))
@@ -276,6 +289,7 @@ class CNN2D(nn.Module):
           else:
             gate2 = 0
             print("Please enter valid numeric values.  The value must be an integer and greater than or equal to zero")
+            self.padding = []
             break
         else:
           self.padding.append((0,0))
@@ -286,7 +300,7 @@ class CNN2D(nn.Module):
     while gate3!=1:
       for i in range(n_conv):
         if value == 'N' or value == 'n':
-          stride_size = input("Enter stride for the convolutions \n For Example 2,2: ")
+          stride_size = input("Enter stride for the convolutions for convolutional layer {} \n For Example 2,2: ".format(i+1))
           stride_split = stride_size.split(",")
           if stride_split[0].isnumeric() and int(stride_split[0]) >= 0 and stride_split[1].isnumeric() and int(stride_split[0]) >= 0:
             self.stride.append((int(stride_split[0]),int(stride_split[1])))
@@ -295,6 +309,7 @@ class CNN2D(nn.Module):
           else:
             gate3 = 0
             print("Please enter valid numeric values.  The value must be an integer and greater than zero")
+            self.stride = []
             break
         else:
           self.stride.append((1,1))
@@ -306,7 +321,7 @@ class CNN2D(nn.Module):
     gate1 = 0 
     value = input("Do you want default values for batch normalization (press y or n): ")
     while gate1!=1:
-      if (value!= "Y" or value!="y" or value!= 'n' or value!= 'N'):
+      if (value == "Y" or value =="y" or value == 'n' or value == 'N'):
         gate1 = 1
       else:
         print("Please enter valid input it should only be (y or n)")
@@ -315,32 +330,31 @@ class CNN2D(nn.Module):
 
     self.batch_norm = []
     
-    gate2 = 0
-    while gate2!=1:
+    gate1 = 0
+    while gate1!= 1:
       for i in range(n_conv):
         if value == "N" or value =='n':
-          b_n = (input("Please enter 1 or 0 depending on whether you want batch normalisation"))
-          if (b_n.isnumeric() and (int(b_n) ==0 or int(b_n)==1)) :
-            self.batch_norm.append(int(b_n))
-            if i == n_conv-1:
-              gate2 =1 
+          batch_boolean = (input("Please enter 0(No) or 1(yes) for using batch normalization in convolutional layer {} : ".format(i+1)))
+          if (batch_boolean.isnumeric() and (int(batch_boolean) ==0 or int(batch_boolean)==1)):
+            self.batch_norm.append(int(batch_boolean))
+            gate1 = 1
           else:
-            gate2 = 0
+            gate1 = 0
             print("Please enter valid numeric values")
-            break                    
-        else:
-          if i <2:
-            self.batch_norm.append(1)
-          else:
-            self.batch_norm.append(0)
+            self.batch_norm = []
+            break
+        elif (value == "Y" or value =='y' ):
+          self.batch_norm.append(1)
+          if i == n_conv-1:
+            gate1 = 1
 
-      return self.batch_norm
+    return self.batch_norm
 
   def get_dropout(self): # Get input for dropout from the user
     gate1 = 0 
     value = input("Do you want default values for dropout(press y or n): ")
     while gate1!=1:
-      if value!= "Y" or value!="y" or value!= 'n' or value!= 'N':
+      if value == "Y" or value =="y" or value == 'n' or value == 'N':
         gate1 = 1
       else:
         print("Please enter valid input it should only be (y or n)")
@@ -351,13 +365,16 @@ class CNN2D(nn.Module):
     if value == 'N' or value =='n':    
       drop_out = (input(("Please input the dropout probability: ")))
       while gate!=1:
-        if (float(drop_out) > 0 and float(drop_out)<1):
-          self.drop = drop_out
-          gate  = 1
+        if drop_out.replace('.','').isdigit():
+          if (float(drop_out) > 0 and float(drop_out)<1):
+            self.drop = drop_out
+            gate  = 1
+          else:
+            print("Please enter the valid numeric values. The value should lie between 0 and 1")
+            drop_out = (input(("Please input the dropout probability")))
+            gate = 0
         else:
-          print("Please enter the valid numeric values. The value should lie between 0 and 1")
-          drop_out = (input(("Please input the dropout probability")))
-          gate = 0
+          drop_out = (input(("Please input the dropout probability: ")))
     else:
       self.drop = 0
 
@@ -367,7 +384,7 @@ class CNN2D(nn.Module):
     gate1 = 0 
     value = value = input("Do you want default pooling values (press y or n): ")
     while gate1!=1:
-      if value!= "Y" or value!="y" or value!= 'n' or value!= 'N':
+      if value== "Y" or value=="y" or value== 'n' or value== 'N':
         gate1 = 1
       else:
         print("Please enter valid input it should only be (y or n)")
@@ -381,7 +398,7 @@ class CNN2D(nn.Module):
     while gate2!=1:
       for i in range(n_conv):
         if value == "N" or value =='n':
-          pool_boolean = (input("Please enter 0(No) or 1(yes) for pooling: "))
+          pool_boolean = (input("Please enter 0(No) or 1(yes) for using pooling in convolutional layer {} : ".format(i+1)))
           if (pool_boolean.isnumeric() and (int(pool_boolean) ==0 or int(pool_boolean)==1)):
             self.pool_bool.append(int(pool_boolean))
             if i == n_conv-1:
@@ -389,6 +406,8 @@ class CNN2D(nn.Module):
           else:
             gate2 = 0
             print("Please enter valid numeric values")
+            self.pool_bool = []
+            break
         elif (value == "Y" or value =='y' ):
           if i <= n_conv -2:
             self.pool_bool.append(0)
@@ -405,7 +424,7 @@ class CNN2D(nn.Module):
             self.pool_size.append((0,0))
             gate3 = 1
           else:
-            pooling_size = input("Please enter pool size \n For example 2,2: ")
+            pooling_size = input("Please enter pool size for convolutional layer {} \n For example 2,2: ".format(i+1))
             pooling_size_split = pooling_size.split(',')
             if (pooling_size_split[0].isnumeric() and int(pooling_size_split[0])>0 and pooling_size_split[1].isnumeric() and int(pooling_size_split[1]) >0) :
               self.pool_size.append((int(pooling_size_split[0]), int(pooling_size_split[1])))
@@ -414,6 +433,8 @@ class CNN2D(nn.Module):
             else:
               gate3 =0
               print("please enter valid numeric values. The value must be an integer and greater than zero")
+              self.pool_size = []
+              break
         else:
           self.pool_size.append((2,2))
           if i == len(self.pool_bool) -1:
@@ -427,7 +448,7 @@ class CNN2D(nn.Module):
             self.pool_stride.append((0,0))
             gate4 = 1
           else:
-            pooling_stride = input("Please enter pool stride \n For example 2,2: ")
+            pooling_stride = input("Please enter pool stride for convolutional layer {} \n For example 2,2: ".format(i+1))
             pooling_stride_split = pooling_stride.split(',')
             if (pooling_stride_split[0].isnumeric() and int(pooling_stride_split[0])>0 and pooling_stride_split[1].isnumeric() and int(pooling_stride_split[1]) >0) :
               self.pool_stride.append((int(pooling_stride_split[0]), int(pooling_stride_split[1])))
@@ -436,6 +457,8 @@ class CNN2D(nn.Module):
             else:
               gate4 =0
               print("please enter valid numeric values. The value must be an integer and greater than zero")
+              self.pool_stride = []
+              break
         else:
           self.pool_stride.append((2,2))
           if i == len(self.pool_bool) -1:
