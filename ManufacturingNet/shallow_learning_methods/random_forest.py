@@ -258,35 +258,37 @@ class RandomForest:
             print("= RandomForestRegressor Parameter Inputs =")
             print("==========================================\n")
 
-        if input("Use default parameters (Y/n)? ").lower() != "n":
-            self.test_size = 0.25
-            self.cv = None
-            print("\n===========================================")
-            print("= End of inputs; press enter to continue. =")
-            input("===========================================\n")
+        # Set defaults
+        self.test_size = 0.25
+        self.cv = None
+        self.graph_results = False
 
-            if classifier:
-                return RandomForestClassifier()
-
-            return RandomForestRegressor()
+        while True:
+            user_input = input("\nUse default parameters (Y/n)? ").lower()
+            if user_input in {"y", ""}:
+                print("\n===========================================")
+                print("= End of inputs; press enter to continue. =")
+                input("===========================================\n")
+                if classifier:
+                    return RandomForestClassifier()
+                return RandomForestRegressor()
+            elif user_input == "n":
+                break
+            else:
+                print("Invalid input.")
 
         print("\nIf you are unsure about a parameter, press enter to use its",
               "default value.")
-        print("Invalid parameter inputs will be replaced with their default",
-              "values.")
         print("If you finish entering parameters early, enter 'q' to skip",
               "ahead.\n")
 
-        # Set defaults
+        # Set more defaults
         if classifier:
             criterion = "gini"
             class_weight = None
         else:
             criterion = "mse"
 
-        self.test_size = 0.25
-        self.cv = None
-        self.graph_results = False
         n_estimators = 100
         max_depth = None
         min_samples_split = 2
@@ -295,7 +297,6 @@ class RandomForest:
         max_features = "auto"
         max_leaf_nodes = None
         min_impurity_decrease = 0.0
-        min_impurity_split = None
         bootstrap = True
         oob_score = False
         n_jobs = None
@@ -307,353 +308,652 @@ class RandomForest:
 
         # Get user parameter input
         while True:
-            user_input = input("What fraction of the dataset should be the "
-                               + "testing set? Input a decimal: ")
+            break_early = False
+            while True:
+                user_input = input("\nWhat fraction of the dataset should be the "
+                                   + "testing set (0,1)? ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
 
-            try:
-                self.test_size = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                    user_input = float(user_input)
+                    if user_input <= 0 or user_input >= 1:
+                        raise Exception
+
+                    self.test_size = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            user_input = input("\n\nUse GridSearch to find the best "
-                               + "hyperparameters (y/N)? ").lower()
+            if break_early:
+                break
 
-            if user_input == "q":
+            while True:
+                user_input = input("\nUse GridSearch to find the best "
+                                   + "hyperparameters (y/N)? ").lower()
+                if user_input == "q":
+                    break_early = True
+                    break
+                elif user_input in {"n", "y", ""}:
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
                 break
 
             while user_input == "y":
                 print("\n= GridSearch Parameter Inputs =\n")
-                print("Note: All parameters are required. Skipping ahead",
-                      "will quit GridSearch.")
-                print("Press 'q' to skip GridSearch.")
+                print("Enter 'q' to skip GridSearch.")
                 self.gridsearch = True
                 params = {}
 
-                print("\nEnter the max_features for the best split.")
-                print("Options: 1-auto, 2-sqrt, 3-log2. Enter 'all' for all",
-                      "options.")
-                print("Example input: 1,2,3")
-                user_input = input().lower()
+                while True:
+                    print("\nEnter the max_features for the best split.")
+                    print("Options: 1-auto, 2-sqrt, 3-log2. Enter 'all' for all",
+                          "options.")
+                    print("Example input: 1,2,3")
+                    user_input = input().lower()
 
-                if user_input == "q":
-                    self.gridsearch = False
-                    break
-                elif user_input == "all":
-                    feat_params = ["auto", "sqrt", "log2"]
-                else:
-                    feat_dict = {1: "auto", 2: "sqrt", 3: "log2"}
-
-                    try:
-                        feat_params_int = \
-                            list(map(int, list(user_input.split(","))))
-                        feat_params = []
-                        for each in feat_params_int:
-                            feat_params.append(feat_dict.get(each))
-                    except Exception:
-                        print("\nInput not recognized. Skipping GridSearch...")
+                    if user_input == "q":
                         self.gridsearch = False
+                        break_early = True
                         break
+                    elif user_input == "all":
+                        feat_params = ["auto", "sqrt", "log2"]
+                        break
+                    else:
+                        feat_dict = {1: "auto", 2: "sqrt", 3: "log2"}
+                        try:
+                            feat_params_int = \
+                                list(map(int, list(user_input.split(","))))
+                            if len(feat_params_int) > len(feat_dict):
+                                raise Exception
+
+                            feat_params = []
+                            for each in feat_params_int:
+                                if not feat_dict.get(each):
+                                    raise Exception
+
+                                feat_params.append(feat_dict.get(each))
+                            break
+                        except Exception:
+                            print("Invalid input.")
+
+                if break_early:
+                    break
 
                 params["max_features"] = feat_params
 
-                print("\nEnter the list of num_estimators to try out.")
-                print("Example input: 1,2,3")
-                user_input = input().lower()
+                while True:
+                    print("\nEnter the list of num_estimators to try out.")
+                    print("Example input: 1,2,3")
+                    user_input = input().lower()
 
-                if user_input == "q":
-                    self.gridsearch = False
-                    break
+                    if user_input == "q":
+                        self.gridsearch = False
+                        break_early = True
+                        break
 
-                try:
-                    n_est_params = list(map(int, list(user_input.split(","))))
-                except Exception:
-                    print("\nInput not recognized. Skipping GridSearch...")
-                    self.gridsearch = False
+                    try:
+                        n_est_params = \
+                            list(map(int, list(user_input.split(","))))
+                        if len(n_est_params) == 0:
+                            raise Exception
+
+                        for num in n_est_params:
+                            if num <= 0:
+                                raise Exception
+                        break
+                    except Exception:
+                        print("Invalid input.")
+
+                if break_early:
                     break
 
                 params["n_estimators"] = n_est_params
 
-                print("\nEnter the criterion to be tried for.")
+                while True:
+                    print("\nEnter the criterion to be tried for.")
 
-                if classifier:
-                    print("Options: 1-'gini', 2-'entropy'. Enter 'all' for all",
-                          "options.")
-                    user_input = input().lower()
+                    if classifier:
+                        print("Options: 1-'gini', 2-'entropy'. Enter 'all' for",
+                              "all options.")
+                        user_input = input().lower()
 
-                    if user_input == "q":
-                        self.gridsearch = False
-                        break
-                    elif user_input == "all":
-                        crit_params = ["gini", "entropy"]
-                    else:
-                        crit_dict = {1: "gini", 2: "entropy"}
-
-                        try:
-                            crit_params_int = list(user_input.split(","))
-                            crit_params = []
-                            for each in crit_params_int:
-                                crit_params.append(crit_dict.get(each))
-                        except Exception:
-                            print("\nInput not recognized.",
-                                  "Skipping GridSearch...")
+                        if user_input == "q":
                             self.gridsearch = False
+                            break_early = True
                             break
-                else:
-                    print("Options: 1-'mse', 2-'mae'. Enter 'all' for all",
-                          "options.")
-                    user_input = input().lower()
+                        elif user_input == "all":
+                            crit_params = ["gini", "entropy"]
+                            break
+                        else:
+                            crit_dict = {1: "gini", 2: "entropy"}
+                            try:
+                                crit_params_int = \
+                                    list(map(int, list(user_input.split(","))))
+                                if len(crit_params_int) > len(crit_dict):
+                                    raise Exception
 
-                    if user_input == "q":
-                        self.gridsearch = False
-                        break
-                    elif user_input == "all":
-                        crit_params = ["mse", "mae"]
+                                crit_params = []
+                                for each in crit_params_int:
+                                    if not crit_dict.get(each):
+                                        raise Exception
+
+                                    crit_params.append(crit_dict.get(each))
+                                break
+                            except Exception:
+                                print("Invalid input.")
                     else:
-                        crit_dict = {1: "mse", 2: "mae"}
+                        print("Options: 1-'mse', 2-'mae'. Enter 'all' for all",
+                              "options.")
+                        user_input = input().lower()
 
-                        try:
-                            crit_params_int = list(user_input.split(","))
-                            crit_params = []
-                            for each in crit_params_int:
-                                crit_params.append(crit_dict.get(each))
-                        except Exception:
-                            print("\nInput not recognized.",
-                                  "Skipping GridSearch...")
+                        if user_input == "q":
                             self.gridsearch = False
+                            break_early = True
                             break
+                        elif user_input == "all":
+                            crit_params = ["mse", "mae"]
+                            break
+                        else:
+                            crit_dict = {1: "mse", 2: "mae"}
+                            try:
+                                crit_params_int = \
+                                    list(map(int, list(user_input.split(","))))
+                                if len(crit_params_int) > len(crit_dict):
+                                    raise Exception
+
+                                crit_params = []
+                                for each in crit_params_int:
+                                    if not crit_dict.get(each):
+                                        raise Exception
+
+                                    crit_params.append(crit_dict.get(each))
+                                break
+                            except Exception:
+                                print("Invalid input.")
+
+                if break_early:
+                    break
 
                 params["criterion"] = crit_params
 
-                print("\nEnter the maximum depth of trees to try for.")
-                print("Example input: 1,2,3")
-                user_input = input().lower()
+                while True:
+                    print("\nEnter the maximum depth of trees to try for.")
+                    print("Example input: 1,2,3")
+                    user_input = input().lower()
 
-                if user_input == "q":
-                    self.gridsearch = False
-                    break
+                    if user_input == "q":
+                        self.gridsearch = False
+                        break_early = True
+                        break
 
-                try:
-                    max_dep_params = list(map(int, list(user_input.split(","))))
-                except Exception:
-                    print("\nInput not recognized. Skipping GridSearch...")
-                    self.gridsearch = False
+                    try:
+                        max_dep_params = \
+                            list(map(int, list(user_input.split(","))))
+                        if len(max_dep_params) == 0:
+                            raise Exception
+
+                        for num in max_dep_params:
+                            if num <= 0:
+                                raise Exception
+                        break
+                    except Exception:
+                        print("Invalid input.")
+
+                if break_early:
                     break
 
                 params["max_depth"] = max_dep_params
-
                 self.gs_params = params
                 print("\n= End of GridSearch inputs. =")
                 break
 
-            user_input = \
-                input("\n\nInput the number of folds for cross validation: ")
+            break_early = False
 
-            try:
-                self.cv = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+            while True:
+                user_input = input("\nEnter the number of folds for cross "
+                                   + "validation [2,): ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input < 2:
+                        raise Exception
+
+                    self.cv = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            if classifier:
+            if break_early:
+                break
+
+            while classifier:
                 user_input = \
                     input("\nGraph the ROC curve? Only binary classification "
                           + "is supported (y/N): ").lower()
-
                 if user_input == "y":
                     self.graph_results = True
+                    break
+                elif user_input in {"n", ""}:
+                    break
                 elif user_input == "q":
+                    break_early = True
                     break
+                else:
+                    print("Invalid input.")
 
-            user_input = input("\nEnter the number of trees in the forest: ")
+            if break_early:
+                break
 
-            try:
-                n_estimators = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+            while True:
+                user_input = \
+                    input("\nEnter a positive number of trees for the forest: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    n_estimators = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            print("\n",
-                  "Which criteria should be used for measuring split quality?")
+            if break_early:
+                break
 
-            if classifier:
-                user_input = input("Enter 1 for 'gini' or 2 for 'entropy': ")
+            while True:
+                print("\nWhich criteria should be used for measuring split",
+                      "quality?")
+                if classifier:
+                    user_input = input("Enter 1 for 'gini' or 2 for 'entropy': ")
+                    if user_input == "2":
+                        criterion = "entropy"
+                        break
+                    elif user_input in {"1", ""}:
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+                    else:
+                        print("Invalid input.")
+                else:
+                    user_input = input("Enter 1 for 'mse' or 2 for 'mae': ")
+                    if user_input == "2":
+                        criterion = "mae"
+                        break
+                    elif user_input in {"1", ""}:
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+                    else:
+                        print("Invalid input.")
 
-                if user_input == "q":
-                    break
-                elif user_input == "2":
-                    criterion = "entropy"
+            if break_early:
+                break
 
+            while classifier:
                 user_input = input("\nAutomatically balance the class weights "
                                    + "(y/N)? ").lower()
-
-                if user_input == "q":
-                    break
-                elif user_input == "y":
+                if user_input == "y":
                     class_weight = "balanced"
-            else:
-                user_input = input("Enter 1 for 'mse' or 2 for 'mae': ")
-
-                if user_input == "q":
                     break
-                elif user_input == "2":
-                    criterion = "mae"
-
-            user_input = input("\nEnter the maximum depth of each tree: ")
-
-            try:
-                max_depth = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                elif user_input in {"n", ""}:
                     break
-
-            user_input = input("\nEnter the minimum number of samples "
-                               + "required to split an internal node: ")
-
-            try:
-                if int(user_input) < 1:
-                    min_samples_split = float(user_input)
+                elif user_input == "q":
+                    break_early = True
+                    break
                 else:
-                    min_samples_split = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
+                    print("Invalid input.")
 
-            user_input = input("\nEnter the minimum number of samples required "
-                               + "to be at a leaf node: ")
-
-            try:
-                if int(user_input) < 1:
-                    min_samples_leaf = float(user_input)
-                else:
-                    min_samples_leaf = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            user_input = input("\nEnter the minimum weighted fraction of the "
-                               + "weight total required to be at a leaf node: ")
-
-            try:
-                min_weight_fraction_leaf = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            print("\nHow many features should be considered when looking for",
-                  "the best split?")
-            print("Enter 'auto' to use n_features, 'sqrt' to use",
-                  "sqrt(n_features), 'log2' to use log2(n_features) or a",
-                  "number: ")
-            user_input = input().lower()
-
-            try:
-                max_features = int(user_input)
-            except Exception:
-                if user_input == "q":
-                    break
-                elif user_input == "sqrt":
-                    max_features = "sqrt"
-                elif user_input == "log2":
-                    max_features = "log2"
-
-            user_input = input("\nEnter the maximum number of leaf nodes: ")
-
-            try:
-                max_leaf_nodes = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            user_input = input("\nEnter the minimum impurity decrease: ")
-
-            try:
-                min_impurity_decrease = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            user_input = input("\nEnter the threshold for early stopping "
-                               + "in tree growth: ")
-
-            try:
-                min_impurity_split = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            user_input = input("\nUse bootstrap samples when building trees "
-                               + "(Y/n)? ").lower()
-
-            if user_input == "q":
+            if break_early:
                 break
-            elif user_input == "n":
-                bootstrap = False
 
-            user_input = input("\nUse out-of-bag samples to estimate R2 scores "
-                               + "on unseen data (y/N)? ").lower()
+            while True:
+                print("\nEnter a positive maximum tree depth.")
+                user_input = input("Press enter for no maximum depth: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
 
-            if user_input == "q":
-                break
-            elif user_input == "y":
-                oob_score = True
+                    user_input = int(user_input)
+                    if user_input <= 0:
+                        raise Exception
 
-            user_input = \
-                input("\nEnter the number of jobs to run in parallel: ")
-
-            try:
-                n_jobs = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                    max_depth = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            user_input = \
-                input("\nEnter an integer for the random number seed: ")
-
-            try:
-                random_state = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            user_input = input("\nUse verbose logging when fitting and "
-                               + "predicting (y/N)? ").lower()
-
-            if user_input == "q":
+            if break_early:
                 break
-            elif user_input == "y":
-                verbose = 1
 
-            user_input = input("\nUse warm start? This will reuse the previous "
-                               + "solution to fit and add more estimators "
-                               + "(y/N): ").lower()
+            while True:
+                user_input = input("\nEnter a positive minimum number of samples "
+                                   + "required to split an internal node: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
 
-            if user_input == "q":
-                break
-            elif user_input == "y":
-                warm_start = True
+                    if int(user_input) < 1:
+                        if float(user_input) <= 0:
+                            raise Exception
 
-            user_input = input("\nEnter the complexity parameter for Minimal "
-                               + "Cost-Complexity Pruning: ")
+                        min_samples_split = float(user_input)
+                    else:
+                        if int(user_input) <= 0:
+                            raise Exception
 
-            try:
-                if float(user_input) >= 0:
-                    ccp_alpha = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                        min_samples_split = int(user_input)
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            if bootstrap:
-                user_input = input("\nEnter the maximum number of samples to "
-                                   + "train each base estimator: ")
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnter a positive minimum number of samples "
+                                   + "required to be at a leaf node: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    if int(user_input) < 1:
+                        if float(user_input) <= 0:
+                            raise Exception
+
+                        min_samples_leaf = float(user_input)
+                    else:
+                        if int(user_input) <= 0:
+                            raise Exception
+
+                        min_samples_leaf = int(user_input)
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter the minimum weighted fraction of the "
+                          + "weight total required to be at a leaf node [0,0.5]: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input < 0 or user_input > 0.5:
+                        raise Exception
+
+                    min_weight_fraction_leaf = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nHow many features should be considered when looking",
+                      "for the best split?")
+                print("Enter 'auto' to use n_features, 'sqrt' to use",
+                      "sqrt(n_features), 'log2' to use log2(n_features) or a",
+                      "positive number/fraction: ")
+                user_input = input().lower()
 
                 try:
-                    if int(user_input) < 1:
-                        max_samples = float(user_input)
+                    if user_input in {"sqrt", "log2", "auto"}:
+                        max_features = user_input
+                        break
+                    elif user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    if int(user_input) == 0:
+                        user_input = float(user_input)
                     else:
-                        max_samples = int(user_input)
-                except Exception:
+                        user_input = int(user_input)
+
+                    if user_input <= 0:
+                        raise Exception
+
+                    max_features = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a positive maximum number of leaf nodes: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    max_leaf_nodes = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter the minimum impurity decrease [0,): ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input < 0:
+                        raise Exception
+
+                    min_impurity_decrease = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nUse bootstrap samples when building "
+                                   + "trees (Y/n)? ").lower()
+                if user_input == "n":
+                    bootstrap = False
+                    break
+                elif user_input in {"y", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nUse out-of-bag samples to estimate R2 "
+                                   + "scores on unseen data (y/N)? ").lower()
+                if user_input == "y":
+                    oob_score = True
+                    break
+                elif user_input in {"n", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nEnter a positive number of CPU cores to use.")
+                user_input = input("Enter -1 to use all cores: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input <= 0 and user_input != -1:
+                        raise Exception
+
+                    n_jobs = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter an integer for the random number seed: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    random_state = int(user_input)
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnable verbose output during training "
+                                   + "(y/N)? ").lower()
+                if user_input == "y":
+                    verbose = 1
+                    break
+                elif user_input in {"n", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnable warm start? This will use the previous "
+                          + "solution for fitting (y/N): ").lower()
+                if user_input == "y":
+                    warm_start = True
+                    break
+                elif user_input in {"n", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnter the complexity parameter for "
+                                   + "Minimal Cost-Complexity Pruning [0,): ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input < 0:
+                        raise Exception
+
+                    ccp_alpha = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while bootstrap:
+                user_input = \
+                    input("\nEnter a positive number/fraction for the maximum "
+                          + "number of samples to train the base estimators: ")
+                try:
+                    if user_input.lower() in {"q", ""}:
+                        break
+
+                    if int(user_input) == 0:
+                        user_input = float(user_input)
+                    else:
+                        user_input = int(user_input)
+
+                    if user_input <= 0:
+                        raise Exception
+
+                    max_samples = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
 
             break
 
@@ -695,14 +995,13 @@ class RandomForest:
                                           max_features=max_features,
                                           max_leaf_nodes=max_leaf_nodes,
                                           min_impurity_decrease=min_impurity_decrease,
-                                          min_impurity_split=min_impurity_split,
                                           bootstrap=bootstrap, oob_score=oob_score,
                                           n_jobs=n_jobs, random_state=random_state,
                                           verbose=verbose, warm_start=warm_start,
                                           class_weight=class_weight,
                                           ccp_alpha=ccp_alpha,
                                           max_samples=max_samples)
-        
+
         # If GridSearch is enabled
         if self.gridsearch:
             clf = RandomForestRegressor()
@@ -732,7 +1031,6 @@ class RandomForest:
                                      max_features=max_features,
                                      max_leaf_nodes=max_leaf_nodes,
                                      min_impurity_decrease=min_impurity_decrease,
-                                     min_impurity_split=min_impurity_split,
                                      bootstrap=bootstrap, oob_score=oob_score,
                                      n_jobs=n_jobs, random_state=random_state,
                                      verbose=verbose, warm_start=warm_start,

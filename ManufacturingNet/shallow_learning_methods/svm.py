@@ -619,40 +619,41 @@ class SVM:
             print("= SVC Parameter Inputs =")
             print("========================\n")
 
-        if input("Use default parameters (Y/n)? ").lower() != "n":
-            self.test_size = 0.25
-            self.cv = None
-            print("\n===========================================")
-            print("= End of inputs; press enter to continue. =")
-            input("===========================================\n")
+        # Set defaults
+        self.test_size = 0.25
+        self.cv = None
+        self.graph_results = False
 
-            if is_nu:
-                return NuSVC(probability=True)
-
-            return SVC(probability=True)
+        while True:
+            user_input = input("\nUse default parameters (Y/n)? ").lower()
+            if user_input in {"y", ""}:
+                print("\n===========================================")
+                print("= End of inputs; press enter to continue. =")
+                input("===========================================\n")
+                if is_nu:
+                    return NuSVC(probability=True)
+                return SVC(probability=True)
+            elif user_input == "n":
+                break
+            else:
+                print("Invalid input.")
 
         print("\nIf you are unsure about a parameter, press enter to use its",
               "default value.")
-        print("Invalid parameter inputs will be replaced with their default",
-              "values.")
         print("If you finish entering parameters early, enter 'q' to skip",
               "ahead.\n")
 
-        # Set defaults
+        # Set more defaults
         if is_nu:
             nu = 0.5
         else:
             C = 1.0
 
-        self.test_size = 0.25
-        self.cv = None
-        self.graph_results = False
         kernel = "rbf"
         degree = 3
         gamma = "scale"
         coef0 = 0.0
         shrinking = True
-        probability = True
         tol = 0.001
         cache_size = 200
         class_weight = None
@@ -664,75 +665,117 @@ class SVM:
 
         # Get user parameter input
         while True:
-            user_input = input("What fraction of the dataset should be the "
-                               + "testing set? Input a decimal: ")
+            break_early = False
+            while True:
+                user_input = input("\nWhat fraction of the dataset should be the "
+                                   + "testing set (0,1)? ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
 
-            try:
-                self.test_size = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                    user_input = float(user_input)
+                    if user_input <= 0 or user_input >= 1:
+                        raise Exception
+
+                    self.test_size = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            user_input = input("\n\nUse GridSearch to find the best "
-                               + "hyperparameters (y/N)? ").lower()
+            if break_early:
+                break
 
-            if user_input == "q":
+            while True:
+                user_input = input("\nUse GridSearch to find the best "
+                                   + "hyperparameters (y/N)? ").lower()
+                if user_input == "q":
+                    break_early = True
+                    break
+                elif user_input in {"n", "y", ""}:
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
                 break
 
             while user_input == "y":
                 print("\n= GridSearch Parameter Inputs =\n")
-                print("Note: All parameters are required. Skipping ahead",
-                      "will quit GridSearch.")
-                print("Press 'q' to skip GridSearch.")
+                print("Enter 'q' to skip GridSearch.")
                 self.gridsearch = True
                 params = {}
 
-                print("\nEnter the kernels to try out.")
-                print("Options: 1-'linear', 2-'poly', 3-'rbf', 4-'sigmoid'.",
-                      "Enter 'all' for all options.")
-                print("Example input: 1,2,3")
-                user_input = input().lower()
+                while True:
+                    print("\nEnter the kernels to try out.")
+                    print("Options: 1-'linear', 2-'poly', 3-'rbf', 4-'sigmoid'.",
+                          "Enter 'all' for all options.")
+                    print("Example input: 1,2,3")
+                    user_input = input().lower()
 
-                if user_input == "q":
-                    self.gridsearch = False
-                    break
-                elif user_input == "all":
-                    kern_params = ["linear", "poly", "rbf", "sigmoid"]
-                else:
-                    kern_dict = {1: "linear", 2: "poly", 3: "rbf", 4: "sigmoid"}
-
-                    try:
-                        kern_params_int = \
-                            list(map(int, list(user_input.split(","))))
-                        kern_params = []
-                        for each in kern_params_int:
-                            kern_params.append(kern_dict.get(each))
-                    except Exception:
-                        print("\nInput not recognized. Skipping GridSearch...")
+                    if user_input == "q":
                         self.gridsearch = False
+                        break_early = True
                         break
+                    elif user_input == "all":
+                        kern_params = ["linear", "poly", "rbf", "sigmoid"]
+                        break
+                    else:
+                        kern_dict = {1: "linear", 2: "poly", 3: "rbf",
+                                     4: "sigmoid"}
+                        try:
+                            kern_params_int = \
+                                list(map(int, list(user_input.split(","))))
+                            if len(kern_params_int) > len(kern_dict):
+                                raise Exception
+
+                            kern_params = []
+                            for each in kern_params_int:
+                                if not kern_dict.get(each):
+                                    raise Exception
+
+                                kern_params.append(kern_dict.get(each))
+                            break
+                        except Exception:
+                            print("Invalid input.")
+
+                if break_early:
+                    break
 
                 params["kernel"] = kern_params
 
-                print("\nEnter the list of kernel coefficients/gamma values",
-                      "to try out.")
-                print("Example input: 0.001,0.0001")
-                user_input = input().lower()
+                while True:
+                    print("\nEnter the list of kernel coefficients/gamma values",
+                          "to try out.")
+                    print("Example input: 0.001,0.0001")
+                    user_input = input().lower()
 
-                if user_input == "q":
-                    self.gridsearch = False
-                    break
+                    if user_input == "q":
+                        self.gridsearch = False
+                        break_early = True
+                        break
 
-                try:
-                    gamma_params = list(map(float, list(user_input.split(","))))
-                except Exception:
-                    print("\nInput not recognized. Skipping GridSearch...")
-                    self.gridsearch = False
+                    try:
+                        gamma_params = \
+                            list(map(float, list(user_input.split(","))))
+                        if len(gamma_params) == 0:
+                            raise Exception
+
+                        for num in gamma_params:
+                            if num <= 0:
+                                raise Exception
+                        break
+                    except Exception:
+                        print("Invalid input.")
+
+                if break_early:
                     break
 
                 params["gamma"] = gamma_params
 
-                if not is_nu:
+                while not is_nu:
                     print("\nEnter the list of regularization parameters to",
                           "try out.")
                     print("Example input: 1,10,100")
@@ -740,167 +783,364 @@ class SVM:
 
                     if user_input == "q":
                         self.gridsearch = False
+                        break_early = True
                         break
 
                     try:
                         gamma_params = \
                             list(map(int, list(user_input.split(","))))
-                    except Exception:
-                        print("\nInput not recognized. Skipping GridSearch...")
-                        self.gridsearch = False
-                        break
+                        if len(gamma_params) == 0:
+                            raise Exception
 
-                    params['C'] = gamma_params
+                        for num in gamma_params:
+                            if num <= 0:
+                                raise Exception
+
+                        params['C'] = gamma_params
+                        break
+                    except Exception:
+                        print("Invalid input.")
+
+                if break_early:
+                    break
 
                 self.gs_params = params
                 print("\n= End of GridSearch inputs. =")
                 break
 
-            user_input = \
-                input("\n\nInput the number of folds for cross validation: ")
+            break_early = False
 
-            try:
-                self.cv = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+            while True:
+                user_input = input("\nEnter the number of folds for cross "
+                                   + "validation [2,): ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input < 2:
+                        raise Exception
+
+                    self.cv = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            user_input = \
-                input("\nGraph the ROC curve? Only binary classification "
-                      + "is supported (y/N): ").lower()
-
-            if user_input == "y":
-                self.graph_results = True
-            elif user_input == "q":
+            if break_early:
                 break
 
-            if is_nu:
-                user_input = input("\nEnter a decimal for nu: ")
-                try:
-                    nu = float(user_input)
-                except Exception:
-                    if user_input.lower() == "q":
-                        break
-            else:
-                user_input = input("\nEnter the regularization parameter: ")
-                try:
-                    C = float(user_input)
-                except Exception:
-                    if user_input.lower() == "q":
-                        break
+            while True:
+                user_input = \
+                    input("\nGraph the ROC curve? Only binary classification "
+                          + "is supported (y/N): ").lower()
+                if user_input == "y":
+                    self.graph_results = True
+                    break
+                elif user_input in {"n", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
 
-            print("\nWhich kernel type should be used?")
-            user_input = \
-                input("Enter 1 for 'linear', 2 for 'poly', 3 for 'rbf', 4 "
-                      + "for 'sigmoid', or 5 for 'precomputed': ")
-
-            if user_input.lower() == "q":
+            if break_early:
                 break
-            elif user_input == "1":
-                kernel = "linear"
-            elif user_input == "2":
-                kernel = "poly"
-            elif user_input == "4":
-                kernel = "sigmoid"
-            elif user_input == "5":
-                kernel = "recomputed"
 
-            if kernel == "poly":
-                user_input = input("\nEnter the degree of the kernel function: ")
+            while is_nu:
+                user_input = input("\nEnter a decimal for nu (0,1]: ")
                 try:
-                    degree = int(user_input)
-                except Exception:
-                    if user_input.lower() == "q":
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
                         break
 
-            if kernel == "rbf" or kernel == "poly" or kernel == "sigmoid":
-                print("\nSet the kernel coefficient.")
-                user_input = input("Enter 1 for 'scale', or 2 for 'auto': ")
-                if user_input.lower() == "q":
+                    user_input = float(user_input)
+                    if user_input <= 0 or user_input > 1:
+                        raise Exception
+
+                    nu = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            while not is_nu:
+                user_input = \
+                    input("\nEnter a positive regularization parameter: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    C = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nWhich kernel type should be used?")
+                user_input = \
+                    input("Enter 1 for 'linear', 2 for 'poly', 3 for 'rbf', 4 "
+                          + "for 'sigmoid', or 5 for 'precomputed': ")
+                if user_input == "1":
+                    kernel = "linear"
                     break
                 elif user_input == "2":
+                    kernel = "poly"
+                    break
+                elif user_input == "4":
+                    kernel = "sigmoid"
+                    break
+                elif user_input == "5":
+                    kernel = "recomputed"
+                    break
+                elif user_input in {"3", ""}:
+                    break
+                elif user_input.lower() == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while kernel == "poly":
+                user_input = \
+                    input("\nEnter the degree of the kernel function [0,): ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input < 0:
+                        raise Exception
+
+                    degree = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while kernel in {"rbf", "poly", "sigmoid"}:
+                print("\nSet the kernel coefficient.")
+                user_input = input("Enter 1 for 'scale', or 2 for 'auto': ")
+                if user_input == "2":
                     gamma = "auto"
-
-            user_input = \
-                input("\nEnter the independent term in the kernel function: ")
-
-            try:
-                coef0 = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
                     break
-
-            user_input = input("\nUse the shrinking heuristic (Y/n)? ").lower()
-
-            if user_input == "q":
-                break
-            elif user_input == "n":
-                shrinking = False
-
-            user_input = input("\nEnter the tolerance for stopping criterion: ")
-
-            try:
-                tol = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                elif user_input in {"1", ""}:
                     break
-
-            user_input = input("\nEnter the kernel cache size in MB: ")
-
-            try:
-                cache_size = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                elif user_input.lower() == "q":
+                    break_early = True
                     break
+                else:
+                    print("Invalid input.")
 
-            user_input = \
-                input("\nAutomatically adjust class weights (y/N)? ").lower()
-
-            if user_input == "q":
+            if break_early:
                 break
-            elif user_input == "y":
-                class_weight = "balanced"
 
-            user_input = \
-                input("\nEnter the maximum number of iterations, or press "
-                      + "enter for no limit: ")
+            while kernel in {"poly", "sigmoid"}:
+                user_input = input("\nEnter the independent term in the "
+                                   + "kernel function [0,): ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
 
-            try:
-                max_iter = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                    user_input = float(user_input)
+                    if user_input < 0:
+                        raise Exception
+
+                    coef0 = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            print("\nSet the decision function.")
-            user_input = input("Enter 1 for one-vs-rest, or 2 for one-vs-one: ")
-
-            if user_input.lower() == "q":
+            if break_early:
                 break
-            elif user_input == "2":
-                decision_function_shape = "ovo"
 
-            user_input = input("\nEnable tie-breaking (y/N)? ").lower()
-
-            if user_input == "q":
-                break
-            elif user_input == "y":
-                break_ties = True
-
-            user_input = \
-                input("\nEnter a seed for the random number generator: ")
-
-            try:
-                random_state = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+            while True:
+                user_input = \
+                    input("\nUse the shrinking heuristic (Y/n)? ").lower()
+                if user_input == "n":
+                    shrinking = False
                     break
+                elif user_input in {"y", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
 
-            user_input = input("\nEnable verbose logging (y/N)? ").lower()
-
-            if user_input == "q":
+            if break_early:
                 break
-            elif user_input == "y":
-                verbose = True
+
+            while True:
+                user_input = input("\nEnter a positive number for the "
+                                   + "tolerance for stopping criterion: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    tol = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a positive kernel cache size in MB: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    cache_size = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nAutomatically adjust class weights (y/N)? ").lower()
+                if user_input == "y":
+                    class_weight = "balanced"
+                    break
+                elif user_input in {"n", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a positive maximum number of iterations, or "
+                          + "press enter for no limit: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    max_iter = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nSet the decision function.")
+                user_input = \
+                    input("Enter 1 for one-vs-rest, or 2 for one-vs-one: ")
+                if user_input == "2":
+                    decision_function_shape = "ovo"
+                    break
+                elif user_input in {"1", ""}:
+                    break
+                elif user_input.lower() == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnable tie-breaking (y/N)? ").lower()
+                if user_input == "y":
+                    break_ties = True
+                    break
+                elif user_input in {"n", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a seed for the random number generator: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    random_state = int(user_input)
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnable verbose logging (y/N)? ").lower()
+                if user_input == "y":
+                    verbose = True
+                    break
+                elif user_input in {"n", "q", ""}:
+                    break
+                else:
+                    print("Invalid input.")
 
             break
 
@@ -934,7 +1174,7 @@ class SVM:
 
             return NuSVC(nu=nu, kernel=kernel, degree=degree, gamma=gamma,
                          coef0=coef0, shrinking=shrinking,
-                         probability=probability, tol=tol, cache_size=cache_size,
+                         probability=True, tol=tol, cache_size=cache_size,
                          class_weight=class_weight, verbose=verbose,
                          max_iter=max_iter,
                          decision_function_shape=decision_function_shape,
@@ -963,7 +1203,7 @@ class SVM:
             self.gs_result = accuracy_score(self.dataset_y_test, predictions)
 
         return SVC(C=C, kernel=kernel, degree=degree, gamma=gamma, coef0=coef0,
-                   shrinking=shrinking, probability=probability, tol=tol,
+                   shrinking=shrinking, probability=True, tol=tol,
                    cache_size=cache_size, class_weight=class_weight,
                    verbose=verbose, max_iter=max_iter,
                    decision_function_shape=decision_function_shape,
@@ -975,24 +1215,28 @@ class SVM:
         print("= LinearSVC Parameter Inputs =")
         print("==============================\n")
 
-        if input("Use default parameters (Y/n)? ").lower() != "n":
-            self.test_size = 0.25
-            self.cv = None
-            print("\n===========================================")
-            print("= End of inputs; press enter to continue. =")
-            input("===========================================\n")
-            return LinearSVC()
-
-        print("\nIf you are unsure about a parameter, press enter to use its",
-              "default value.")
-        print("Invalid parameter inputs will be replaced with their default",
-              "values.")
-        print("If you finish entering parameters early, enter 'q' to skip",
-              "ahead.\n")
-
         # Set defaults
         self.test_size = 0.25
         self.cv = None
+
+        while True:
+            user_input = input("\nUse default parameters (Y/n)? ").lower()
+            if user_input in {"y", ""}:
+                print("\n===========================================")
+                print("= End of inputs; press enter to continue. =")
+                input("===========================================\n")
+                return LinearSVC()
+            elif user_input == "n":
+                break
+            else:
+                print("Invalid input.")
+
+        print("\nIf you are unsure about a parameter, press enter to use its",
+              "default value.")
+        print("If you finish entering parameters early, enter 'q' to skip",
+              "ahead.\n")
+
+        # Set more defaults
         penalty = "l2"
         loss = "squared_hinge"
         dual = True
@@ -1008,119 +1252,266 @@ class SVM:
 
         # Get user parameter input
         while True:
-            user_input = input("What fraction of the dataset should be the "
-                               + "testing set? Input a decimal: ")
-
-            try:
-                self.test_size = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            user_input = \
-                input("\nInput the number of folds for cross validation: ")
-
-            try:
-                self.cv = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            user_input = input("\nCalculate a y-intercept (Y/n)? ").lower()
-
-            if user_input == "q":
-                break
-            elif user_input == "n":
-                fit_intercept = False
-
-            if fit_intercept:
-                user_input = input("\nEnter a value for intercept scaling: ")
+            break_early = False
+            while True:
+                user_input = input("\nWhat fraction of the dataset should be the "
+                                   + "testing set (0,1)? ")
                 try:
-                    intercept_scaling = float(user_input)
-                except Exception:
-                    if user_input.lower() == "q":
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
                         break
 
-            print("\nSet the norm used in penalization.")
-            user_input = input("Enter 1 for 'l1', or 2 for 'l2': ")
+                    user_input = float(user_input)
+                    if user_input <= 0 or user_input >= 1:
+                        raise Exception
 
-            if user_input.lower() == "q":
-                break
-            elif user_input == "1":
-                penalty = "l1"
-
-            print("\nChoose a loss function.")
-            user_input = input("Enter 1 for 'hinge', or 2 for 'squared_hinge': ")
-
-            if user_input.lower() == "q":
-                break
-            elif user_input == "1":
-                loss = "hinge"
-
-            print("\nShould the algorithm solve the duel or primal",
-                  "optimization problem?")
-            user_input = input("Enter 1 for dual, or 2 for primal: ")
-
-            if user_input.lower() == "q":
-                break
-            elif user_input == "2":
-                dual = False
-
-            user_input = input("\nEnter the tolerance for stopping criterion: ")
-
-            try:
-                tol = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                    self.test_size = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            user_input = input("\nEnter the regularization parameter: ")
-
-            try:
-                C = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            print("\nSet the multi-class strategy if there are more than",
-                  "two classes.")
-            user_input = \
-                input("Enter 1 for one-vs-rest, or 2 for Crammer-Singer: ")
-
-            if user_input.lower() == "q":
+            if break_early:
                 break
-            elif user_input == "2":
-                multi_class = "crammer_singer"
 
-            user_input = \
-                input("\nAutomatically adjust class weights (y/N)? ").lower()
+            while True:
+                user_input = input("\nEnter the number of folds for cross "
+                                   + "validation [2,): ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
 
-            if user_input == "q":
+                    user_input = int(user_input)
+                    if user_input < 2:
+                        raise Exception
+
+                    self.cv = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
                 break
-            elif user_input == "y":
-                class_weight = "balanced"
 
-            user_input = input("\nEnter the maximum number of iterations: ")
-
-            try:
-                max_iter = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+            while True:
+                user_input = input("\nCalculate a y-intercept (Y/n)? ").lower()
+                if user_input == "n":
+                    fit_intercept = False
                     break
-
-            user_input = \
-                input("\nEnter a seed for the random number generator: ")
-
-            try:
-                random_state = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                elif user_input in {"y", ""}:
                     break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
 
-            user_input = input("\nEnable verbose logging (y/N)? ").lower()
+            if break_early:
+                break
 
-            if user_input == "y":
-                verbose = 1
+            while fit_intercept:
+                user_input = \
+                    input("\nEnter a number for the intercept scaling factor: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    intercept_scaling = float(user_input)
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nSet the norm used in penalization.")
+                user_input = input("Enter 1 for 'l1', or 2 for 'l2': ")
+                if user_input == "1":
+                    penalty = "l1"
+                    break
+                elif user_input in {"2", ""}:
+                    break
+                elif user_input.lower() == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nChoose a loss function.")
+                user_input = \
+                    input("Enter 1 for 'hinge', or 2 for 'squared_hinge': ")
+                if user_input == "1":
+                    loss = "hinge"
+                    break
+                elif user_input in {"2", ""}:
+                    break
+                elif user_input.lower() == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nShould the algorithm solve the duel or primal",
+                      "optimization problem?")
+                user_input = input("Enter 1 for dual, or 2 for primal: ")
+                if user_input == "2":
+                    dual = False
+                    break
+                elif user_input in {"1", ""}:
+                    break
+                elif user_input.lower() == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnter a positive tolerance for stopping "
+                                   + "criterion: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    tol = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a positive regularization parameter: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    C = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nSet the multi-class strategy if there are more than",
+                      "two classes.")
+                user_input = input("Enter 1 for 'one-vs-rest', or 2 for "
+                                   + "'Crammer-Singer': ")
+                if user_input == "2":
+                    multi_class = "crammer_singer"
+                    break
+                elif user_input in {"1", ""}:
+                    break
+                elif user_input.lower() == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nAutomatically adjust class weights "
+                                   + "(y/N)? ").lower()
+                if user_input == "y":
+                    class_weight = "balanced"
+                    break
+                elif user_input in {"n", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a positive maximum number of iterations: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    max_iter = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a seed for the random number generator: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    random_state = int(user_input)
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnable verbose logging (y/N)? ").lower()
+                if user_input == "y":
+                    verbose = True
+                    break
+                elif user_input in {"n", "q", ""}:
+                    break
+                else:
+                    print("Invalid input.")
 
             break
 
@@ -1145,33 +1536,35 @@ class SVM:
             print("= SVR Parameter Inputs =")
             print("========================\n")
 
-        if input("Use default parameters (Y/n)? ").lower() != "n":
-            self.test_size = 0.25
-            self.cv = None
-            print("\n===========================================")
-            print("= End of inputs; press enter to continue. =")
-            input("===========================================\n")
+        # Set defaults
+        self.test_size = 0.25
+        self.cv = None
 
-            if is_nu:
-                return NuSVR()
-
-            return SVR()
+        while True:
+            user_input = input("\nUse default parameters (Y/n)? ").lower()
+            if user_input in {"y", ""}:
+                print("\n===========================================")
+                print("= End of inputs; press enter to continue. =")
+                input("===========================================\n")
+                if is_nu:
+                    return NuSVR()
+                return SVR()
+            elif user_input == "n":
+                break
+            else:
+                print("Invalid input.")
 
         print("\nIf you are unsure about a parameter, press enter to use its",
               "default value.")
-        print("Invalid parameter inputs will be replaced with their default",
-              "values.")
         print("If you finish entering parameters early, enter 'q' to skip",
               "ahead.\n")
 
-        # Set defaults
+        # Set more defaults
         if is_nu:
             nu = 0.5
         else:
             epsilon = 0.1
 
-        self.test_size = 0.25
-        self.cv = None
         kernel = "rbf"
         degree = 3
         gamma = 'scale'
@@ -1185,231 +1578,443 @@ class SVM:
 
         # Get user parameter input
         while True:
-            user_input = input("What fraction of the dataset should be the "
-                               + "testing set? Input a decimal: ")
+            break_early = False
+            while True:
+                user_input = input("\nWhat fraction of the dataset should be the "
+                                   + "testing set (0,1)? ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
 
-            try:
-                self.test_size = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                    user_input = float(user_input)
+                    if user_input <= 0 or user_input >= 1:
+                        raise Exception
+
+                    self.test_size = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            user_input = input("\n\nUse GridSearch to find the best "
-                               + "hyperparameters (y/N)? ").lower()
+            if break_early:
+                break
 
-            if user_input == "q":
+            while True:
+                user_input = input("\nUse GridSearch to find the best "
+                                   + "hyperparameters (y/N)? ").lower()
+                if user_input == "q":
+                    break_early = True
+                    break
+                elif user_input in {"n", "y", ""}:
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
                 break
 
             while user_input == "y":
                 print("\n= GridSearch Parameter Inputs =\n")
-                print("Note: All parameters are required. Skipping ahead",
-                      "will quit GridSearch.")
-                print("Press 'q' to skip GridSearch.")
+                print("Enter 'q' to skip GridSearch.")
                 self.gridsearch = True
                 params = {}
 
-                print("\nEnter the kernels to try out: ")
-                print("\nOptions: 1-'linear', 2-'poly', 3-'rbf', 4-'sigmoid'.",
-                      "Enter 'all' for all options")
-                print("Example input: 1,2,3")
-                user_input = input().lower()
+                while True:
+                    print("\nEnter the kernels to try out.")
+                    print("Options: 1-'linear', 2-'poly', 3-'rbf', 4-'sigmoid'.",
+                          "Enter 'all' for all options.")
+                    print("Example input: 1,2,3")
+                    user_input = input().lower()
 
-                if user_input == "q":
-                    self.gridsearch = False
-                    break
-                elif user_input == "all":
-                    kern_params = ["linear", "poly", "rbf", "sigmoid"]
-                else:
-                    kern_dict = {1: "linear", 2: "poly", 3: "rbf", 4: "sigmoid"}
-
-                    try:
-                        kern_params_int = \
-                            list(map(int, list(user_input.split(","))))
-                        kern_params = []
-                        for each in kern_params_int:
-                            kern_params.append(kern_dict.get(each))
-                    except Exception:
-                        print("\nInput not recognized. Skipping GridSearch...")
+                    if user_input == "q":
                         self.gridsearch = False
+                        break_early = True
                         break
+                    elif user_input == "all":
+                        kern_params = ["linear", "poly", "rbf", "sigmoid"]
+                        break
+                    else:
+                        kern_dict = {1: "linear", 2: "poly", 3: "rbf",
+                                     4: "sigmoid"}
+                        try:
+                            kern_params_int = \
+                                list(map(int, list(user_input.split(","))))
+                            if len(kern_params_int) > len(kern_dict):
+                                raise Exception
+
+                            kern_params = []
+                            for each in kern_params_int:
+                                if not kern_dict.get(each):
+                                    raise Exception
+
+                                kern_params.append(kern_dict.get(each))
+                            break
+                        except Exception:
+                            print("Invalid input.")
+
+                if break_early:
+                    break
 
                 params["kernel"] = kern_params
 
-                if is_nu:
+                while is_nu:
                     print("\nEnter a list of decimals for nu.")
                     print("Example input: 0.1,0.2,0.3")
                     user_input = input().lower()
 
                     if user_input == "q":
                         self.gridsearch = False
+                        break_early = True
                         break
 
                     try:
                         nu_params = \
                             list(map(float, list(user_input.split(","))))
-                    except Exception:
-                        print("\nInput not recognized. Skipping GridSearch...")
-                        self.gridsearch = False
+                        if len(nu_params) == 0:
+                            raise Exception
+
+                        for num in nu_params:
+                            if num <= 0:
+                                raise Exception
                         break
+                    except Exception:
+                        print("Invalid input.")
 
                     params["nu"] = nu_params
-                else:
-                    print("\nEnter epsilon, the range from an actual value",
-                          "where penalties aren't applied.")
+
+                while not is_nu:
+                    print("\nEnter epsilons (the ranges from an actual value",
+                          "where penalties aren't applied) to try out.")
                     print("Example input: 0.1,0.2,0.3")
                     user_input = input().lower()
 
                     if user_input == "q":
                         self.gridsearch = False
+                        break_early = True
                         break
 
                     try:
                         eps_params = \
                             list(map(float, list(user_input.split(","))))
-                    except Exception:
-                        print("\nInput not recognized. Skipping GridSearch...")
-                        self.gridsearch = False
+                        if len(eps_params) == 0:
+                            raise Exception
+
+                        for num in eps_params:
+                            if num <= 0:
+                                raise Exception
                         break
+                    except Exception:
+                        print("Invalid input.")
 
                     params["epsilon"] = eps_params
 
-                if not is_nu:
-                    print("\nEnter the list of regularization parameters",
-                          "to try out.")
+                if break_early:
+                    break
+
+                while not is_nu:
+                    print("\nEnter the list of regularization parameters to",
+                          "try out.")
                     print("Example input: 1,10,100")
                     user_input = input().lower()
 
                     if user_input == "q":
                         self.gridsearch = False
+                        break_early = True
                         break
 
                     try:
                         gamma_params = \
                             list(map(int, list(user_input.split(","))))
-                    except Exception:
-                        print("\nInput not recognized. Skipping GridSearch...")
-                        self.gridsearch = False
-                        break
+                        if len(gamma_params) == 0:
+                            raise Exception
 
-                    params["C"] = gamma_params
+                        for num in gamma_params:
+                            if num <= 0:
+                                raise Exception
+
+                        params['C'] = gamma_params
+                        break
+                    except Exception:
+                        print("Invalid input.")
+
+                if break_early:
+                    break
 
                 self.gs_params = params
                 print("\n= End of GridSearch inputs. =")
                 break
 
-            user_input = \
-                input("\n\nInput the number of folds for cross validation: ")
+            break_early = False
 
-            try:
-                self.cv = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+            while True:
+                user_input = input("\nEnter the number of folds for cross "
+                                   + "validation [2,): ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input < 2:
+                        raise Exception
+
+                    self.cv = user_input
                     break
-
-            if is_nu:
-                user_input = input("\nEnter a decimal for nu: ")
-                try:
-                    nu = float(user_input)
                 except Exception:
-                    if user_input.lower() == "q":
-                        break
-            else:
-                user_input = input("\nEnter epsilon, the range from an actual "
-                                   + "value where penalties aren't applied: ")
-                try:
-                    epsilon = float(user_input)
-                except Exception:
-                    if user_input.lower() == "q":
-                        break
+                    print("Invalid input.")
 
-            print("\nWhich kernel type should be used?")
-            user_input = \
-                input("Enter 1 for 'linear', 2 for 'poly', 3 for 'rbf', 4 "
-                      + "for 'sigmoid', or 5 for 'precomputed': ")
-
-            if user_input.lower() == "q":
+            if break_early:
                 break
-            elif user_input == "1":
-                kernel = "linear"
-            elif user_input == "2":
-                kernel = "poly"
-            elif user_input == "4":
-                kernel = "sigmoid"
-            elif user_input == "5":
-                kernel = "recomputed"
 
-            if kernel == "poly":
-                user_input = \
-                    input("\nEnter the degree of the kernel function: ")
+            while is_nu:
+                user_input = input("\nEnter a decimal for nu (0,1]: ")
                 try:
-                    degree = int(user_input)
-                except Exception:
-                    if user_input.lower() == "q":
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
                         break
 
-            if kernel == "rbf" or kernel == "poly" or kernel == "sigmoid":
-                print("\nSet the kernel coefficient.")
-                user_input = input("Enter 1 for 'scale', or 2 for 'auto': ")
-                if user_input.lower() == "q":
+                    user_input = float(user_input)
+                    if user_input <= 0 or user_input > 1:
+                        raise Exception
+
+                    nu = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            while not is_nu:
+                user_input = \
+                    input("\nEnter a positive epsilon, the range from an actual "
+                          + "value where penalties aren't applied: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    epsilon = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nWhich kernel type should be used?")
+                user_input = \
+                    input("Enter 1 for 'linear', 2 for 'poly', 3 for 'rbf', 4 "
+                          + "for 'sigmoid', or 5 for 'precomputed': ")
+                if user_input == "1":
+                    kernel = "linear"
                     break
                 elif user_input == "2":
+                    kernel = "poly"
+                    break
+                elif user_input == "4":
+                    kernel = "sigmoid"
+                    break
+                elif user_input == "5":
+                    kernel = "recomputed"
+                    break
+                elif user_input in {"3", ""}:
+                    break
+                elif user_input.lower() == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while kernel == "poly":
+                user_input = \
+                    input("\nEnter the degree of the kernel function [0,): ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input < 0:
+                        raise Exception
+
+                    degree = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while kernel in {"rbf", "poly", "sigmoid"}:
+                print("\nSet the kernel coefficient.")
+                user_input = input("Enter 1 for 'scale', or 2 for 'auto': ")
+                if user_input == "2":
                     gamma = "auto"
-
-            user_input = input("\nEnter the regularization parameter: ")
-
-            try:
-                C = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
                     break
-
-            user_input = input("\nEnter the independent term in the kernel "
-                               + "function: ")
-
-            try:
-                coef0 = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                elif user_input in {"1", ""}:
                     break
-
-            user_input = input("\nEnter the tolerance for stopping criterion: ")
-
-            try:
-                tol = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                elif user_input.lower() == "q":
+                    break_early = True
                     break
+                else:
+                    print("Invalid input.")
 
-            user_input = input("\nUse the shrinking heuristic (Y/n)? ").lower()
-
-            if user_input == "q":
+            if break_early:
                 break
-            elif user_input == "n":
-                shrinking = False
 
-            user_input = input("\nEnter the kernel cache size in MB: ")
+            while True:
+                user_input = \
+                    input("\nEnter a positive regularization parameter: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
 
-            try:
-                cache_size = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    C = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            user_input = input("\nEnter the maximum number of iterations, or "
-                               + "press enter for no limit: ")
-
-            try:
-                max_iter = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            user_input = input("\nEnable verbose logging (y/N)? ").lower()
-
-            if user_input == "q":
+            if break_early:
                 break
-            elif user_input == "y":
-                verbose = True
+
+            while kernel in {"poly", "sigmoid"}:
+                user_input = input("\nEnter the independent term in the "
+                                   + "kernel function [0,): ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input < 0:
+                        raise Exception
+
+                    coef0 = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnter a positive tolerance for stopping "
+                                   + "criterion: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    tol = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nUse the shrinking heuristic (Y/n)? ").lower()
+                if user_input == "n":
+                    shrinking = False
+                    break
+                elif user_input in {"y", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a positive kernel cache size in MB: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    cache_size = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a positive maximum number of iterations, or "
+                          + "press enter for no limit: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    max_iter = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnable verbose logging (y/N)? ").lower()
+                if user_input == "y":
+                    verbose = True
+                    break
+                elif user_input in {"n", "q", ""}:
+                    break
+                else:
+                    print("Invalid input.")
 
             break
 
@@ -1475,24 +2080,28 @@ class SVM:
         print("= LinearSVR Parameter Inputs =")
         print("==============================\n")
 
-        if input("Use default parameters (Y/n)? ").lower() != "n":
-            self.test_size = 0.25
-            self.cv = None
-            print("\n===========================================")
-            print("= End of inputs; press enter to continue. =")
-            input("===========================================\n")
-            return LinearSVR()
-
-        print("\nIf you are unsure about a parameter, press enter to use its",
-              "default value.")
-        print("Invalid parameter inputs will be replaced with their default",
-              "values.")
-        print("If you finish entering parameters early, enter 'q' to skip",
-              "ahead.\n")
-
         # Set defaults
         self.test_size = 0.25
         self.cv = None
+
+        while True:
+            user_input = input("\nUse default parameters (Y/n)? ").lower()
+            if user_input in {"y", ""}:
+                print("\n===========================================")
+                print("= End of inputs; press enter to continue. =")
+                input("===========================================\n")
+                return LinearSVR()
+            elif user_input == "n":
+                break
+            else:
+                print("Invalid input.")
+
+        print("\nIf you are unsure about a parameter, press enter to use its",
+              "default value.")
+        print("If you finish entering parameters early, enter 'q' to skip",
+              "ahead.\n")
+
+        # Set more defaults
         epsilon = 0.0
         tol = 0.0001
         C = 1.0
@@ -1506,102 +2115,237 @@ class SVM:
 
         # Get user parameter input
         while True:
-            user_input = input("What fraction of the dataset should be the "
-                               + "testing set? Input a decimal: ")
-
-            try:
-                self.test_size = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            user_input = input("\nInput the number of folds for cross "
-                               + "validation: ")
-
-            try:
-                self.cv = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            user_input = input("\nEnter epsilon, the range from an actual "
-                               + "value where penalties aren't applied: ")
-
-            try:
-                epsilon = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            user_input = input("\nEnter the tolerance for stopping criterion: ")
-
-            try:
-                tol = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            user_input = input("\nEnter the regularization parameter: ")
-
-            try:
-                C = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            print("\nChoose a loss function.")
-            user_input = input("\nEnter 1 for 'epsilon_insensitive', or 2 for "
-                               + "'squared_epsilon_insensitive': ")
-
-            if user_input.lower() == "q":
-                break
-            elif user_input == "2":
-                loss = "squared_epsilon_insensitive"
-
-            user_input = input("\nCalculate a y-intercept (Y/n)? ").lower()
-
-            if user_input == "q":
-                break
-            elif user_input == "n":
-                fit_intercept = False
-
-            if fit_intercept:
-                user_input = input("\nEnter a value for intercept scaling: ")
+            break_early = False
+            while True:
+                user_input = input("\nWhat fraction of the dataset should be the "
+                                   + "testing set (0,1)? ")
                 try:
-                    intercept_scaling = float(user_input)
-                except Exception:
-                    if user_input.lower() == "q":
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
                         break
 
-            print("\nShould the algorithm solve the duel or primal",
-                  "optimization problem?")
-            user_input = input("Enter 1 for dual, or 2 for primal: ")
+                    user_input = float(user_input)
+                    if user_input <= 0 or user_input >= 1:
+                        raise Exception
 
-            if user_input.lower() == "q":
+                    self.test_size = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
                 break
-            elif user_input == "2":
-                dual = False
 
-            user_input = input("\nEnter the maximum number of iterations: ")
+            while True:
+                user_input = input("\nEnter the number of folds for cross "
+                                   + "validation [2,): ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
 
-            try:
-                max_iter = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                    user_input = int(user_input)
+                    if user_input < 2:
+                        raise Exception
+
+                    self.cv = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            user_input = input("\nEnter a seed for the random number generator: ")
+            if break_early:
+                break
 
-            try:
-                random_state = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+            while True:
+                user_input = \
+                    input("\nEnter a positive epsilon, the range from an actual "
+                          + "value where penalties aren't applied: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    epsilon = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            user_input = input("\nEnable verbose logging (y/N)? ").lower()
+            if break_early:
+                break
 
-            if user_input == "y":
-                verbose = 1
+            while True:
+                user_input = input("\nEnter a positive tolerance for stopping "
+                                   + "criterion: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    tol = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a positive regularization parameter: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    C = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nChoose a loss function.")
+                user_input = \
+                    input("\nEnter 1 for 'epsilon_insensitive', or 2 for "
+                          + "'squared_epsilon_insensitive': ")
+                if user_input == "2":
+                    loss = "squared_epsilon_insensitive"
+                    break
+                elif user_input in {"1", ""}:
+                    break
+                elif user_input.lower() == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nCalculate a y-intercept (Y/n)? ").lower()
+                if user_input == "n":
+                    fit_intercept = False
+                    break
+                elif user_input in {"y", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while fit_intercept:
+                user_input = \
+                    input("\nEnter a number for the intercept scaling factor: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    intercept_scaling = float(user_input)
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nShould the algorithm solve the duel or primal",
+                      "optimization problem?")
+                user_input = input("Enter 1 for dual, or 2 for primal: ")
+                if user_input == "2":
+                    dual = False
+                    break
+                elif user_input in {"1", ""}:
+                    break
+                elif user_input.lower() == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a positive maximum number of iterations: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    max_iter = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a seed for the random number generator: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    random_state = int(user_input)
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnable verbose logging (y/N)? ").lower()
+                if user_input == "y":
+                    verbose = True
+                    break
+                elif user_input in {"n", "q", ""}:
+                    break
+                else:
+                    print("Invalid input.")
 
             break
 
@@ -1727,7 +2471,7 @@ class SVM:
             print("{:<20} {:<20}".format("Mean Squared Error:",
                                          self.mean_squared_error_linear_SVR))
             print("\n{:<20} {:<20}".format("R2 Score:",
-                  self.r2_score_linear_SVR))
+                                           self.r2_score_linear_SVR))
             print("\n{:<20} {:<20}".format("R Score:", self.r_score_linear_SVR))
             print("\nCross Validation Scores:\n",
                   self.cross_val_scores_linear_SVR)
