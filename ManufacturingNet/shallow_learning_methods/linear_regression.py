@@ -167,14 +167,10 @@ class LinRegression:
         self.test_size = 0.25
         self.cv = None
         self.graph_results = False
-        fit_intercept = True
-        normalize = False
-        copy_X = True
-        n_jobs = None
 
         while True:
             user_input = input("\nUse default parameters (Y/n)? ").lower()
-            if user_input == "y" or user_input == "":
+            if user_input in {"y", ""}:
                 print("\n===========================================")
                 print("= End of inputs; press enter to continue. =")
                 input("===========================================\n")
@@ -189,41 +185,47 @@ class LinRegression:
         print("If you finish entering parameters early, enter 'q' to skip",
               "ahead.")
 
+        # Set more defaults
+        fit_intercept = True
+        normalize = False
+        copy_X = True
+        n_jobs = None
+
         # Get user parameter input
         while True:
             break_early = False
             while True:
                 user_input = input("\nWhat fraction of the dataset should be the "
-                                   + "testing set? Enter a decimal: ")
+                                   + "testing set (0,1)? ")
                 try:
-                    if user_input.lower() == "q":
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
                         break_early = True
                         break
-                    elif user_input == "":
-                        break
-                    
+
                     user_input = float(user_input)
-                    if user_input < 0 or user_input > 1:
+                    if user_input <= 0 or user_input >= 1:
                         raise Exception
                     else:
                         self.test_size = user_input
                         break
                 except Exception:
                     print("Invalid input.")
-            
+
             if break_early:
                 break
 
             while True:
                 user_input = input("\nEnter the number of folds for cross "
-                                   + "validation [2,]: ")
+                                   + "validation [2,): ")
                 try:
-                    if user_input.lower() == "q":
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
                         break_early = True
                         break
-                    elif user_input == "":
-                        break
-                    
+
                     user_input = int(user_input)
                     if user_input < 2:
                         raise Exception
@@ -232,58 +234,56 @@ class LinRegression:
                         break
                 except Exception:
                     print("Invalid input.")
-            
+
             if break_early:
                 break
-            
+
             while self.attributes.shape[1] == 1:
                 user_input = input("\nGraph the results (y/N)? ").lower()
-
                 if user_input == "y":
                     self.graph_results = True
                     break
-                elif user_input == "n" or user_input == "":
+                elif user_input in {"n", ""}:
                     break
                 elif user_input == "q":
                     break_early = True
                     break
                 else:
                     print("Invalid input.")
-            
+
             if break_early:
                 break
 
             while True:
                 user_input = input("\nInclude a y-intercept in the model "
-                                 + "(Y/n)? ").lower()
+                                   + "(Y/n)? ").lower()
                 if user_input == "n":
                     fit_intercept = False
                     break
-                elif user_input == "y" or user_input == "":
+                elif user_input in {"y", ""}:
                     break
                 elif user_input == "q":
                     break_early = True
                     break
                 else:
                     print("Invalid input.")
-            
+
             if break_early:
                 break
 
             while True:
                 user_input = input("\nNormalize the dataset (y/N)? ").lower()
-
                 if user_input == "y":
                     normalize = True
                     break
-                elif user_input == "n" or user_input == "":
+                elif user_input in {"n", ""}:
                     break
                 elif user_input == "q":
                     break_early = True
                     break
                 else:
                     print("Invalid input.")
-            
+
             if break_early:
                 break
 
@@ -293,24 +293,24 @@ class LinRegression:
                 if user_input == "n":
                     copy_X = False
                     break
-                elif user_input == "y" or user_input == "":
+                elif user_input in {"y", ""}:
                     break
                 elif user_input == "q":
                     break_early = True
                     break
                 else:
                     print("Invalid input.")
-            
+
             if break_early:
                 break
 
             while True:
                 user_input = \
-                    input("\nInput the number of jobs for computation [1,]: ")
+                    input("\nInput the number of jobs for computation [1,): ")
                 try:
-                    if user_input.lower() == "q" or user_input == "":
+                    if user_input.lower() in {"q", ""}:
                         break
-                    
+
                     user_input = int(user_input)
                     if user_input < 1:
                         raise Exception

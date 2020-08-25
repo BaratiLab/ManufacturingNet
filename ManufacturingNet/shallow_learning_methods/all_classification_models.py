@@ -121,23 +121,36 @@ class AllClassificationModels:
         """
         print("\n==========================================")
         print("= All Classifier Models Parameter Inputs =")
-        print("==========================================\n")
+        print("==========================================")
 
         # Get user input for verbose, test_size
-        user_input = input("Enable verbose logging (y/N)? ").lower()
+        while True:
+            user_input = input("\nEnable verbose logging (y/N)? ").lower()
+            if user_input == "y":
+                self.verbose = True
+                break
+            elif user_input in {"n", ""}:
+                self.verbose = False
+                break
+            else:
+                print("Invalid input.")
 
-        if user_input == "y":
-            self.verbose = True
-        else:
-            self.verbose = False
+        while True:
+            user_input = input("\nWhat fraction of the dataset should be used "
+                               + "for testing (0,1)? ")
+            try:
+                if user_input == "":
+                    self.test_size = 0.25
+                    break
 
-        user_input = input("\nWhat fraction of the dataset should be used for "
-                           + "testing? Enter a decimal: ")
-
-        try:
-            self.test_size = float(user_input)
-        except Exception:
-            self.test_size = 0.25
+                user_input = float(user_input)
+                if user_input <= 0 or user_input >= 1:
+                    raise Exception
+                else:
+                    self.test_size = user_input
+                    break
+            except Exception:
+                print("Invalid input.")
 
         print("\n===========================================")
         print("= End of inputs; press enter to continue. =")
@@ -278,7 +291,7 @@ class AllClassificationModels:
 
         for model, data in self._classification_models.items():
             print("\n{:<20} {:<20} {:<20} {:<20}".format(model, data[0], data[1],
-                                                       data[2]))
+                                                         data[2]))
 
         print()
 

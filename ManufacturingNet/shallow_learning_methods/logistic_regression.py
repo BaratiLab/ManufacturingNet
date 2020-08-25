@@ -184,27 +184,31 @@ class LogRegression:
         """Runs UI for getting parameters and creating model."""
         print("\n==================================")
         print("= LogRegression Parameter Inputs =")
-        print("==================================\n")
-
-        if input("Use default parameters (Y/n)? ").lower() != "n":
-            self.test_size = 0.25
-            self.cv = None
-            print("\n===========================================")
-            print("= End of inputs; press enter to continue. =")
-            input("===========================================\n")
-            return LogisticRegression()
-
-        print("\nIf you are unsure about a parameter, press enter to use its",
-              "default value.")
-        print("Invalid parameter inputs will be replaced with their default",
-              "values.")
-        print("If you finish entering parameters early, enter 'q' to skip",
-              "ahead.\n")
+        print("==================================")
 
         # Set defaults
         self.test_size = 0.25
         self.cv = None
         self.graph_results = False
+
+        while True:
+            user_input = input("\nUse default parameters (Y/n)? ").lower()
+            if user_input in {"y", ""}:
+                print("\n===========================================")
+                print("= End of inputs; press enter to continue. =")
+                input("===========================================\n")
+                return LogisticRegression()
+            elif user_input == "n":
+                break
+            else:
+                print("Invalid input.")
+
+        print("\nIf you are unsure about a parameter, press enter to use its",
+              "default value.")
+        print("If you finish entering parameters early, enter 'q' to skip",
+              "ahead.\n")
+
+        # Set more defaults
         penalty = "l2"
         dual = False
         tol = 0.0001
@@ -223,248 +227,487 @@ class LogRegression:
 
         # Get user parameter input
         while True:
-            user_input = input("What fraction of the dataset should be the "
-                               + "testing set? Input a decimal: ")
+            break_early = False
+            while True:
+                user_input = input("\nWhat fraction of the dataset should be the "
+                                   + "testing set (0,1)? ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
 
-            try:
-                self.test_size = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                    user_input = float(user_input)
+                    if user_input <= 0 or user_input >= 1:
+                        raise Exception
+
+                    self.test_size = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            user_input = input("\n\nUse GridSearch to find the best "
-                               + "hyperparameters (y/N)? ").lower()
+            if break_early:
+                break
 
-            if user_input == "q":
+            while True:
+                user_input = input("\nUse GridSearch to find the best "
+                                   + "hyperparameters (y/N)? ").lower()
+                if user_input == "q":
+                    break_early = True
+                    break
+                elif user_input in {"n", "y", ""}:
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
                 break
 
             while user_input == "y":
                 print("\n= GridSearch Parameter Inputs =\n")
-                print("Note: All parameters are required. Skipping ahead",
-                      "will quit GridSearch.")
-                print("Press 'q' to skip GridSearch.")
+                print("Enter 'q' to skip GridSearch.")
                 self.gridsearch = True
                 params = {}
 
-                print("\nEnter the classifier penalties to evaluate.")
-                print("Options: 1-'l1', 2-'l2', 3-'elasticnet'. Enter 'all' for",
-                      "all options.")
-                print("Example input: 1,2,3")
-                user_input = input().lower()
+                while True:
+                    print("\nEnter the classifier penalties to evaluate.")
+                    print("Options: 1-'l1', 2-'l2', 3-'elasticnet'. Enter 'all'",
+                          "for all options.")
+                    print("Example input: 1,2,3")
+                    user_input = input().lower()
 
-                if user_input == "q":
-                    self.gridsearch = False
-                    break
-                elif user_input == "all":
-                    pen_params = ["l1", "l2", "elasticnet"]
-                else:
-                    pen_dict = {1: "l1", 2: "l2", 3: "elasticnet"}
-
-                    try:
-                        pen_params_int = \
-                            list(map(int, list(user_input.split(","))))
-                        pen_params = []
-                        for each in pen_params_int:
-                            pen_params.append(pen_dict.get(each))
-                    except Exception:
-                        print("\nInput not recognized. Skipping GridSearch...")
+                    if user_input == "q":
                         self.gridsearch = False
+                        break_early = True
                         break
+                    elif user_input == "all":
+                        pen_params = ["l1", "l2", "elasticnet"]
+                        break
+                    else:
+                        pen_dict = {1: "l1", 2: "l2", 3: "elasticnet"}
+                        try:
+                            pen_params_int = \
+                                list(map(int, list(user_input.split(","))))
+                            if len(pen_params_int) > len(pen_dict):
+                                raise Exception
+
+                            pen_params = []
+                            for each in pen_params_int:
+                                if not pen_dict.get(each):
+                                    raise Exception
+
+                                pen_params.append(pen_dict.get(each))
+                            break
+                        except Exception:
+                            print("Invalid input.")
+
+                if break_early:
+                    break
 
                 params["penalty"] = pen_params
 
-                print("\nEnter the solvers to evaluate.")
-                print("Options: 1-'newton-cg', 2-'lbfgs', 3-'liblinear',",
-                      "4-'sag', 5-'saga'. Enter 'all' for all options.")
-                print("Example input: 1,2,3")
-                user_input = input().lower()
+                while True:
+                    print("\nEnter the solvers to evaluate.")
+                    print("Options: 1-'newton-cg', 2-'lbfgs', 3-'liblinear',",
+                          "4-'sag', 5-'saga'. Enter 'all' for all options.")
+                    print("Example input: 1,2,3")
+                    user_input = input().lower()
 
-                if user_input == "q":
-                    self.gridsearch = False
-                    break
-                elif user_input == "all":
-                    sol_params = ["newton-cg", "lbfgs", "liblinear", "sag",
-                                  "saga"]
-                else:
-                    sol_dict = {1: "newton-cg", 2: "lbfgs", 3: "liblinear",
-                                4: "sag", 5: "saga"}
-
-                    try:
-                        sol_params_int = \
-                            list(map(int, list(user_input.split(","))))
-                        sol_params = []
-                        for each in sol_params_int:
-                            sol_params.append(sol_dict.get(each))
-                    except Exception:
-                        print("\nInput not recognized. Skipping GridSearch...")
+                    if user_input == "q":
                         self.gridsearch = False
+                        break_early = True
                         break
+                    elif user_input == "all":
+                        sol_params = ["newton-cg", "lbfgs", "liblinear", "sag",
+                                      "saga"]
+                        break
+                    else:
+                        sol_dict = {1: "newton-cg", 2: "lbfgs", 3: "liblinear",
+                                    4: "sag", 5: "saga"}
+                        try:
+                            sol_params_int = \
+                                list(map(int, list(user_input.split(","))))
+                            if len(sol_params_int) > len(sol_dict):
+                                raise Exception
+
+                            sol_params = []
+                            for each in sol_params_int:
+                                if not sol_dict.get(each):
+                                    raise Exception
+
+                                sol_params.append(sol_dict.get(each))
+                            break
+                        except Exception:
+                            print("Invalid input.")
+
+                if break_early:
+                    break
 
                 params["solver"] = sol_params
                 self.gs_params = params
-
                 print("\n= End of GridSearch inputs. =")
                 break
 
-            user_input = \
-                input("\n\nEnter the number of folds for cross validation: ")
+            break_early = False
 
-            try:
-                self.cv = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+            while True:
+                user_input = input("\nEnter the number of folds for cross "
+                                   + "validation [2,): ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input < 2:
+                        raise Exception
+
+                    self.cv = user_input
                     break
+                except Exception:
+                    print("Invalid input.")
 
-            user_input = input("\nGraph the ROC curve? Only binary "
-                               + "classification is supported (y/N): ").lower()
-
-            if user_input == "y":
-                self.graph_results = True
-            elif user_input == "q":
+            if break_early:
                 break
 
-            print("\nWhich norm should be used in penalization?")
-            user_input = input("Enter 1 for 'l1', 2 for 'l2', 3 for "
-                               + "'elasticnet', or 4 for 'none': ").lower()
-
-            if user_input == "q":
-                break
-            elif user_input == "1":
-                penalty = "l1"
-            elif user_input == "3":
-                penalty = "elasticnet"
-            elif user_input == "4":
-                penalty = "none"
-
-            user_input = input("\nUse dual formulation (y/N)? ").lower()
-            if user_input == "y":
-                dual = True
-            elif user_input == "q":
-                break
-
-            user_input = input("\nEnter a number for the tolerance for "
-                               + "stopping criteria: ")
-
-            try:
-                tol = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+            while True:
+                user_input = \
+                    input("\nGraph the ROC curve? Only binary classification "
+                          + "is supported (y/N): ").lower()
+                if user_input == "y":
+                    self.graph_results = True
                     break
-
-            user_input = input("\nEnter a positive number for the inverse of "
-                               + "regularization strength (C): ")
-
-            try:
-                C = float(user_input)
-            except Exception:
-                if user_input.lower() == "q":
+                elif user_input in {"n", ""}:
                     break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
 
-            user_input = \
-                input("\nInclude a y-intercept in the model (Y/n)? ").lower()
-
-            if user_input == "n":
-                fit_intercept = False
-            elif user_input == "q":
+            if break_early:
                 break
 
-            if fit_intercept:
+            while True:
+                print("\nWhich algorithm should be used in the optimization",
+                      "problem?")
+                user_input = input("Enter 1 for 'newton-cg', 2 for 'lbfgs', 3 "
+                                   + "for 'liblinear', 4 for 'sag', or 5 for "
+                                   + "'saga': ").lower()
+                if user_input == "1":
+                    solver = "newton-cg"
+                    break
+                elif user_input == "3":
+                    solver = "liblinear"
+                    break
+                elif user_input == "4":
+                    solver = "sag"
+                    break
+                elif user_input == "5":
+                    solver = "saga"
+                    break
+                elif user_input in {"2", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nWhich norm should be used in penalization?")
+                user_input = input("Enter 1 for 'l1', 2 for 'l2', 3 for "
+                                   + "'elasticnet', or 4 for 'none': ").lower()
+                if solver in {"newton-cg", "lbfgs", "sag"} \
+                    and user_input not in {"2", "4"}:
+                    print("Invalid input.")
+                    print("Solvers 'newton-cg', 'sag', and 'lbfgs' support",
+                          "only 'l2' or no penalty.")
+                    continue
+                if user_input == "3" and solver != "saga":
+                    print("Invalid input.")
+                    print("'elasticnet' is only supported by the 'saga' solver.")
+                    continue
+                if user_input == "4" and solver == "liblinear":
+                    print("Invalid input.")
+                    print("Solver 'liblinear' requires a penalty.")
+                    continue
+
+                if user_input == "1":
+                    penalty = "l1"
+                    break
+                elif user_input == "3":
+                    penalty = "elasticnet"
+                    break
+                elif user_input == "4":
+                    penalty = "none"
+                    break
+                elif user_input in {"2", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nUse dual formulation (y/N)? ").lower()
+                if user_input == "y":
+                    dual = True
+                    break
+                elif user_input in {"n", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnter a positive number for the tolerance "
+                                   + "for stopping criteria: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    tol = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnter a positive number for the inverse "
+                                   + "of regularization strength C: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = float(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    C = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nInclude a y-intercept in the model (Y/n)? ").lower()
+                if user_input == "n":
+                    fit_intercept = False
+                    break
+                elif user_input in {"y", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while fit_intercept:
                 user_input = input("\nEnter a number for the intercept "
                                    + "scaling factor: ")
                 try:
-                    intercept_scaling = float(user_input)
-                except Exception:
-                    if user_input.lower() == "q":
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
                         break
 
-            user_input = input("\nAutomatically balance the class weights "
-                               + "(y/N)? ").lower()
+                    intercept_scaling = float(user_input)
+                    break
+                except Exception:
+                    print("Invalid input.")
 
-            if user_input == "y":
-                class_weight = "balanced"
-            elif user_input == "q":
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nAutomatically balance the class weights "
+                                   + "(y/N)? ").lower()
+                if user_input == "y":
+                    class_weight = "balanced"
+                    break
+                elif user_input in {"n", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
                 break
 
             print("\nTo set manual weights, call",
                   "get_regression().set_params() to set the class_weight",
                   "parameter.")
 
-            user_input = \
-                input("\nInput an integer for the random number seed: ")
-
-            try:
-                random_state = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            print("\nWhich algorithm should be used in the optimization",
-                  "problem?")
-            user_input = input("Enter 1 for 'newton-cg', 2 for 'lbfgs', 3 for "
-                               + "'liblinear', 4 for 'sag', or 5 for "
-                               + "'saga': ").lower()
-
-            if user_input == "q":
-                break
-            elif user_input == "1":
-                solver = "newton-cg"
-            elif user_input == "3":
-                solver = "liblinear"
-            elif user_input == "4":
-                solver = "sag"
-            elif user_input == "5":
-                solver = "saga"
-
-            user_input = input("\nEnter the max number of iterations: ")
-
-            try:
-                max_iter = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            print("\nPlease choose a multiclass scheme.")
-            user_input = input("Enter 1 for one-vs-rest, 2 for multinomial, "
-                               + "or 3 to automatically choose: ").lower()
-
-            if user_input == "q":
-                break
-            elif user_input == "1":
-                multi_class = "ovr"
-            elif user_input == "2":
-                multi_class = "multinomial"
-
-            user_input = \
-                input("\nEnable verbose output during training (y/N)? ").lower()
-
-            if user_input == "y":
-                verbose = 1
-            elif user_input == "q":
-                break
-
-            user_input = input("\nEnable warm start? This will use the "
-                               + "previous solution for fitting (y/N): ").lower()
-
-            if user_input == "y":
-                warm_start = True
-            elif user_input == "q":
-                break
-
-            user_input = input("\nEnter the number of jobs for computation: ")
-
-            try:
-                n_jobs = int(user_input)
-            except Exception:
-                if user_input.lower() == "q":
-                    break
-
-            if penalty == "elasticnet":
-                user_input = input("\nEnter a number for the Elastic-Net "
-                                   + "mixing parameter: ")
+            while True:
+                user_input = \
+                    input("\nEnter an integer for the random number seed: ")
                 try:
-                    l1_ratio = float(user_input)
-                except Exception:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    random_state = int(user_input)
                     break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnter a positive maximum number of iterations: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input <= 0:
+                        raise Exception
+
+                    max_iter = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                print("\nPlease choose a multiclass scheme.")
+                user_input = input("Enter 1 for one-vs-rest, 2 for multinomial, "
+                                   + "or 3 to automatically choose: ").lower()
+                if user_input == "1":
+                    multi_class = "ovr"
+                    break
+                elif user_input == "2":
+                    multi_class = "multinomial"
+                    break
+                elif user_input in {"3", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = input("\nEnable verbose output during training "
+                                   + "(y/N)? ").lower()
+                if user_input == "y":
+                    verbose = 1
+                    break
+                elif user_input in {"n", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while True:
+                user_input = \
+                    input("\nEnable warm start? This will use the previous "
+                          + "solution for fitting (y/N): ").lower()
+                if user_input == "y":
+                    warm_start = True
+                    break
+                elif user_input in {"n", ""}:
+                    break
+                elif user_input == "q":
+                    break_early = True
+                    break
+                else:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while multi_class == "ovr":
+                print("\nEnter a positive number of CPU cores to use.")
+                user_input = input("Enter -1 to use all cores: ")
+                try:
+                    if user_input == "":
+                        break
+                    elif user_input.lower() == "q":
+                        break_early = True
+                        break
+
+                    user_input = int(user_input)
+                    if user_input <= 0 and user_input != -1:
+                        raise Exception
+
+                    n_jobs = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
+
+            if break_early:
+                break
+
+            while penalty == "elasticnet":
+                user_input = input("\nEnter a decimal for the Elastic-Net "
+                                   + "mixing parameter [0,1]: ")
+                try:
+                    if user_input.lower() in {"q", ""}:
+                        break
+
+                    user_input = float(user_input)
+                    if user_input < 0 or user_input > 1:
+                        raise Exception
+
+                    l1_ratio = user_input
+                    break
+                except Exception:
+                    print("Invalid input.")
 
             break
 
