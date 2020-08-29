@@ -796,7 +796,7 @@ class SVM:
                             if num <= 0:
                                 raise Exception
 
-                        params['C'] = gamma_params
+                        params["C"] = gamma_params
                         break
                     except Exception:
                         print("Invalid input.")
@@ -806,6 +806,12 @@ class SVM:
 
                 self.gs_params = params
                 print("\n= End of GridSearch inputs. =")
+
+                best_params = self._run_gridsearch_classifier(is_nu)
+                kernel = best_params["kernel"]
+                gamma = best_params["gamma"]
+                if not is_nu:
+                    C = best_params["C"]
                 break
 
             break_early = False
@@ -868,9 +874,9 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
-            while not is_nu:
+            while not is_nu and not self.gridsearch:
                 user_input = \
-                    input("\nEnter a positive regularization parameter: ")
+                    input("\nEnter a positive regularization parameter C: ")
                 try:
                     if user_input == "":
                         break
@@ -890,7 +896,7 @@ class SVM:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 print("\nWhich kernel type should be used?")
                 user_input = \
                     input("Enter 1 for 'linear', 2 for 'poly', 3 for 'rbf', 4 "
@@ -940,7 +946,7 @@ class SVM:
             if break_early:
                 break
 
-            while kernel in {"rbf", "poly", "sigmoid"}:
+            while kernel in {"rbf", "poly", "sigmoid"} and not self.gridsearch:
                 print("\nSet the kernel coefficient.")
                 user_input = input("Enter 1 for 'scale', or 2 for 'auto': ")
                 if user_input == "2":
@@ -958,7 +964,7 @@ class SVM:
                 break
 
             while kernel in {"poly", "sigmoid"}:
-                user_input = input("\nEnter the independent term in the "
+                user_input = input("\nEnter coef0, the independent term in the "
                                    + "kernel function [0,): ")
                 try:
                     if user_input == "":
@@ -1149,29 +1155,6 @@ class SVM:
         input("===========================================\n")
 
         if is_nu:
-            # If GridSearch is enabled
-            if self.gridsearch:
-                acc_scorer = make_scorer(accuracy_score)
-                clf = NuSVC()
-
-                if self.dataset_X_test is None:
-                    self._split_data()
-
-                # Run GridSearch
-                grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
-                grid_obj = grid_obj.fit(self.dataset_X_train,
-                                        self.dataset_y_train)
-
-                # Set the clf to the best combination of parameters
-                clf = grid_obj.best_estimator_
-
-                print("Best GridSearch Parameters:\n", clf)
-
-                # Fit the best algorithm to the data
-                clf.fit(self.dataset_X_train, self.dataset_y_train)
-                predictions = clf.predict(self.dataset_X_test)
-                self.gs_result = accuracy_score(self.dataset_y_test, predictions)
-
             return NuSVC(nu=nu, kernel=kernel, degree=degree, gamma=gamma,
                          coef0=coef0, shrinking=shrinking,
                          probability=True, tol=tol, cache_size=cache_size,
@@ -1180,34 +1163,41 @@ class SVM:
                          decision_function_shape=decision_function_shape,
                          break_ties=break_ties, random_state=random_state)
 
-        # If GridSearch is enabled
-        if self.gridsearch:
-            acc_scorer = make_scorer(accuracy_score)
-            clf = SVC()
-
-            if self.dataset_X_test is None:
-                self._split_data()
-
-            # Run GridSearch
-            grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
-            grid_obj = grid_obj.fit(self.dataset_X_train, self.dataset_y_train)
-
-            # Set the clf to the best combination of parameters
-            clf = grid_obj.best_estimator_
-
-            print("Best GridSearch Parameters:\n", clf)
-
-            # Fit the best algorithm to the data
-            clf.fit(self.dataset_X_train, self.dataset_y_train)
-            predictions = clf.predict(self.dataset_X_test)
-            self.gs_result = accuracy_score(self.dataset_y_test, predictions)
-
         return SVC(C=C, kernel=kernel, degree=degree, gamma=gamma, coef0=coef0,
                    shrinking=shrinking, probability=True, tol=tol,
                    cache_size=cache_size, class_weight=class_weight,
                    verbose=verbose, max_iter=max_iter,
                    decision_function_shape=decision_function_shape,
                    break_ties=break_ties, random_state=random_state)
+
+    def _run_gridsearch_classifier(self, is_nu):
+        """Runs GridSearch with the parameters given in run_SVC() or
+        run_nu_SVC(). Returns the best parameters."""
+        if is_nu:
+            clf = NuSVC()
+        else:
+            clf = SVC()
+
+        acc_scorer = make_scorer(accuracy_score)
+
+        if self.dataset_X_test is None:
+            self._split_data()
+
+        # Run GridSearch
+        grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
+        grid_obj = grid_obj.fit(self.dataset_X_train, self.dataset_y_train)
+
+        # Set the clf to the best combination of parameters
+        clf = grid_obj.best_estimator_
+
+        # Fit the best algorithm to the data
+        clf.fit(self.dataset_X_train, self.dataset_y_train)
+        predictions = clf.predict(self.dataset_X_test)
+        self.gs_result = accuracy_score(self.dataset_y_test, predictions)
+
+        # Return the best parameters
+        print("\nBest GridSearch Parameters:\n", grid_obj.best_params_, "\n")
+        return grid_obj.best_params_
 
     def _create_linear_SVC_model(self):
         """Runs UI for getting parameters and creating LinearSVC model."""
@@ -1407,7 +1397,7 @@ class SVM:
 
             while True:
                 user_input = \
-                    input("\nEnter a positive regularization parameter: ")
+                    input("\nEnter a positive regularization parameter C: ")
                 try:
                     if user_input == "":
                         break
@@ -1678,11 +1668,10 @@ class SVM:
                         for num in nu_params:
                             if num <= 0:
                                 raise Exception
+                        params["nu"] = nu_params
                         break
                     except Exception:
                         print("Invalid input.")
-
-                    params["nu"] = nu_params
 
                 while not is_nu:
                     print("\nEnter epsilons (the ranges from an actual value",
@@ -1704,11 +1693,10 @@ class SVM:
                         for num in eps_params:
                             if num <= 0:
                                 raise Exception
+                        params["epsilon"] = eps_params
                         break
                     except Exception:
                         print("Invalid input.")
-
-                    params["epsilon"] = eps_params
 
                 if break_early:
                     break
@@ -1734,7 +1722,7 @@ class SVM:
                             if num <= 0:
                                 raise Exception
 
-                        params['C'] = gamma_params
+                        params["C"] = gamma_params
                         break
                     except Exception:
                         print("Invalid input.")
@@ -1744,6 +1732,14 @@ class SVM:
 
                 self.gs_params = params
                 print("\n= End of GridSearch inputs. =")
+
+                best_params = self._run_gridsearch_regressor(is_nu)
+                kernel = best_params["kernel"]
+                if is_nu:
+                    nu = best_params["nu"]
+                else:
+                    C = best_params["C"]
+                    epsilon = best_params["epsilon"]
                 break
 
             break_early = False
@@ -1770,7 +1766,7 @@ class SVM:
             if break_early:
                 break
 
-            while is_nu:
+            while is_nu and not self.gridsearch:
                 user_input = input("\nEnter a decimal for nu (0,1]: ")
                 try:
                     if user_input == "":
@@ -1788,7 +1784,7 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
-            while not is_nu:
+            while not is_nu and not self.gridsearch:
                 user_input = \
                     input("\nEnter a positive epsilon, the range from an actual "
                           + "value where penalties aren't applied: ")
@@ -1811,7 +1807,7 @@ class SVM:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 print("\nWhich kernel type should be used?")
                 user_input = \
                     input("Enter 1 for 'linear', 2 for 'poly', 3 for 'rbf', 4 "
@@ -1878,9 +1874,9 @@ class SVM:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch or is_nu:
                 user_input = \
-                    input("\nEnter a positive regularization parameter: ")
+                    input("\nEnter a positive regularization parameter C: ")
                 try:
                     if user_input == "":
                         break
@@ -1901,7 +1897,7 @@ class SVM:
                 break
 
             while kernel in {"poly", "sigmoid"}:
-                user_input = input("\nEnter the independent term in the "
+                user_input = input("\nEnter coef0, the independent term in the "
                                    + "kernel function [0,): ")
                 try:
                     if user_input == "":
@@ -2023,56 +2019,40 @@ class SVM:
         input("===========================================\n")
 
         if is_nu:
-            # If GridSearch is enabled
-            if self.gridsearch:
-                clf = NuSVR()
-
-                if self.dataset_X_test is None:
-                    self._split_data()
-
-                # Run GridSearch
-                grid_obj = GridSearchCV(clf, self.gs_params, scoring="r2")
-                grid_obj = grid_obj.fit(self.dataset_X_train,
-                                        self.dataset_y_train)
-
-                # Set the clf to the best combination of parameters
-                clf = grid_obj.best_estimator_
-
-                print("Best GridSearch Parameters:\n", grid_obj.best_params_)
-
-                # Fit the best algorithm to the data
-                clf.fit(self.dataset_X_train, self.dataset_y_train)
-                predictions = clf.predict(self.dataset_X_test)
-                self.gs_result = clf.score(self.dataset_X_test,
-                                           self.dataset_y_test)
-
             return NuSVR(nu=nu, C=C, kernel=kernel, degree=degree, gamma=gamma,
                          coef0=coef0, shrinking=shrinking, tol=tol,
                          cache_size=cache_size, verbose=verbose,
                          max_iter=max_iter)
-        # If GridSearch is enabled
-        if self.gridsearch:
-            clf = SVR()
-            if self.dataset_X_test is None:
-                self._split_data()
-
-            # Run GridSearch
-            grid_obj = GridSearchCV(clf, self.gs_params, scoring="r2")
-            grid_obj = grid_obj.fit(self.dataset_X_train, self.dataset_y_train)
-
-            # Set the clf to the best combination of parameters
-            clf = grid_obj.best_estimator_
-
-            print("Best GridSearch Parameters:\n", grid_obj.best_params_)
-
-            # Fit the best algorithm to the data
-            clf.fit(self.dataset_X_train, self.dataset_y_train)
-            predictions = clf.predict(self.dataset_X_test)
-            self.gs_result = clf.score(self.dataset_X_test, self.dataset_y_test)
 
         return SVR(kernel=kernel, degree=degree, gamma=gamma, coef0=coef0,
                    tol=tol, C=C, epsilon=epsilon, shrinking=shrinking,
                    cache_size=cache_size, verbose=verbose, max_iter=max_iter)
+
+    def _run_gridsearch_regressor(self, is_nu):
+        """Runs GridSearch with the parameters given in run_SVR() or
+        run_nu_SVR(). Returns the best parameters."""
+        if is_nu:
+            clf = NuSVR()
+        else:
+            clf = SVR()
+
+        if self.dataset_X_test is None:
+            self._split_data()
+
+        # Run GridSearch
+        grid_obj = GridSearchCV(clf, self.gs_params, scoring="r2")
+        grid_obj = grid_obj.fit(self.dataset_X_train, self.dataset_y_train)
+
+        # Set the clf to the best combination of parameters
+        clf = grid_obj.best_estimator_
+
+        # Fit the best algorithm to the data
+        clf.fit(self.dataset_X_train, self.dataset_y_train)
+        self.gs_result = clf.score(self.dataset_X_test, self.dataset_y_test)
+
+        # Return the best parameters
+        print("\nBest GridSearch Parameters:\n", grid_obj.best_params_, "\n")
+        return grid_obj.best_params_
 
     def _create_linear_SVR_model(self):
         """Runs UI for getting parameters and creates LinearSVR model."""
@@ -2207,7 +2187,7 @@ class SVM:
 
             while True:
                 user_input = \
-                    input("\nEnter a positive regularization parameter: ")
+                    input("\nEnter a positive regularization parameter C: ")
                 try:
                     if user_input == "":
                         break
@@ -2489,7 +2469,6 @@ class SVM:
         This method runs under the assumption that all relevant instance
         data has been checked for correctness.
         """
-
         self.dataset_X_train, self.dataset_X_test, self.dataset_y_train, \
             self.dataset_y_test = train_test_split(self.attributes, self.labels,
                                                    test_size=self.test_size)

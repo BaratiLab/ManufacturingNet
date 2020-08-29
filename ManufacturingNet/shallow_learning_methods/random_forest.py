@@ -511,7 +511,13 @@ class RandomForest:
 
                 params["max_depth"] = max_dep_params
                 self.gs_params = params
-                print("\n= End of GridSearch inputs. =")
+                print("\n= End of GridSearch inputs. =\n")
+
+                best_params = self._run_gridsearch(classifier)
+                criterion = best_params["criterion"]
+                max_depth = best_params["max_depth"]
+                max_features = best_params["max_features"]
+                n_estimators = best_params["n_estimators"]
                 break
 
             break_early = False
@@ -556,7 +562,7 @@ class RandomForest:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 user_input = \
                     input("\nEnter a positive number of trees for the forest: ")
                 try:
@@ -578,7 +584,7 @@ class RandomForest:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 print("\nWhich criteria should be used for measuring split",
                       "quality?")
                 if classifier:
@@ -626,7 +632,7 @@ class RandomForest:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 print("\nEnter a positive maximum tree depth.")
                 user_input = input("Press enter for no maximum depth: ")
                 try:
@@ -649,8 +655,9 @@ class RandomForest:
                 break
 
             while True:
-                user_input = input("\nEnter a positive minimum number of samples "
-                                   + "required to split an internal node: ")
+                user_input = \
+                    input("\nEnter min_samples_split, a positive minimum number "
+                          + "of samples required to split an internal node: ")
                 try:
                     if user_input == "":
                         break
@@ -676,8 +683,9 @@ class RandomForest:
                 break
 
             while True:
-                user_input = input("\nEnter a positive minimum number of samples "
-                                   + "required to be at a leaf node: ")
+                user_input = \
+                    input("\nEnter min_samples_leaf, a positive minimum number "
+                          + "of samples required to be at a leaf node: ")
                 try:
                     if user_input == "":
                         break
@@ -704,8 +712,9 @@ class RandomForest:
 
             while True:
                 user_input = \
-                    input("\nEnter the minimum weighted fraction of the "
-                          + "weight total required to be at a leaf node [0,0.5]: ")
+                    input("\nEnter min_weight_fraction_leaf, the minimum "
+                          + "weighted fraction of the weight total required to "
+                          + "be at a leaf node [0,0.5]: ")
                 try:
                     if user_input == "":
                         break
@@ -725,7 +734,7 @@ class RandomForest:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 print("\nHow many features should be considered when looking",
                       "for the best split?")
                 print("Enter 'auto' to use n_features, 'sqrt' to use",
@@ -783,7 +792,7 @@ class RandomForest:
 
             while True:
                 user_input = \
-                    input("\nEnter the minimum impurity decrease [0,): ")
+                    input("\nEnter minimum_impurity_decrease [0,): ")
                 try:
                     if user_input == "":
                         break
@@ -913,8 +922,9 @@ class RandomForest:
                 break
 
             while True:
-                user_input = input("\nEnter the complexity parameter for "
-                                   + "Minimal Cost-Complexity Pruning [0,): ")
+                user_input = \
+                    input("\nEnter ccp_alpha, the complexity parameter for "
+                          + "Minimal Cost-Complexity Pruning [0,): ")
                 try:
                     if user_input == "":
                         break
@@ -962,30 +972,6 @@ class RandomForest:
         input("===========================================\n")
 
         if classifier:
-            # If GridSearch is enabled
-            if self.gridsearch:
-                acc_scorer = make_scorer(accuracy_score)
-                clf = RandomForestClassifier()
-                dataset_X_train, dataset_X_test, dataset_y_train, \
-                    dataset_y_test = train_test_split(self.attributes,
-                                                      self.labels,
-                                                      test_size=self.test_size)
-
-                # Run GridSearch
-                grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
-                grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
-
-                # Set the clf to the best combination of parameters
-                clf = grid_obj.best_estimator_
-
-                print("Best GridSearch Parameters:\n",
-                      grid_obj.best_params_)
-
-                # Fit the best algorithm to the data
-                clf.fit(dataset_X_train, dataset_y_train)
-                predictions = clf.predict(dataset_X_test)
-                self.gs_result = accuracy_score(dataset_y_test, predictions)
-
             return RandomForestClassifier(n_estimators=n_estimators,
                                           criterion=criterion,
                                           max_depth=max_depth,
@@ -1001,27 +987,6 @@ class RandomForest:
                                           class_weight=class_weight,
                                           ccp_alpha=ccp_alpha,
                                           max_samples=max_samples)
-
-        # If GridSearch is enabled
-        if self.gridsearch:
-            clf = RandomForestRegressor()
-            dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = \
-                train_test_split(self.attributes, self.labels,
-                                 test_size=self.test_size)
-
-            # Run GridSearch
-            grid_obj = GridSearchCV(clf, self.gs_params, scoring="r2")
-            grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
-
-            # Set the clf to the best combination of parameters
-            clf = grid_obj.best_estimator_
-
-            print("Best GridSearch Parameters:\n", grid_obj.best_params_)
-
-            # Fit the best algorithm to the data
-            clf.fit(dataset_X_train, dataset_y_train)
-            predictions = clf.predict(dataset_X_test)
-            self.gs_result = clf.score(dataset_X_test, dataset_y_test)
 
         return RandomForestRegressor(n_estimators=n_estimators,
                                      criterion=criterion, max_depth=max_depth,
@@ -1092,6 +1057,46 @@ class RandomForest:
         print("\n===================")
         print("= End of results. =")
         print("===================\n")
+
+    def _run_gridsearch(self, classifier):
+        """Runs GridSearch with the parameters given in run_classifier()
+        or run_regressor(). Returns the best parameters."""
+        dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = \
+            train_test_split(self.attributes, self.labels,
+                             test_size=self.test_size)
+        if classifier:
+            acc_scorer = make_scorer(accuracy_score)
+            clf = RandomForestClassifier()
+
+            # Run GridSearch
+            grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
+            grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+            # Set the clf to the best combination of parameters
+            clf = grid_obj.best_estimator_
+
+            # Fit the best algorithm to the data
+            clf.fit(dataset_X_train, dataset_y_train)
+            predictions = clf.predict(dataset_X_test)
+            self.gs_result = accuracy_score(dataset_y_test, predictions)
+        else:
+            clf = RandomForestRegressor()
+
+            # Run GridSearch
+            grid_obj = GridSearchCV(clf, self.gs_params, scoring="r2")
+            grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+            # Set the clf to the best combination of parameters
+            clf = grid_obj.best_estimator_
+
+            # Fit the best algorithm to the data
+            clf.fit(dataset_X_train, dataset_y_train)
+            predictions = clf.predict(dataset_X_test)
+            self.gs_result = clf.score(dataset_X_test, dataset_y_test)
+
+        # Return the best parameters
+        print("\nBest GridSearch Parameters:\n", grid_obj.best_params_, "\n")
+        return grid_obj.best_params_
 
     def _check_inputs(self):
         """Verifies if instance data is ready for use in RandomForest

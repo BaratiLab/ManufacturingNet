@@ -346,7 +346,11 @@ class LogRegression:
 
                 params["solver"] = sol_params
                 self.gs_params = params
-                print("\n= End of GridSearch inputs. =")
+                print("\n= End of GridSearch inputs. =\n")
+
+                best_params = self._run_gridsearch()
+                solver = best_params["solver"]
+                penalty = best_params["penalty"]
                 break
 
             break_early = False
@@ -391,7 +395,7 @@ class LogRegression:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 print("\nWhich algorithm should be used in the optimization",
                       "problem?")
                 user_input = input("Enter 1 for 'newton-cg', 2 for 'lbfgs', 3 "
@@ -420,7 +424,7 @@ class LogRegression:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 print("\nWhich norm should be used in penalization?")
                 user_input = input("Enter 1 for 'l1', 2 for 'l2', 3 for "
                                    + "'elasticnet', or 4 for 'none': ").lower()
@@ -715,27 +719,6 @@ class LogRegression:
         print("= End of inputs; press enter to continue. =")
         input("===========================================\n")
 
-        # If GridSearch is enabled
-        if self.gridsearch:
-            acc_scorer = make_scorer(accuracy_score)
-            clf = LogisticRegression()
-            dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = \
-                train_test_split(self.attributes, self.labels,
-                                 test_size=self.test_size)
-
-            # Run GridSearch
-            grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
-            grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
-
-            # Set the clf to the best combination of parameters
-            clf = grid_obj.best_estimator_
-            print("Best GridSearch Parameters:\n", clf)
-
-            # Fit the best algorithm to the data
-            clf.fit(dataset_X_train, dataset_y_train)
-            predictions = clf.predict(dataset_X_test)
-            self.gs_result = accuracy_score(dataset_y_test, predictions)
-
         return LogisticRegression(penalty=penalty, dual=dual, tol=tol, C=C,
                                   fit_intercept=fit_intercept,
                                   intercept_scaling=intercept_scaling,
@@ -779,6 +762,31 @@ class LogRegression:
         print("\n===================")
         print("= End of results. =")
         print("===================\n")
+
+    def _run_gridsearch(self):
+        """Runs GridSearch with the parameters given in run(). Returns
+        the best parameters."""
+        acc_scorer = make_scorer(accuracy_score)
+        clf = LogisticRegression()
+        dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = \
+            train_test_split(self.attributes, self.labels,
+                             test_size=self.test_size)
+
+        # Run GridSearch
+        grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
+        grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+        # Set the clf to the best combination of parameters
+        clf = grid_obj.best_estimator_
+
+        # Fit the best algorithm to the data
+        clf.fit(dataset_X_train, dataset_y_train)
+        predictions = clf.predict(dataset_X_test)
+        self.gs_result = accuracy_score(dataset_y_test, predictions)
+
+        # Return the best parameters
+        print("\nBest GridSearch Parameters:\n", grid_obj.best_params_, "\n")
+        return grid_obj.best_params_
 
     def _check_inputs(self):
         """Verifies if the instance data is ready for use in logistic

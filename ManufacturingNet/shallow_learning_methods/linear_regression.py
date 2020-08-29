@@ -306,7 +306,7 @@ class LinRegression:
 
             while True:
                 user_input = \
-                    input("\nInput the number of jobs for computation [1,): ")
+                    input("\nEnter a positive number of CPU cores to use: ")
                 try:
                     if user_input.lower() in {"q", ""}:
                         break
