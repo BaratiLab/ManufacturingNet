@@ -506,7 +506,14 @@ class XGBoost:
 
                 params["max_depth"] = mdepth_params
                 self.gs_params = params
-                print("\n= End of GridSearch inputs. =")
+                print("\n= End of GridSearch inputs. =\n")
+
+                best_params = self._run_gridsearch(classifier)
+                booster = best_params["booster"]
+                gamma = best_params["gamma"]
+                learning_rate = best_params["learning_rate"]
+                max_depth = best_params["max_depth"]
+                n_estimators = best_params["n_estimators"]
                 break
 
             break_early = False
@@ -551,7 +558,7 @@ class XGBoost:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 user_input = input("\nEnter the number of gradient-boosted "
                                    + "trees to use: ")
                 try:
@@ -573,7 +580,7 @@ class XGBoost:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 print("\nEnter a positive maximum tree depth.")
                 user_input = input("Press enter for no maximum depth: ")
                 try:
@@ -595,7 +602,7 @@ class XGBoost:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 user_input = input("\nEnter a positive learning rate: ")
                 try:
                     if user_input == "":
@@ -616,7 +623,7 @@ class XGBoost:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 print("\nWhich booster should be used?")
                 user_input = input("Enter 1 for 'gbtree', 2 for 'gblinear', or "
                                    + "3 for 'dart': ").lower()
@@ -659,7 +666,7 @@ class XGBoost:
             if break_early:
                 break
 
-            while True:
+            while not self.gridsearch:
                 user_input = \
                     input("\nEnter gamma, the minimum loss reduction "
                           + "needed to further partition a leaf node [0,): ")
@@ -683,7 +690,7 @@ class XGBoost:
                 break
 
             while True:
-                user_input = input("\nEnter the minimum child weight [0,): ")
+                user_input = input("\nEnter min_child_weight [0,): ")
                 try:
                     if user_input == "":
                         break
@@ -704,7 +711,7 @@ class XGBoost:
                 break
 
             while True:
-                user_input = input("\nEnter the maximum delta step [0,): ")
+                user_input = input("\nEnter max_delta_step [0,): ")
                 try:
                     if user_input == "":
                         break
@@ -746,8 +753,8 @@ class XGBoost:
                 break
 
             while True:
-                user_input = input("\nEnter the subsample column ratio for "
-                                   + "all trees (0,1]: ")
+                user_input = input("\nEnter colsample_bytree, the subsample "
+                                   + "column ratio for all trees (0,1]: ")
                 try:
                     if user_input == "":
                         break
@@ -768,8 +775,8 @@ class XGBoost:
                 break
 
             while True:
-                user_input = input("\nEnter the subsample column ratio for "
-                                   + "all levels (0,1]: ")
+                user_input = input("\nEnter colsample_bylevel, the subsample "
+                                   + "column ratio for all levels (0,1]: ")
                 try:
                     if user_input == "":
                         break
@@ -914,29 +921,6 @@ class XGBoost:
         input("===========================================\n")
 
         if classifier:
-            # If GridSearch is enabled
-            if self.gridsearch:
-                acc_scorer = make_scorer(accuracy_score)
-                clf = XGBClassifier()
-                dataset_X_train, dataset_X_test, dataset_y_train, \
-                    dataset_y_test = train_test_split(self.attributes,
-                                                      self.labels,
-                                                      test_size=self.test_size)
-
-                # Run GridSearch
-                grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
-                grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
-
-                # Set the clf to the best combination of parameters
-                clf = grid_obj.best_estimator_
-
-                print("Best GridSearch Parameters:\n", clf.get_xgb_params())
-
-                # Fit the best algorithm to the data
-                clf.fit(dataset_X_train, dataset_y_train)
-                predictions = clf.predict(dataset_X_test)
-                self.gs_result = accuracy_score(dataset_y_test, predictions)
-
             return XGBClassifier(max_depth=max_depth,
                                  learning_rate=learning_rate,
                                  n_estimators=n_estimators, objective=objective,
@@ -952,27 +936,6 @@ class XGBoost:
                                  base_score=base_score,
                                  random_state=random_state, missing=missing,
                                  verbosity=verbosity)
-
-        # If GridSearch is enabled
-        if self.gridsearch:
-            clf = XGBRegressor()
-            dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = \
-                train_test_split(self.attributes, self.labels,
-                                 test_size=self.test_size)
-
-            # Run GridSearch
-            grid_obj = GridSearchCV(clf, self.gs_params, scoring="r2")
-            grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
-
-            # Set the clf to the best combination of parameters
-            clf = grid_obj.best_estimator_
-
-            print("Best GridSearch Parameters:\n", grid_obj.best_params_)
-
-            # Fit the best algorithm to the data
-            clf.fit(dataset_X_train, dataset_y_train)
-            predictions = clf.predict(dataset_X_test)
-            self.gs_result = clf.score(dataset_X_test, dataset_y_test)
 
         return XGBRegressor(max_depth=max_depth, learning_rate=learning_rate,
                             n_estimators=n_estimators, objective=objective,
@@ -1041,6 +1004,46 @@ class XGBoost:
         print("\n===================")
         print("= End of results. =")
         print("===================\n")
+
+    def _run_gridsearch(self, classifier):
+        """Runs GridSearch with the parameters given in run_classifier()
+        or run_regressor(). Returns the best parameters."""
+        dataset_X_train, dataset_X_test, dataset_y_train, dataset_y_test = \
+            train_test_split(self.attributes, self.labels,
+                             test_size=self.test_size)
+        if classifier:
+            acc_scorer = make_scorer(accuracy_score)
+            clf = XGBClassifier()
+
+            # Run GridSearch
+            grid_obj = GridSearchCV(clf, self.gs_params, scoring=acc_scorer)
+            grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+            # Set the clf to the best combination of parameters
+            clf = grid_obj.best_estimator_
+
+            # Fit the best algorithm to the data
+            clf.fit(dataset_X_train, dataset_y_train)
+            predictions = clf.predict(dataset_X_test)
+            self.gs_result = accuracy_score(dataset_y_test, predictions)
+        else:
+            clf = XGBRegressor()
+
+            # Run GridSearch
+            grid_obj = GridSearchCV(clf, self.gs_params, scoring="r2")
+            grid_obj = grid_obj.fit(dataset_X_train, dataset_y_train)
+
+            # Set the clf to the best combination of parameters
+            clf = grid_obj.best_estimator_
+
+            # Fit the best algorithm to the data
+            clf.fit(dataset_X_train, dataset_y_train)
+            predictions = clf.predict(dataset_X_test)
+            self.gs_result = clf.score(dataset_X_test, dataset_y_test)
+
+        # Return the best parameters
+        print("\nBest GridSearch Parameters:\n", grid_obj.best_params_, "\n")
+        return grid_obj.best_params_
 
     def _check_inputs(self):
         """Verifies if the instance data is ready for use in XGBoost model."""
