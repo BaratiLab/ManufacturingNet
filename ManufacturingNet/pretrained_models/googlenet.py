@@ -16,6 +16,7 @@ import time
 import datetime
 import matplotlib.pyplot as plt
 from torchvision.models import googlenet
+from sklearn.model_selection import train_test_split
 
 
 class MyDataset(data.Dataset):
@@ -30,12 +31,6 @@ class MyDataset(data.Dataset):
         X=torch.from_numpy(self.X[index]).double()#(in_channel,depth,height,width)
         Y=torch.from_numpy(np.array(self.Y[index])).long()
         return X,Y
-
-def conv3D_output_size(img_size,kernel_size, stride,padding):
-    outshape = (np.floor((img_size[0] + 2 * padding[0] - (kernel_size[0] - 1) - 1) / stride[0] + 1).astype(int),
-                np.floor((img_size[1] + 2 * padding[1] - (kernel_size[1] - 1) - 1) / stride[1] + 1).astype(int),
-                np.floor((img_size[2] + 2 * padding[2] - (kernel_size[2] - 1) - 1) / stride[2] + 1).astype(int))
-    return outshape
 
 def spacing():
     print('\n')
@@ -55,12 +50,13 @@ class BasicConv2d(nn.Module):
 
 class GoogleNet():
 
-    def __init__(self,train_data,dev_data):
+    def __init__(self,X,Y,shuffle=True):
         
         #train_data
-        self.train_data=train_data
-        #dev_data
-        self.dev_data=dev_data
+        self.X=X
+        self.Y=Y
+        self.shuffle=shuffle
+        spacing()
 
         #(1 question)
         self.get_num_classes()
@@ -68,6 +64,8 @@ class GoogleNet():
         print(self.net)         # printing model architecture
 
         self._get_batchsize_input()             # getting a batch size for training and validation
+
+        self._get_valsize_input()
 
         self._get_loss_function()               # getting a loss function
 
@@ -85,7 +83,7 @@ class GoogleNet():
         self.main()             # run function
 
     def get_num_classes(self):
-        print('Question [1/7]: No of classes:')
+        print('Question [1/8]: No of classes:')
         print('\n')
         gate = 0
         while gate!= 1:
@@ -97,7 +95,7 @@ class GoogleNet():
         spacing()
     
     def get_pretrained_model(self):
-        print('Question [2/7]: Model Selection:')
+        print('Question [2/8]: Model Selection:')
         print('\n')
         
         gate=0
@@ -113,7 +111,7 @@ class GoogleNet():
                 print('Please enter valid input')
         
         model=googlenet(pretrained=self.pretrained)
-        model.conv1=BasicConv2d(3, 64, kernel_size=7, stride=2, padding=3)
+        model.conv1=BasicConv2d(self.X[0].shape[0], 64, kernel_size=7, stride=2, padding=3)
         model.fc=nn.Linear(1024,self.num_classes)
 
         self.net=model.double()
@@ -121,7 +119,7 @@ class GoogleNet():
         spacing()
 
     def _get_batchsize_input(self):
-        print('Question [3/7]: Batchsize:')
+        print('Question [3/8]: Batchsize:')
         print('\n')
         # Method for getting batch size input
         gate = 0
@@ -131,7 +129,24 @@ class GoogleNet():
                 gate =1
             else:
                 print('Please enter a valid input')
-        spacing() 
+        spacing()
+
+    def _get_valsize_input(self):
+        print('Question [4/8]: Validation_size:')
+        # Method for getting validation set size input
+        gate = 0
+        while gate!= 1:
+            self.valset_size = (input('Please enter the validation set size (size > 0 and size < 1) \n For default size, please directly press enter without any input: '))
+            if self.valset_size == '':              # handling default case for valsize
+                print('Default value selected')
+                self.valset_size = '0.2'
+            if self.valset_size.replace('.','').isdigit() :
+                if float(self.valset_size) >0 and float(self.valset_size) < 1 :
+                    self.valset_size = float(self.valset_size)
+                    gate = 1
+            else:
+                print('Please enter a valid numeric input') 
+        spacing()  
 
     def _set_device(self):
         if torch.cuda.is_available():
@@ -142,7 +157,7 @@ class GoogleNet():
             self.cuda=False
     
     def _get_loss_function(self):
-        print('Question [4/7]: Loss function:')
+        print('Question [5/8]: Loss function:')
         print('\n')
         # Method for getting a loss function for training
         self.criterion_list = {1:nn.CrossEntropyLoss(),2:torch.nn.L1Loss(),3:torch.nn.SmoothL1Loss(),4:torch.nn.MSELoss()}
@@ -162,14 +177,15 @@ class GoogleNet():
     def dataloader(self):
 
         #train and dev loader
-        train_dataset = MyDataset(self.train_data[:,0],self.train_data[:,1])
+        self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(self.X,self.Y,test_size=self.valset_size)
 
-        train_loader_args = dict(shuffle=True, batch_size=self.batch_size)
+        train_dataset = MyDataset(self.X_train,self.Y_train)
+
+        train_loader_args = dict(shuffle=self.shuffle, batch_size=self.batch_size)
 
         self.train_loader = data.DataLoader(train_dataset, **train_loader_args)
-
         
-        dev_dataset = MyDataset(self.dev_data[:,0],self.dev_data[:,1])
+        dev_dataset = MyDataset(self.X_test,self.Y_test)
 
         dev_loader_args = dict(shuffle=False, batch_size=self.batch_size)
 
@@ -177,7 +193,7 @@ class GoogleNet():
     
 
     def _get_optimizer(self):
-        print('Question [5/7]: Optimizer:')
+        print('Question [6/8]: Optimizer:')
         print('\n')
 
         # Method for getting a optimizer input
@@ -214,7 +230,7 @@ class GoogleNet():
 
 #scheduler
     def _get_scheduler(self):
-        print('Question [6/7]: Scheduler:')
+        print('Question [7/8]: Scheduler:')
         print('\n')
 
         # Method for getting scheduler
@@ -250,12 +266,19 @@ class GoogleNet():
         spacing()
     
     def _get_epoch(self):
-        print('Question [7/7]: Number of Epochs:')
+        print('Question [8/8]: Number of Epochs:')
         print('\n')
 
         # Method for getting number of epochs for training the model
 
-        self.numEpochs = int(input('Please enter the number of epochs to train the model: '))
+        gate = 0
+        while gate!= 1:
+            self.numEpochs = (input('Please enter the number of epochs to train the model: '))
+            if self.numEpochs.isnumeric() and int(self.numEpochs) >0 :
+                self.numEpochs = int(self.numEpochs)
+                gate =1
+            else:
+                print('Please enter a valid numeric input. The number must be integer and greater than zero')
     
     def train_model(self):
 
