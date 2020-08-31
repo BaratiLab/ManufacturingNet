@@ -85,56 +85,71 @@ class BasicBlock(nn.Module):
                 gate=0
                 while gate!=1:
                     self.pool_kernel=[]
-                    kernel_input=list(input('Please enter the kernel size (depth,heigth,width)\nFor example 3,3,3\nFor default size, please directly press enter without any input: '))
+                    kernel_input=((input('Please enter the kernel size (depth,heigth,width)\nFor example 3,3,3\nFor default size, please directly press enter without any input: ')))
                     if len(kernel_input)==0:
                         print('Default Value selected')
                         self.pool_kernel=tuple([3,3,3])
                         gate=1
                     elif len(kernel_input)==5:
-                        for i in range(len(kernel_input)):
-                            if kernel_input[i]!=',' and (1<= int(kernel_input[i]) <= 20): 
-                                self.pool_kernel.append(int(kernel_input[i]))
+                        k_split=kernel_input.split(",")
+                        for i in k_split:
+                            if i.isnumeric() and int(i)>0:
+                                self.pool_kernel.append(int(i))
+                                gate=1
+                            else:
+                                gate=0
+                                print('Please enter valid input')
+                                break
                         self.pool_kernel=tuple(self.pool_kernel)
-                        gate=1
                     else:
                         print('Please enter valid input')
-                
+                        
                 print('Question: Stride value for this pooling layer:')
                 print('\n')
                 gate=0
                 while gate!=1:
                     self.pool_stride=[]
-                    stride_input=list(input('Please enter the stride (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))
+                    stride_input=((input('Please enter the stride (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: ')))
                     if len(stride_input)==0:
                         print('Default Value selected')
                         self.pool_stride=tuple([2,2,2])
                         gate=1
                     elif len(stride_input)==5:
-                        for i in range(len(stride_input)):
-                            if stride_input[i]!=',' and (1<= int(stride_input[i]) <= 20): 
-                                self.pool_stride.append(int(stride_input[i]))
+                        s_split=stride_input.split(",")
+                        for i in s_split:
+                            if i.isnumeric() and int(i)>0:
+                                self.pool_stride.append(int(i))
+                                gate=1
+                            else:
+                                gate=0
+                                print('Please enter valid input')
+                                break
                         self.pool_stride=tuple(self.pool_stride)
-                        gate=1
                     else:
                         print('Please enter valid input')
-                
+                        
 
                 print('Question: Padding value for this pooling layer:')
                 print('\n')
                 gate=0
                 while gate!=1:
                     self.pool_padding=[]
-                    padding_input=list(input('Please enter the value of padding (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))
+                    padding_input=((input('Please enter the value of padding (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: ')))
                     if len(padding_input)==0:
                         print('Default Value selected')
                         self.pool_padding=tuple([0,0,0])
                         gate=1
                     elif len(padding_input)==5:
-                        for i in range(len(padding_input)):
-                            if padding_input[i]!=',' and (1<= int(padding_input[i]) <= 20): 
-                                self.pool_padding.append(int(padding_input[i]))
+                        p_split=padding_input.split(",")
+                        for i in p_split:
+                            if i.isnumeric() and int(i)>0:
+                                self.pool_padding.append(int(i))
+                                gate=1
+                            else:
+                                gate=0
+                                print('Please enter valid input')
+                                break
                         self.pool_padding=tuple(self.pool_padding)
-                        gate=1
                     else:
                         print('Please enter valid input')
                 self.pool=nn.MaxPool3d(kernel_size=self.pool_kernel,stride=self.pool_stride, padding=self.pool_padding) #kept constant for now
@@ -149,26 +164,31 @@ class BasicBlock(nn.Module):
     
     def get_dropout(self): # Get input for dropout from the user
         gate1 = 0 
-        
+        value = input("Do you want default values for dropout(press y or n): ")
         while gate1!=1:
-            value = input("Do you want default values for dropout(press y or n): ")
-            if value.lower()=='y' or value.lower()=='n' :
+            if value == "Y" or value =="y" or value == 'n' or value == 'N':
                 gate1 = 1
             else:
                 print("Please enter valid input it should only be (y or n)")
-
-        gate  = 0    
-        if value.lower() =='n':    
+                value = input("Do you want default values for dropout(press y or n)")
+                gate1 =0 
+    
+        if value == 'N' or value =='n':   
+            gate  = 0 
+            drop_out = (input(("Please input the dropout probability: ")))
             while gate!=1:
-                drop_out = (input(("Please input the dropout probability: ")))
-                if drop_out.isnumeric() and (float(drop_out) > 0 and float(drop_out)<1):
-                    self.drop = nn.Dropout3d(drop_out)
-                    gate  = 1
+                if drop_out.replace('.','').isdigit():
+                    if (float(drop_out) > 0.0 and float(drop_out)<1.0):
+                        self.drop = nn.Dropout3d(p=float(drop_out))
+                        gate  = 1
+                    else:
+                        print("Please enter the valid numeric values. The value should lie between 0 and 1")
+                        drop_out = (input(("Please input the dropout probability")))
+                        gate = 0
                 else:
-                    print("Please enter the valid numeric values. The value should lie between 0 and 1")
+                    drop_out = (input(("Please input the dropout probability: ")))
         else:
             self.drop = nn.Dropout3d(p=0)
-        spacing()
         
     def get_channel_input(self):
         print('Question: Out-channels for this conv:')
@@ -189,17 +209,22 @@ class BasicBlock(nn.Module):
         gate=0
         while gate!=1:
             self.kernel=[]
-            kernel_input=list(input('Please enter the kernel size (depth,heigth,width)\nFor example 3,3,3\nFor default size, please directly press enter without any input: '))
+            kernel_input=((input('Please enter the kernel size (depth,heigth,width)\nFor example 3,3,3\nFor default size, please directly press enter without any input: ')))
             if len(kernel_input)==0:
                 print('Default Value selected')
                 self.kernel=tuple([3,3,3])
                 gate=1
             elif len(kernel_input)==5:
-                for i in range(len(kernel_input)):
-                    if kernel_input[i]!=',' and (1<= int(kernel_input[i]) <= 20): 
-                        self.kernel.append(int(kernel_input[i]))
+                k_split=kernel_input.split(",")
+                for i in k_split:
+                    if i.isnumeric() and int(i)>0:
+                        self.kernel.append(int(i))
+                        gate=1
+                    else:
+                        gate=0
+                        print('Please enter valid input')
+                        break
                 self.kernel=tuple(self.kernel)
-                gate=1
             else:
                 print('Please enter valid input')
         spacing()
@@ -211,17 +236,22 @@ class BasicBlock(nn.Module):
         gate=0
         while gate!=1:
             self.stride=[]
-            stride_input=list(input('Please enter the stride (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))
+            stride_input=((input('Please enter the stride (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: ')))
             if len(stride_input)==0:
                 print('Default Value selected')
                 self.stride=tuple([1,1,1])
                 gate=1
             elif len(stride_input)==5:
-                for i in range(len(stride_input)):
-                    if stride_input[i]!=',' and (1<= int(stride_input[i]) <= 20): 
-                        self.stride.append(int(stride_input[i]))
+                s_split=stride_input.split(",")
+                for i in s_split:
+                    if i.isnumeric() and int(i)>0:
+                        self.stride.append(int(i))
+                        gate=1
+                    else:
+                        gate=0
+                        print('Please enter valid input')
+                        break
                 self.stride=tuple(self.stride)
-                gate=1
             else:
                 print('Please enter valid input')
         spacing()
@@ -232,17 +262,22 @@ class BasicBlock(nn.Module):
         gate=0
         while gate!=1:
             self.padding=[]
-            padding_input=list(input('Please enter the value of padding (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))
+            padding_input=((input('Please enter the value of padding (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: ')))
             if len(padding_input)==0:
                 print('Default Value selected')
                 self.padding=tuple([1,1,1])
                 gate=1
             elif len(padding_input)==5:
-                for i in range(len(padding_input)):
-                    if padding_input[i]!=',' and (1<= int(padding_input[i]) <= 20): 
-                        self.padding.append(int(padding_input[i]))
+                p_split=padding_input.split(",")
+                for i in p_split:
+                    if i.isnumeric() and int(i)>0:
+                        self.padding.append(int(i))
+                        gate=1
+                    else:
+                        gate=0
+                        print('Please enter valid input')
+                        break
                 self.padding=tuple(self.padding)
-                gate=1
             else:
                 print('Please enter valid input')
         spacing()
