@@ -66,13 +66,13 @@ import ManufacturingNet
 If you don't need the entire library, you can import specific classes using dot notation and "from" statements. For example, to import the linear regression model, use this code:
 
 ```python
-from ManufacturingNet.shallow_learning_methods import LinRegression
+from ManufacturingNet.models import LinRegression
 ```
 
 To import the feature extraction functionality, use this code:
 
 ```python
-from ManufacturingNet.featurization_and_preprocessing import Featurizer
+from ManufacturingNet.featurization import Featurizer
 ```
 
 When in doubt, check the [documentation](https://manufacturingnet.readthedocs.io/en/latest/)!
