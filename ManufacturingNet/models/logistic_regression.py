@@ -184,7 +184,26 @@ class LogRegression:
         """Runs UI for getting parameters and creating model."""
         print("\n==================================")
         print("= LogRegression Parameter Inputs =")
-        print("==================================")
+        print("==================================\n")
+        print("Default values:",
+              "test_size = 0.25",
+              "cv = 5",
+              "graph_results = False",
+              "penalty = 'l2'",
+              "dual = False",
+              "tol = 0.0001",
+              "C = 1.0",
+              "fit_intercept = True",
+              "intercept_scaling = 1",
+              "class_weight = None",
+              "random_state = None",
+              "solver = 'lbfgs'",
+              "max_iter = 100",
+              "multi_class = 'auto'",
+              "verbose = False",
+              "warm_start = False",
+              "n_jobs = None",
+              "l1_ratio = None", sep="\n")
 
         # Set defaults
         self.test_size = 0.25
@@ -247,6 +266,8 @@ class LogRegression:
                 except Exception:
                     print("Invalid input.")
 
+            print("test_size =", self.test_size)
+
             if break_early:
                 break
 
@@ -269,6 +290,14 @@ class LogRegression:
                 print("Enter 'q' to skip GridSearch.")
                 self.gridsearch = True
                 params = {}
+
+                print("\nWarnings:")
+                print("Solvers 'lbfgs', 'newton-cg', 'sag', and 'saga' support",
+                      "only 'l2' or no penalty.")
+                print("Solver 'liblinear' requires a penalty.")
+                print("Penalty 'elasticnet' is only supported by the",
+                      "'saga' solver.")
+                print("Failing to heed these warnings may crash GridSearch!")
 
                 while True:
                     print("\nEnter the classifier penalties to evaluate.")
@@ -306,6 +335,7 @@ class LogRegression:
                     break
 
                 params["penalty"] = pen_params
+                print("penalties:", pen_params)
 
                 while True:
                     print("\nEnter the solvers to evaluate.")
@@ -345,9 +375,10 @@ class LogRegression:
                     break
 
                 params["solver"] = sol_params
-                self.gs_params = params
-                print("\n= End of GridSearch inputs. =\n")
+                print("solvers:", sol_params)
 
+                print("\n= End of GridSearch inputs. =\n")
+                self.gs_params = params
                 best_params = self._run_gridsearch()
                 solver = best_params["solver"]
                 penalty = best_params["penalty"]
@@ -374,6 +405,8 @@ class LogRegression:
                 except Exception:
                     print("Invalid input.")
 
+            print("cv =", self.cv)
+
             if break_early:
                 break
 
@@ -391,6 +424,8 @@ class LogRegression:
                     break
                 else:
                     print("Invalid input.")
+
+            print("graph_results =", self.graph_results)
 
             if break_early:
                 break
@@ -420,6 +455,9 @@ class LogRegression:
                     break
                 else:
                     print("Invalid input.")
+
+            if not self.gridsearch:
+                print("solver =", solver)
 
             if break_early:
                 break
@@ -460,6 +498,9 @@ class LogRegression:
                 else:
                     print("Invalid input.")
 
+            if not self.gridsearch:
+                print("penalty =", penalty)
+
             if break_early:
                 break
 
@@ -475,6 +516,8 @@ class LogRegression:
                     break
                 else:
                     print("Invalid input.")
+
+            print("dual =", dual)
 
             if break_early:
                 break
@@ -498,6 +541,8 @@ class LogRegression:
                 except Exception:
                     print("Invalid input.")
 
+            print("tol =", tol)
+
             if break_early:
                 break
 
@@ -520,6 +565,8 @@ class LogRegression:
                 except Exception:
                     print("Invalid input.")
 
+            print("C =", C)
+
             if break_early:
                 break
 
@@ -536,6 +583,8 @@ class LogRegression:
                     break
                 else:
                     print("Invalid input.")
+
+            print("fit_intercept =", fit_intercept)
 
             if break_early:
                 break
@@ -555,6 +604,9 @@ class LogRegression:
                 except Exception:
                     print("Invalid input.")
 
+            if fit_intercept:
+                print("intercept_scaling =", intercept_scaling)
+
             if break_early:
                 break
 
@@ -571,6 +623,8 @@ class LogRegression:
                     break
                 else:
                     print("Invalid input.")
+
+            print("class_weight =", class_weight)
 
             if break_early:
                 break
@@ -594,6 +648,8 @@ class LogRegression:
                 except Exception:
                     print("Invalid input.")
 
+            print("random_state =", random_state)
+
             if break_early:
                 break
 
@@ -616,6 +672,8 @@ class LogRegression:
                 except Exception:
                     print("Invalid input.")
 
+            print("max_iter =", max_iter)
+
             if break_early:
                 break
 
@@ -637,6 +695,8 @@ class LogRegression:
                 else:
                     print("Invalid input.")
 
+            print("multi_class =", multi_class)
+
             if break_early:
                 break
 
@@ -653,6 +713,8 @@ class LogRegression:
                     break
                 else:
                     print("Invalid input.")
+
+            print("verbose =", bool(verbose))
 
             if break_early:
                 break
@@ -671,6 +733,8 @@ class LogRegression:
                     break
                 else:
                     print("Invalid input.")
+
+            print("warm_start =", warm_start)
 
             if break_early:
                 break
@@ -694,6 +758,9 @@ class LogRegression:
                 except Exception:
                     print("Invalid input.")
 
+            if multi_class == "ovr":
+                print("n_jobs =", n_jobs)
+
             if break_early:
                 break
 
@@ -712,6 +779,9 @@ class LogRegression:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            if penalty == "elasticnet":
+                print("l1_ratio =", l1_ratio)
 
             break
 

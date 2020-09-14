@@ -40,12 +40,14 @@ class RandomForest:
         self.roc_auc = None
         self.confusion_matrix = None
         self.cross_val_scores_classifier = None
+        self.feature_importances_classifier = None
 
         self.regressor = None
         self.r2_score = None
         self.r_score = None
         self.mean_squared_error = None
         self.cross_val_scores_regressor = None
+        self.feature_importances_regressor = None
 
     # Accessor methods
 
@@ -77,6 +79,10 @@ class RandomForest:
         """Accessor method for cross_val_scores_classifier."""
         return self.cross_val_scores_classifier
 
+    def get_feature_importances_classifier(self):
+        """Accessor method for feature_importances_classifier."""
+        return self.feature_importances_classifier
+
     def get_regressor(self):
         """Accessor method for regressor."""
         return self.regressor
@@ -96,6 +102,10 @@ class RandomForest:
     def get_cross_val_scores_regressor(self):
         """Accessor method for cross_val_scores_regressor."""
         return self.cross_val_scores_regressor
+
+    def get_feature_importances_regressor(self):
+        """Accessor method for feature_importances_regressor."""
+        return self.feature_importances_regressor
 
     # Modifier methods
 
@@ -155,6 +165,8 @@ class RandomForest:
             self.cross_val_scores_classifier = \
                 cross_val_score(self.classifier, self.attributes, self.labels,
                                 cv=self.cv)
+            self.feature_importances_classifier = \
+                self.classifier.feature_importances_
 
             # Output results
             self._output_classifier_results()
@@ -186,13 +198,17 @@ class RandomForest:
 
             # Metrics
             self.r2_score = self.regressor.score(dataset_X_test, dataset_y_test)
-            self.r_score = sqrt(self.r2_score)
+            if self.r2_score >= 0:
+                self.r_score = sqrt(self.r2_score)
+
             self.mean_squared_error = \
                 mean_squared_error(dataset_y_test,
                                    self.regressor.predict(dataset_X_test))
             self.cross_val_scores_regressor = \
                 cross_val_score(self.regressor, self.attributes, self.labels,
                                 cv=self.cv)
+            self.feature_importances_regressor = \
+                self.regressor.feature_importances_
 
             # Output results
             self._output_regressor_results()
@@ -257,6 +273,30 @@ class RandomForest:
             print("\n==========================================")
             print("= RandomForestRegressor Parameter Inputs =")
             print("==========================================\n")
+
+        print("Default values:", "test_size = 0.25", "cv = 5", sep="\n")
+        if classifier:
+            print("graph_results = False", "criterion = 'gini'",
+                  "class_weight = None", sep="\n")
+        else:
+            print("criterion = 'mse'")
+
+        print("n_estimators = 100",
+              "max_depth = None",
+              "min_samples_split = 2",
+              "min_samples_leaf = 1",
+              "min_weight_fraction_leaf = 0.0",
+              "max_features = 'auto'",
+              "max_leaf_nodes = None",
+              "min_impurity_decrease = 0.0",
+              "bootstrap = True",
+              "oob_score = False",
+              "n_jobs = None",
+              "random_state = None",
+              "verbose = 0",
+              "warm_start = False",
+              "ccp_alpha = 0.0",
+              "max_samples = None", sep="\n")
 
         # Set defaults
         self.test_size = 0.25
@@ -328,6 +368,8 @@ class RandomForest:
                 except Exception:
                     print("Invalid input.")
 
+            print("test_size =", self.test_size)
+
             if break_early:
                 break
 
@@ -387,6 +429,7 @@ class RandomForest:
                     break
 
                 params["max_features"] = feat_params
+                print("max_features:", feat_params)
 
                 while True:
                     print("\nEnter the list of num_estimators to try out.")
@@ -415,6 +458,7 @@ class RandomForest:
                     break
 
                 params["n_estimators"] = n_est_params
+                print("n_estimators:", n_est_params)
 
                 while True:
                     print("\nEnter the criterion to be tried for.")
@@ -482,6 +526,7 @@ class RandomForest:
                     break
 
                 params["criterion"] = crit_params
+                print("criterion:", crit_params)
 
                 while True:
                     print("\nEnter the maximum depth of trees to try for.")
@@ -510,9 +555,10 @@ class RandomForest:
                     break
 
                 params["max_depth"] = max_dep_params
-                self.gs_params = params
-                print("\n= End of GridSearch inputs. =\n")
+                print("max_depths:", max_dep_params)
 
+                print("\n= End of GridSearch inputs. =\n")
+                self.gs_params = params
                 best_params = self._run_gridsearch(classifier)
                 criterion = best_params["criterion"]
                 max_depth = best_params["max_depth"]
@@ -541,6 +587,8 @@ class RandomForest:
                 except Exception:
                     print("Invalid input.")
 
+            print("cv =", self.cv)
+
             if break_early:
                 break
 
@@ -558,6 +606,9 @@ class RandomForest:
                     break
                 else:
                     print("Invalid input.")
+
+            if classifier:
+                print("graph_results =", self.graph_results)
 
             if break_early:
                 break
@@ -580,6 +631,9 @@ class RandomForest:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            if not self.gridsearch:
+                print("n_estimators =", n_estimators)
 
             if break_early:
                 break
@@ -612,6 +666,9 @@ class RandomForest:
                     else:
                         print("Invalid input.")
 
+            if not self.gridsearch:
+                print("criterion =", criterion)
+
             if break_early:
                 break
 
@@ -628,6 +685,9 @@ class RandomForest:
                     break
                 else:
                     print("Invalid input.")
+
+            if classifier:
+                print("class_weight =", class_weight)
 
             if break_early:
                 break
@@ -650,6 +710,9 @@ class RandomForest:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            if not self.gridsearch:
+                print("max_depth =", max_depth)
 
             if break_early:
                 break
@@ -679,6 +742,8 @@ class RandomForest:
                 except Exception:
                     print("Invalid input.")
 
+            print("min_samples_split =", min_samples_split)
+
             if break_early:
                 break
 
@@ -707,6 +772,8 @@ class RandomForest:
                 except Exception:
                     print("Invalid input.")
 
+            print("min_samples_leaf =", min_samples_leaf)
+
             if break_early:
                 break
 
@@ -730,6 +797,8 @@ class RandomForest:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            print("min_weight_fraction_leaf =", min_weight_fraction_leaf)
 
             if break_early:
                 break
@@ -765,6 +834,9 @@ class RandomForest:
                 except Exception:
                     print("Invalid input.")
 
+            if not self.gridsearch:
+                print("max_features =", max_features)
+
             if break_early:
                 break
 
@@ -786,6 +858,8 @@ class RandomForest:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            print("max_leaf_nodes =", max_leaf_nodes)
 
             if break_early:
                 break
@@ -809,6 +883,8 @@ class RandomForest:
                 except Exception:
                     print("Invalid input.")
 
+            print("min_impurity_decrease =", min_impurity_decrease)
+
             if break_early:
                 break
 
@@ -826,6 +902,8 @@ class RandomForest:
                 else:
                     print("Invalid input.")
 
+            print("bootstrap =", bootstrap)
+
             if break_early:
                 break
 
@@ -842,6 +920,8 @@ class RandomForest:
                     break
                 else:
                     print("Invalid input.")
+
+            print("oob_score =", oob_score)
 
             if break_early:
                 break
@@ -865,6 +945,8 @@ class RandomForest:
                 except Exception:
                     print("Invalid input.")
 
+            print("n_jobs =", n_jobs)
+
             if break_early:
                 break
 
@@ -883,6 +965,8 @@ class RandomForest:
                 except Exception:
                     print("Invalid input.")
 
+            print("random_state =", random_state)
+
             if break_early:
                 break
 
@@ -899,6 +983,8 @@ class RandomForest:
                     break
                 else:
                     print("Invalid input.")
+
+            print("verbose =", bool(verbose))
 
             if break_early:
                 break
@@ -917,6 +1003,8 @@ class RandomForest:
                     break
                 else:
                     print("Invalid input.")
+
+            print("warm_start =", warm_start)
 
             if break_early:
                 break
@@ -941,6 +1029,8 @@ class RandomForest:
                 except Exception:
                     print("Invalid input.")
 
+            print("ccp_alpha =", ccp_alpha)
+
             if break_early:
                 break
 
@@ -964,6 +1054,9 @@ class RandomForest:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            if bootstrap:
+                print("max_samples =", max_samples)
 
             break
 
@@ -1016,7 +1109,8 @@ class RandomForest:
         else:
             print("\nConfusion Matrix:\n", self.confusion_matrix)
 
-        print("\nCross Validation Scores: ", self.cross_val_scores_classifier)
+        print("\nCross Validation Scores:", self.cross_val_scores_classifier)
+        print("\nFeature Importances:", self.feature_importances_classifier)
 
         if self.gridsearch:
             print("\n{:<20} {:<20}".format("GridSearch Score:",
@@ -1045,8 +1139,9 @@ class RandomForest:
         print("{:<20} {:<20}".format("Mean Squared Error:",
                                      self.mean_squared_error))
         print("\n{:<20} {:<20}".format("R2 Score:", self.r2_score))
-        print("\n{:<20} {:<20}".format("R Score:", self.r_score))
+        print("\n{:<20} {:<20}".format("R Score:", str(self.r_score)))
         print("\nCross Validation Scores:", self.cross_val_scores_regressor)
+        print("\nFeature Importances:", self.feature_importances_regressor)
 
         if self.gridsearch:
             print("\n{:<20} {:<20}".format("GridSearch Score:",

@@ -131,6 +131,8 @@ class AllRegressionModels:
             else:
                 print("Invalid input.")
 
+        print("verbose =", self.verbose)
+
         while True:
             user_input = input("\nWhat fraction of the dataset should be used "
                                + "for testing (0,1)? ")
@@ -147,6 +149,8 @@ class AllRegressionModels:
                     break
             except Exception:
                 print("Invalid input.")
+
+        print("test_size =", self.test_size)
 
         print("\n===========================================")
         print("= End of inputs; press enter to continue. =")
