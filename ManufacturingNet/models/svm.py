@@ -443,7 +443,9 @@ class SVM:
                 mean_squared_error(self.dataset_y_test, y_prediction)
             self.r2_score_SVR = self.regressor_SVR.score(self.dataset_X_test,
                                                          self.dataset_y_test)
-            self.r_score_SVR = sqrt(self.r2_score_SVR)
+            if self.r2_score_SVR >= 0:
+                self.r_score_SVR = sqrt(self.r2_score_SVR)
+
             self.cross_val_scores_SVR = \
                 cross_val_score(self.regressor_SVR, self.attributes,
                                 self.labels, cv=self.cv)
@@ -508,7 +510,9 @@ class SVM:
             self.r2_score_nu_SVR = \
                 self.regressor_nu_SVR.score(self.dataset_X_test,
                                             self.dataset_y_test)
-            self.r_score_nu_SVR = sqrt(self.r2_score_nu_SVR)
+            if self.r2_score_nu_SVR >= 0:
+                self.r_score_nu_SVR = sqrt(self.r2_score_nu_SVR)
+
             self.cross_val_scores_nu_SVR = \
                 cross_val_score(self.regressor_nu_SVR, self.attributes,
                                 self.labels, cv=self.cv)
@@ -572,7 +576,9 @@ class SVM:
             self.r2_score_linear_SVR = \
                 self.regressor_linear_SVR.score(self.dataset_X_test,
                                                 self.dataset_y_test)
-            self.r_score_linear_SVR = sqrt(self.r2_score_linear_SVR)
+            if self.r2_score_linear_SVR >= 0:
+                self.r_score_linear_SVR = sqrt(self.r2_score_linear_SVR)
+
             self.cross_val_scores_linear_SVR = \
                 cross_val_score(self.regressor_linear_SVR, self.attributes,
                                 self.labels, cv=self.cv)
@@ -618,6 +624,27 @@ class SVM:
             print("\n========================")
             print("= SVC Parameter Inputs =")
             print("========================\n")
+
+        print("Default values:", "test_size = 0.25", "cv = 5",
+              "graph_results = False", sep="\n")
+        if is_nu:
+            print("nu = 0.5")
+        else:
+            print("C = 1.0")
+
+        print("kernel = 'rbf'",
+              "degree = 3",
+              "gamma = 'scale'",
+              "coef0 = 0.0",
+              "shrinking = True",
+              "tol = 0.001",
+              "cache_size = 200",
+              "class_weight = None",
+              "max_iter = -1",
+              "decision_function_shape = 'ovr'",
+              "break_ties = False",
+              "random_state = None",
+              "verbose = False", sep="\n")
 
         # Set defaults
         self.test_size = 0.25
@@ -685,6 +712,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("test_size =", self.test_size)
+
             if break_early:
                 break
 
@@ -745,6 +774,7 @@ class SVM:
                     break
 
                 params["kernel"] = kern_params
+                print("kernels:", kern_params)
 
                 while True:
                     print("\nEnter the list of kernel coefficients/gamma values",
@@ -774,6 +804,7 @@ class SVM:
                     break
 
                 params["gamma"] = gamma_params
+                print("gammas:", gamma_params)
 
                 while not is_nu:
                     print("\nEnter the list of regularization parameters to",
@@ -797,6 +828,7 @@ class SVM:
                                 raise Exception
 
                         params["C"] = gamma_params
+                        print("C values:", gamma_params)
                         break
                     except Exception:
                         print("Invalid input.")
@@ -804,9 +836,8 @@ class SVM:
                 if break_early:
                     break
 
-                self.gs_params = params
                 print("\n= End of GridSearch inputs. =")
-
+                self.gs_params = params
                 best_params = self._run_gridsearch_classifier(is_nu)
                 kernel = best_params["kernel"]
                 gamma = best_params["gamma"]
@@ -835,6 +866,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("cv =", self.cv)
+
             if break_early:
                 break
 
@@ -852,6 +885,8 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            print("graph_results =", self.graph_results)
 
             if break_early:
                 break
@@ -874,6 +909,9 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            if is_nu:
+                print("nu =", nu)
+
             while not is_nu and not self.gridsearch:
                 user_input = \
                     input("\nEnter a positive regularization parameter C: ")
@@ -892,6 +930,9 @@ class SVM:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            if not is_nu and not self.gridsearch:
+                print("C =", C)
 
             if break_early:
                 break
@@ -921,6 +962,9 @@ class SVM:
                 else:
                     print("Invalid input.")
 
+            if not self.gridsearch:
+                print("kernel =", kernel)
+
             if break_early:
                 break
 
@@ -943,6 +987,9 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            if kernel == "poly":
+                print("degree =", degree)
+
             if break_early:
                 break
 
@@ -959,6 +1006,9 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            if kernel in {"rbf", "poly", "sigmoid"} and not self.gridsearch:
+                print("gamma =", gamma)
 
             if break_early:
                 break
@@ -982,6 +1032,9 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            if kernel in {"poly", "sigmoid"}:
+                print("coef0 =", coef0)
+
             if break_early:
                 break
 
@@ -998,6 +1051,8 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            print("shrinking =", shrinking)
 
             if break_early:
                 break
@@ -1021,6 +1076,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("tol =", tol)
+
             if break_early:
                 break
 
@@ -1043,6 +1100,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("cache_size =", cache_size)
+
             if break_early:
                 break
 
@@ -1059,6 +1118,8 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            print("class_weight =", class_weight)
 
             if break_early:
                 break
@@ -1083,6 +1144,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("max_iter =", max_iter)
+
             if break_early:
                 break
 
@@ -1101,6 +1164,8 @@ class SVM:
                 else:
                     print("Invalid input.")
 
+            print("decision_function_shape =", decision_function_shape)
+
             if break_early:
                 break
 
@@ -1116,6 +1181,8 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            print("break_ties =", break_ties)
 
             if break_early:
                 break
@@ -1135,6 +1202,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("random_state =", random_state)
+
             if break_early:
                 break
 
@@ -1148,6 +1217,7 @@ class SVM:
                 else:
                     print("Invalid input.")
 
+            print("verbose =", verbose)
             break
 
         print("\n===========================================")
@@ -1204,6 +1274,21 @@ class SVM:
         print("\n==============================")
         print("= LinearSVC Parameter Inputs =")
         print("==============================\n")
+        print("Default values:",
+              "test_size = 0.25",
+              "cv = 5",
+              "penalty = 'l2'",
+              "loss = 'squared_hinge'",
+              "dual = True",
+              "tol = 0.0001",
+              "C = 1.0",
+              "multi_class = 'ovr'",
+              "fit_intercept = True",
+              "intercept_scaling = 1",
+              "class_weight = None",
+              "random_state = None",
+              "max_iter = 1000",
+              "verbose = False", sep="\n")
 
         # Set defaults
         self.test_size = 0.25
@@ -1232,7 +1317,7 @@ class SVM:
         dual = True
         tol = 0.0001
         C = 1.0
-        multi_class = 'ovr'
+        multi_class = "ovr"
         fit_intercept = True
         intercept_scaling = 1
         class_weight = None
@@ -1262,6 +1347,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("test_size =", self.test_size)
+
             if break_early:
                 break
 
@@ -1284,6 +1371,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("cv =", self.cv)
+
             if break_early:
                 break
 
@@ -1299,6 +1388,8 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            print("fit_intercept =", fit_intercept)
 
             if break_early:
                 break
@@ -1317,6 +1408,9 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            if fit_intercept:
+                print("intercept_scaling =", intercept_scaling)
+
             if break_early:
                 break
 
@@ -1333,6 +1427,8 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            print("penalty =", penalty)
 
             if break_early:
                 break
@@ -1352,6 +1448,8 @@ class SVM:
                 else:
                     print("Invalid input.")
 
+            print("loss =", loss)
+
             if break_early:
                 break
 
@@ -1369,6 +1467,8 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            print("dual =", dual)
 
             if break_early:
                 break
@@ -1392,6 +1492,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("tol =", tol)
+
             if break_early:
                 break
 
@@ -1414,6 +1516,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("C =", C)
+
             if break_early:
                 break
 
@@ -1433,6 +1537,8 @@ class SVM:
                 else:
                     print("Invalid input.")
 
+            print("multi_class =", multi_class)
+
             if break_early:
                 break
 
@@ -1449,6 +1555,8 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            print("class_weight =", class_weight)
 
             if break_early:
                 break
@@ -1472,6 +1580,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("max_iter =", max_iter)
+
             if break_early:
                 break
 
@@ -1490,6 +1600,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("random_state =", random_state)
+
             if break_early:
                 break
 
@@ -1503,6 +1615,7 @@ class SVM:
                 else:
                     print("Invalid input.")
 
+            print("verbose =", verbose)
             break
 
         print("\n===========================================")
@@ -1525,6 +1638,23 @@ class SVM:
             print("\n========================")
             print("= SVR Parameter Inputs =")
             print("========================\n")
+
+        print("Default values:", "test_size = 0.25", "cv = 5", sep="\n")
+        if is_nu:
+            print("nu = 0.5")
+        else:
+            print("epsilon = 0.1")
+
+        print("kernel = 'rbf'",
+              "degree = 3",
+              "gamma = 'scale'",
+              "coef0 = 0.0",
+              "tol = 0.001",
+              "C = 1.0",
+              "shrinking = True",
+              "cache_size = 200",
+              "verbose = False",
+              "max_iter = -1", sep="\n")
 
         # Set defaults
         self.test_size = 0.25
@@ -1557,7 +1687,7 @@ class SVM:
 
         kernel = "rbf"
         degree = 3
-        gamma = 'scale'
+        gamma = "scale"
         coef0 = 0.0
         tol = 0.001
         C = 1.0
@@ -1587,6 +1717,8 @@ class SVM:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            print("test_size =", self.test_size)
 
             if break_early:
                 break
@@ -1648,6 +1780,7 @@ class SVM:
                     break
 
                 params["kernel"] = kern_params
+                print("kernels:", kern_params)
 
                 while is_nu:
                     print("\nEnter a list of decimals for nu.")
@@ -1669,6 +1802,7 @@ class SVM:
                             if num <= 0:
                                 raise Exception
                         params["nu"] = nu_params
+                        print("nu values:", nu_params)
                         break
                     except Exception:
                         print("Invalid input.")
@@ -1694,6 +1828,7 @@ class SVM:
                             if num <= 0:
                                 raise Exception
                         params["epsilon"] = eps_params
+                        print("epsilon values:", eps_params)
                         break
                     except Exception:
                         print("Invalid input.")
@@ -1723,6 +1858,7 @@ class SVM:
                                 raise Exception
 
                         params["C"] = gamma_params
+                        print("C values:", gamma_params)
                         break
                     except Exception:
                         print("Invalid input.")
@@ -1730,9 +1866,8 @@ class SVM:
                 if break_early:
                     break
 
-                self.gs_params = params
                 print("\n= End of GridSearch inputs. =")
-
+                self.gs_params = params
                 best_params = self._run_gridsearch_regressor(is_nu)
                 kernel = best_params["kernel"]
                 if is_nu:
@@ -1763,6 +1898,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("cv =", self.cv)
+
             if break_early:
                 break
 
@@ -1784,6 +1921,9 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            if is_nu and not self.gridsearch:
+                print("nu =", nu)
+
             while not is_nu and not self.gridsearch:
                 user_input = \
                     input("\nEnter a positive epsilon, the range from an actual "
@@ -1803,6 +1943,9 @@ class SVM:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            if not is_nu and not self.gridsearch:
+                print("epsilon =", epsilon)
 
             if break_early:
                 break
@@ -1832,6 +1975,9 @@ class SVM:
                 else:
                     print("Invalid input.")
 
+            if not self.gridsearch:
+                print("kernel =", kernel)
+
             if break_early:
                 break
 
@@ -1854,6 +2000,9 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            if kernel == "poly":
+                print("degree =", degree)
+
             if break_early:
                 break
 
@@ -1870,6 +2019,9 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            if kernel in {"rbf", "poly", "sigmoid"}:
+                print("gamma =", gamma)
 
             if break_early:
                 break
@@ -1893,6 +2045,9 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            if not self.gridsearch or is_nu:
+                print("C =", C)
+
             if break_early:
                 break
 
@@ -1914,6 +2069,9 @@ class SVM:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            if kernel in {"poly", "sigmoid"}:
+                print("coef0 =", coef0)
 
             if break_early:
                 break
@@ -1937,6 +2095,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("tol =", tol)
+
             if break_early:
                 break
 
@@ -1953,6 +2113,8 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            print("shrinking =", shrinking)
 
             if break_early:
                 break
@@ -1975,6 +2137,8 @@ class SVM:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            print("cache_size =", cache_size)
 
             if break_early:
                 break
@@ -1999,6 +2163,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("max_iter =", max_iter)
+
             if break_early:
                 break
 
@@ -2012,6 +2178,7 @@ class SVM:
                 else:
                     print("Invalid input.")
 
+            print("verbose =", verbose)
             break
 
         print("\n===========================================")
@@ -2059,6 +2226,19 @@ class SVM:
         print("\n==============================")
         print("= LinearSVR Parameter Inputs =")
         print("==============================\n")
+        print("Default values:",
+              "test_size = 0.25",
+              "cv = 5",
+              "epsilon = 0.0",
+              "tol = 0.0001",
+              "C = 1.0",
+              "loss = 'epsilon_insensitive'",
+              "fit_intercept = True",
+              "intercept_scaling = 1.0",
+              "dual = True",
+              "random_state = None",
+              "max_iter = 1000",
+              "verbose = False", sep="\n")
 
         # Set defaults
         self.test_size = 0.25
@@ -2115,6 +2295,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("test_size =", self.test_size)
+
             if break_early:
                 break
 
@@ -2136,6 +2318,8 @@ class SVM:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            print("cv =", self.cv)
 
             if break_early:
                 break
@@ -2160,6 +2344,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("epsilon =", epsilon)
+
             if break_early:
                 break
 
@@ -2181,6 +2367,8 @@ class SVM:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            print("tol =", tol)
 
             if break_early:
                 break
@@ -2204,6 +2392,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("C =", C)
+
             if break_early:
                 break
 
@@ -2223,6 +2413,8 @@ class SVM:
                 else:
                     print("Invalid input.")
 
+            print("loss =", loss)
+
             if break_early:
                 break
 
@@ -2238,6 +2430,8 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            print("fit_intercept =", fit_intercept)
 
             if break_early:
                 break
@@ -2256,6 +2450,9 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            if fit_intercept:
+                print("intercept_scaling =", intercept_scaling)
+
             if break_early:
                 break
 
@@ -2273,6 +2470,8 @@ class SVM:
                     break
                 else:
                     print("Invalid input.")
+
+            print("dual =", dual)
 
             if break_early:
                 break
@@ -2296,6 +2495,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("max_iter =", max_iter)
+
             if break_early:
                 break
 
@@ -2314,6 +2515,8 @@ class SVM:
                 except Exception:
                     print("Invalid input.")
 
+            print("random_state =", random_state)
+
             if break_early:
                 break
 
@@ -2327,6 +2530,7 @@ class SVM:
                 else:
                     print("Invalid input.")
 
+            print("verbose =", verbose)
             break
 
         print("\n===========================================")
@@ -2419,7 +2623,7 @@ class SVM:
             print("{:<20} {:<20}".format("Mean Squared Error:",
                                          self.mean_squared_error_SVR))
             print("\n{:<20} {:<20}".format("R2 Score:", self.r2_score_SVR))
-            print("\n{:<20} {:<20}".format("R Score:", self.r_score_SVR))
+            print("\n{:<20} {:<20}".format("R Score:", str(self.r_score_SVR)))
             print("\nCross Validation Scores", self.cross_val_scores_SVR)
 
             if self.gridsearch:
@@ -2435,7 +2639,7 @@ class SVM:
             print("{:<20} {:<20}".format("Mean Squared Error:",
                                          self.mean_squared_error_nu_SVR))
             print("\n{:<20} {:<20}".format("R2 Score:", self.r2_score_nu_SVR))
-            print("\n{:<20} {:<20}".format("R Score:", self.r_score_nu_SVR))
+            print("\n{:<20} {:<20}".format("R Score:", str(self.r_score_nu_SVR)))
             print("\nCross Validation Scores:", self.cross_val_scores_nu_SVR)
 
             if self.gridsearch:
@@ -2452,7 +2656,8 @@ class SVM:
                                          self.mean_squared_error_linear_SVR))
             print("\n{:<20} {:<20}".format("R2 Score:",
                                            self.r2_score_linear_SVR))
-            print("\n{:<20} {:<20}".format("R Score:", self.r_score_linear_SVR))
+            print("\n{:<20} {:<20}".format("R Score:",
+                                           str(self.r_score_linear_SVR)))
             print("\nCross Validation Scores:\n",
                   self.cross_val_scores_linear_SVR)
 

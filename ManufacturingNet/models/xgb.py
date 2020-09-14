@@ -40,6 +40,7 @@ class XGBoost:
         self.r2_score = None
         self.r_score = None
         self.cross_val_scores_regressor = None
+        self.feature_importances_regressor = None
 
         self.classifier = None
         self.accuracy = None
@@ -47,6 +48,7 @@ class XGBoost:
         self.roc_auc = None
         self.classes = None
         self.cross_val_scores_classifier = None
+        self.feature_importances_classifier = None
 
     # Accessor methods
 
@@ -78,9 +80,17 @@ class XGBoost:
         """Accessor method for cross_val_scores_classifier."""
         return self.cross_val_scores_classifier
 
+    def get_feature_importances_classifier(self):
+        """Accessor method for feature_importances_classifier."""
+        return self.feature_importances_classifier
+
     def get_cross_val_scores_regressor(self):
         """Accessor method for cross_val_scores_regressor."""
         return self.cross_val_scores_regressor
+
+    def get_feature_importances_regressor(self):
+        """Accessor method for feature_importances_regressor."""
+        return self.feature_importances_regressor
 
     def get_mean_squared_error(self):
         """Accessor method for mean_squared_error."""
@@ -145,10 +155,14 @@ class XGBoost:
             self.mean_squared_error = mean_squared_error(dataset_y_test,
                                                          y_prediction)
             self.r2_score = self.regressor.score(dataset_X_test, dataset_y_test)
-            self.r_score = sqrt(self.r2_score)
+            if self.r2_score >= 0:
+                self.r_score = sqrt(self.r2_score)
+
             self.cross_val_scores_regressor = \
                 cross_val_score(self.regressor, self.attributes, self.labels,
                                 cv=self.cv)
+            self.feature_importances_regressor = \
+                self.regressor.feature_importances_
 
             # Output results
             self._output_regressor_results()
@@ -221,6 +235,8 @@ class XGBoost:
             self.cross_val_scores_classifier = \
                 cross_val_score(self.classifier, self.attributes, self.labels,
                                 cv=self.cv)
+            self.feature_importances_classifier = \
+                self.classifier.feature_importances_
 
             # Output results
             self._output_classifier_results()
@@ -263,34 +279,37 @@ class XGBoost:
             print("= XGBRegressor Parameter Inputs =")
             print("=================================\n")
 
-        # Set defaults; same parameters for classification and regression
+        print("Default values:", "test_size = 0.25", "cv = 5", sep="\n")
         if classifier:
-            objective = "binary:logistic"
+            print("graph_results = False",
+                  "objective = 'binary:logistic'", sep="\n")
         else:
-            objective = "reg:squarederror"
+            print("objective = 'reg:squarederror'")
 
+        print("n_estimators = 100",
+              "max_depth = 3",
+              "learning_rate = 0.1",
+              "booster = 'gbtree'",
+              "n_jobs = 1",
+              "nthread = None",
+              "gamma = 0",
+              "min_child_weight = 1",
+              "max_delta_step = 0",
+              "subsample = 1",
+              "colsample_bytree = 1",
+              "colsample_bylevel = 1",
+              "reg_alpha = 0",
+              "reg_lambda = 1",
+              "scale_pos_weight = 1",
+              "base_score = 0.5",
+              "random_state = 42",
+              "missing = None",
+              "verbosity = False", sep="\n")
+
+        # Set defaults
         self.test_size = 0.25
         self.cv = None
         self.graph_results = False
-        n_estimators = 100
-        max_depth = 3
-        learning_rate = 0.1
-        booster = "gbtree"
-        n_jobs = 1
-        nthread = None
-        gamma = 0
-        min_child_weight = 1
-        max_delta_step = 0
-        subsample = 1
-        colsample_bytree = 1
-        colsample_bylevel = 1
-        reg_alpha = 0
-        reg_lambda = 1
-        scale_pos_weight = 1
-        base_score = 0.5
-        random_state = 42
-        missing = None
-        verbosity = 0
 
         while True:
             user_input = input("\nUse default parameters (Y/n)? ").lower()
@@ -310,6 +329,32 @@ class XGBoost:
               "default value.")
         print("If you finish entering parameters early, enter 'q' to skip",
               "ahead.\n")
+
+        # Set more defaults; same parameters for classification and regression
+        if classifier:
+            objective = "binary:logistic"
+        else:
+            objective = "reg:squarederror"
+
+        n_estimators = 100
+        max_depth = 3
+        learning_rate = 0.1
+        booster = "gbtree"
+        n_jobs = 1
+        nthread = None
+        gamma = 0
+        min_child_weight = 1
+        max_delta_step = 0
+        subsample = 1
+        colsample_bytree = 1
+        colsample_bylevel = 1
+        reg_alpha = 0
+        reg_lambda = 1
+        scale_pos_weight = 1
+        base_score = 0.5
+        random_state = 42
+        missing = None
+        verbosity = 0
 
         # Get user parameter input
         while True:
@@ -332,6 +377,8 @@ class XGBoost:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            print("test_size =", self.test_size)
 
             if break_early:
                 break
@@ -392,6 +439,7 @@ class XGBoost:
                     break
 
                 params["booster"] = boost_params
+                print("boosters:", boost_params)
 
                 while True:
                     print("\nEnter a list of learning rates to try out.")
@@ -420,6 +468,7 @@ class XGBoost:
                     break
 
                 params["learning_rate"] = lr_params
+                print("learning_rates:", lr_params)
 
                 while True:
                     print("\nEnter a list of gamma values/minimum loss",
@@ -449,6 +498,7 @@ class XGBoost:
                     break
 
                 params["gamma"] = gamma_params
+                print("gammas:", gamma_params)
 
                 while True:
                     print("\nEnter a list of number of trees to try out.")
@@ -477,6 +527,7 @@ class XGBoost:
                     break
 
                 params["n_estimators"] = ntrees_params
+                print("n_estimators:", ntrees_params)
 
                 while True:
                     print("\nEnter a list of max tree depths to try out.")
@@ -505,9 +556,10 @@ class XGBoost:
                     break
 
                 params["max_depth"] = mdepth_params
-                self.gs_params = params
-                print("\n= End of GridSearch inputs. =\n")
+                print("max_depths:", mdepth_params)
 
+                print("\n= End of GridSearch inputs. =\n")
+                self.gs_params = params
                 best_params = self._run_gridsearch(classifier)
                 booster = best_params["booster"]
                 gamma = best_params["gamma"]
@@ -537,6 +589,8 @@ class XGBoost:
                 except Exception:
                     print("Invalid input.")
 
+            print("cv =", self.cv)
+
             if break_early:
                 break
 
@@ -554,6 +608,9 @@ class XGBoost:
                     break
                 else:
                     print("Invalid input.")
+
+            if classifier:
+                print("graph_results =", self.graph_results)
 
             if break_early:
                 break
@@ -577,12 +634,14 @@ class XGBoost:
                 except Exception:
                     print("Invalid input.")
 
+            if not self.gridsearch:
+                print("n_estimators =", n_estimators)
+
             if break_early:
                 break
 
             while not self.gridsearch:
-                print("\nEnter a positive maximum tree depth.")
-                user_input = input("Press enter for no maximum depth: ")
+                user_input = input("\nEnter a positive maximum tree depth: ")
                 try:
                     if user_input == "":
                         break
@@ -598,6 +657,9 @@ class XGBoost:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            if not self.gridsearch:
+                print("max_depth =", max_depth)
 
             if break_early:
                 break
@@ -620,6 +682,9 @@ class XGBoost:
                 except Exception:
                     print("Invalid input.")
 
+            if not self.gridsearch:
+                print("learning_rate =", learning_rate)
+
             if break_early:
                 break
 
@@ -640,6 +705,9 @@ class XGBoost:
                     break
                 else:
                     print("Invalid input.")
+
+            if not self.gridsearch:
+                print("booster =", booster)
 
             if break_early:
                 break
@@ -662,6 +730,8 @@ class XGBoost:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            print("n_jobs =", n_jobs)
 
             if break_early:
                 break
@@ -686,6 +756,9 @@ class XGBoost:
                 except Exception:
                     print("Invalid input.")
 
+            if not self.gridsearch:
+                print("gamma =", gamma)
+
             if break_early:
                 break
 
@@ -706,6 +779,8 @@ class XGBoost:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            print("min_child_weight =", min_child_weight)
 
             if break_early:
                 break
@@ -728,6 +803,8 @@ class XGBoost:
                 except Exception:
                     print("Invalid input.")
 
+            print("max_delta_step =", max_delta_step)
+
             if break_early:
                 break
 
@@ -748,6 +825,8 @@ class XGBoost:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            print("subsample =", subsample)
 
             if break_early:
                 break
@@ -771,6 +850,8 @@ class XGBoost:
                 except Exception:
                     print("Invalid input.")
 
+            print("colsample_bytree =", colsample_bytree)
+
             if break_early:
                 break
 
@@ -792,6 +873,8 @@ class XGBoost:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            print("colsample_bylevel =", colsample_bylevel)
 
             if break_early:
                 break
@@ -815,6 +898,8 @@ class XGBoost:
                 except Exception:
                     print("Invalid input.")
 
+            print("reg_alpha =", reg_alpha)
+
             if break_early:
                 break
 
@@ -837,6 +922,8 @@ class XGBoost:
                 except Exception:
                     print("Invalid input.")
 
+            print("reg_lambda =", reg_lambda)
+
             if break_early:
                 break
 
@@ -858,6 +945,8 @@ class XGBoost:
                     break
                 except Exception:
                     print("Invalid input.")
+
+            print("scale_pos_weight =", scale_pos_weight)
 
             if break_early:
                 break
@@ -882,6 +971,8 @@ class XGBoost:
                 except Exception:
                     print("Invalid input.")
 
+            print("base_score =", base_score)
+
             if break_early:
                 break
 
@@ -900,6 +991,8 @@ class XGBoost:
                 except Exception:
                     print("Invalid input.")
 
+            print("random_state =", random_state)
+
             if break_early:
                 break
 
@@ -914,6 +1007,7 @@ class XGBoost:
                 else:
                     print("Invalid input.")
 
+            print("verbose =", bool(verbosity))
             break
 
         print("\n===========================================")
@@ -964,6 +1058,7 @@ class XGBoost:
             print("\nConfusion Matrix:\n", self.confusion_matrix)
 
         print("\nCross Validation Scores:", self.cross_val_scores_classifier)
+        print("\nFeature Importances:", self.feature_importances_classifier)
 
         if self.gridsearch:
             print("\n{:<20} {:<20}".format("GridSearch Score:",
@@ -992,8 +1087,9 @@ class XGBoost:
         print("{:<20} {:<20}".format("Mean Squared Error:",
                                      self.mean_squared_error))
         print("\n{:<20} {:<20}".format("R2 Score:", self.r2_score))
-        print("\n{:<20} {:<20}".format("R Score:", self.r_score))
+        print("\n{:<20} {:<20}".format("R Score:", str(self.r_score)))
         print("\nCross Validation Scores:", self.cross_val_scores_regressor)
+        print("\nFeature Importances:", self.feature_importances_regressor)
 
         if self.gridsearch:
             print("\n{:<20} {:<20}".format("GridSearch Score:",

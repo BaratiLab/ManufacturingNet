@@ -119,7 +119,9 @@ class LinRegression:
                                                          y_prediction)
             self.r2_score = self.regression.score(dataset_X_test,
                                                   dataset_y_test)
-            self.r_score = sqrt(self.r2_score)
+            if self.r2_score >= 0:
+                self.r_score = sqrt(self.r2_score)
+
             self.cross_val_scores = \
                 cross_val_score(self.regression, self.attributes, self.labels,
                                 cv=self.cv)
@@ -161,7 +163,15 @@ class LinRegression:
         """Runs UI for getting parameters and creating model."""
         print("\n==================================")
         print("= LinRegression Parameter Inputs =")
-        print("==================================")
+        print("==================================\n")
+        print("Default values:",
+              "test_size = 0.25",
+              "cv = 5",
+              "graph_results = False",
+              "fit_intercept = True",
+              "normalize = False",
+              "copy_X = True",
+              "n_jobs = None", sep="\n")
 
         # Set defaults
         self.test_size = 0.25
@@ -213,6 +223,8 @@ class LinRegression:
                 except Exception:
                     print("Invalid input.")
 
+            print("test_size =", self.test_size)
+
             if break_early:
                 break
 
@@ -235,6 +247,8 @@ class LinRegression:
                 except Exception:
                     print("Invalid input.")
 
+            print("cv =", self.cv)
+
             if break_early:
                 break
 
@@ -250,6 +264,9 @@ class LinRegression:
                     break
                 else:
                     print("Invalid input.")
+
+            if self.attributes.shape[1] == 1:
+                print("graph_results =", self.graph_results)
 
             if break_early:
                 break
@@ -268,6 +285,8 @@ class LinRegression:
                 else:
                     print("Invalid input.")
 
+            print("fit_intercept =", fit_intercept)
+
             if break_early:
                 break
 
@@ -283,6 +302,8 @@ class LinRegression:
                     break
                 else:
                     print("Invalid input.")
+
+            print("normalize =", normalize)
 
             if break_early:
                 break
@@ -300,6 +321,8 @@ class LinRegression:
                     break
                 else:
                     print("Invalid input.")
+
+            print("copy_X =", copy_X)
 
             if break_early:
                 break
@@ -319,6 +342,8 @@ class LinRegression:
                         break
                 except Exception:
                     print("Invalid input.")
+
+            print("n_jobs =", n_jobs)
             break
 
         print("\n===========================================")
@@ -340,7 +365,7 @@ class LinRegression:
         print("\n{:<20} {:<20}".format("Mean Squared Error:",
                                        self.mean_squared_error))
         print("\n{:<20} {:<20}".format("R2 Score:", self.r2_score))
-        print("\n{:<20} {:<20}".format("R Score:", self.r_score))
+        print("\n{:<20} {:<20}".format("R Score:", str(self.r_score)))
         print("\nCross Validation Scores:\n", self.cross_val_scores)
 
         print("\n\nCall predict() to make predictions for new data.")
