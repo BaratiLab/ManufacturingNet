@@ -17,6 +17,8 @@ import datetime
 import matplotlib.pyplot as plt
 from torchvision.models import mobilenet_v2
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import r2_score
 
 
 class MyDataset(data.Dataset):
@@ -67,25 +69,25 @@ class MobileNet():
 
         self._get_epoch()           # getting an input for number oftraining epochs
 
-
         self.dataloader()
 
         self.main()             # run function
 
     def get_num_classes(self):
-        print('Question [1/8]: No of classes:')
+        print('Question [1/9]: No of classes:')
         print('\n')
         gate = 0
         while gate!= 1:
-            self.num_classes = int(input('Please enter the number of classes for classification: '))
-            if int(self.num_classes) >1 :
+            self.num_classes_input = (input('Please enter the number of classes \nFor classification (2 or more) \nFor Regression enter 1: '))
+            if self.num_classes_input.isnumeric() and int(self.num_classes_input) >0 :
+                self.num_classes=int(self.num_classes_input)
                 gate =1
             else:
                 print('Please enter a valid input')
         spacing()
     
     def get_pretrained_model(self):
-        print('Question [2/8]: Model Selection:')
+        print('Question [2/9]: Model Selection:')
         print('\n')
         
         gate=0
@@ -108,12 +110,8 @@ class MobileNet():
 
         spacing()
 
-
-
-
-
     def _get_batchsize_input(self):
-        print('Question [3/8]: Batchsize:')
+        print('Question [3/9]: Batchsize:')
         print('\n')
         # Method for getting batch size input
         gate = 0
@@ -126,7 +124,7 @@ class MobileNet():
         spacing()
 
     def _get_valsize_input(self):
-        print('Question [4/8]: Validation_size:')
+        print('Question [4/9]: Validation_size:')
         # Method for getting validation set size input
         gate = 0
         while gate!= 1:
@@ -151,7 +149,7 @@ class MobileNet():
             self.cuda=False
     
     def _get_loss_function(self):
-        print('Question [5/8]: Loss function:')
+        print('Question [5/9]: Loss function:')
         print('\n')
         # Method for getting a loss function for training
         self.criterion_list = {1:nn.CrossEntropyLoss(),2:torch.nn.L1Loss(),3:torch.nn.SmoothL1Loss(),4:torch.nn.MSELoss()}
@@ -187,7 +185,7 @@ class MobileNet():
     
 
     def _get_optimizer(self):
-        print('Question [6/8]: Optimizer:')
+        print('Question [6/9]: Optimizer:')
         print('\n')
 
         # Method for getting a optimizer input
@@ -204,7 +202,8 @@ class MobileNet():
             else:
                 print('Please enter a valid input')
         spacing()
-                
+
+        print('Question [7/9]: Learning_Rate:')        
         gate = 0
         while gate!= 1:
             self.user_lr = input('Please enter a required postive value for learning rate \n For default learning rate, please directly press enter without any input: ')
@@ -224,7 +223,7 @@ class MobileNet():
 
 #scheduler
     def _get_scheduler(self):
-        print('Question [7/8]: Scheduler:')
+        print('Question [8/9]: Scheduler:')
         print('\n')
 
         # Method for getting scheduler
@@ -260,7 +259,7 @@ class MobileNet():
         spacing()
     
     def _get_epoch(self):
-        print('Question [8/8]: Number of Epochs:')
+        print('Question [9/9]: Number of Epochs:')
         print('\n')
 
         # Method for getting number of epochs for training the model
@@ -273,6 +272,60 @@ class MobileNet():
                 gate =1
             else:
                 print('Please enter a valid numeric input. The number must be integer and greater than zero')
+
+    def main(self):
+
+        # Method integrating all the functions and training the model
+
+        self.net.to(self.device)
+
+        self.get_model_summary()        # printing summaray of the model
+
+        self.train_model()          # training the model
+
+        self.get_loss_graph()           # saving the loss graph
+
+        self.get_loss_graph()           # saving the loss graph
+
+        if self.criterion_input == '1':
+
+            self.get_accuracy_graph()           # saving the accuracy graph
+            self.get_confusion_matrix()         # printing confusion matrix
+        else:
+            self.get_r2_score()             # saving r2 score graph
+
+        self._save_model()               # saving model paramters
+    
+    def get_model_summary(self):
+
+        # Method for getting the summary of the model
+        print('Model Summary:')
+        print(' ')
+        print('Criterion: ', self.criterion)
+        print('Optimizer: ', self.optimizer)
+        print('Scheduler: ', self.scheduler)
+        print('Batch size: ', self.batch_size)
+        print('Initial learning rate: ', self.lr)
+        print('Number of training epochs: ', self.numEpochs)
+        print('Device: ', self.device)
+
+        spacing()
+
+    def _save_model(self):
+
+        # Method for saving the model parameters if user wants to
+
+        gate=0
+        save_model = input('Do you want to save the model weights? (y/n): ')
+        while gate  != 1:
+            if save_model.lower() =='y' or save_model.lower() =='yes':
+                path = 'model_parameters.pth'
+                torch.save(self.net.state_dict(),path)
+                gate = 1
+            elif save_model.lower() =='n' or save_model.lower() =='no':
+                gate = 1
+            else:
+                print('Please enter a valid input')
     
     def train_model(self):
 
@@ -285,6 +338,8 @@ class MobileNet():
         self.dev_accuracy = []
         total_predictions = 0.0
         correct_predictions = 0.0
+
+        print('Training the model...')
 
         for epoch in range(self.numEpochs):
             
@@ -354,6 +409,8 @@ class MobileNet():
         total_predictions = 0.0
         correct_predictions = 0.0
         acc = 0
+        self.actual = []
+        self.predict = []
 
         for batch_idx, (data, target) in enumerate(self.dev_loader): 
 
@@ -367,10 +424,13 @@ class MobileNet():
                 _, predicted = torch.max(outputs.data, 1)
                 total_predictions += target.size(0)
                 correct_predictions += (predicted == target).sum().item()
+                self.predict.append(predicted.detach().cpu().numpy())
 
             else:
                 loss = self.criterion(outputs, target)
+                self.predict.append(outputs.detach().cpu().numpy())
             running_loss += loss.item()
+            self.actual.append(target.detach().cpu().numpy())
 
 
         running_loss /= len(self.dev_loader)
@@ -407,73 +467,54 @@ class MobileNet():
         plt.title('Model accuracy')
         plt.xlabel('Epochs')
         plt.ylabel('acc')
-        plt.savefig('accuracy.png') 
+        plt.savefig('accuracy.png')
+    
+    def get_confusion_matrix(self):
+
+        # Method for getting the confusion matrix for classification problem
+        print('Confusion Matix: ')
+
+        result = confusion_matrix(np.concatenate(np.array(self.predict)), np.concatenate(np.array(self.actual)))
+        print(result)
+
+    def get_r2_score(self):
+
+        # Method for getting the r2 score for regression problem
+        print('r2 score: ')
+        result = r2_score(np.concatenate(np.array(self.predict)), np.concatenate(np.array(self.actual)))
+        print(result)
+
+        plt.figure(figsize=(8,8))
+        plt.scatter(np.concatenate(np.array(self.actual)), np.concatenate(np.array(self.predict)),label='r2 score', s = 1)
+        plt.legend()
+        plt.title('Model r2 score: ' + str(result))
+        plt.xlabel('labels')
+        plt.ylabel('predictions')
+        plt.savefig('r2_score.png')
+
 
     def get_prediction(self, x_input):
 
+        """
+        Pass in an input numpy array for making prediction.
+        For passing multiple inputs, make sure to keep number of examples to be the first dimension of the input.
+        For example, 10 data points need to be checked and each point has (3, 50, 50) resized or original input size, the shape of the array must be (10, 3, 50, 50).
+        For more information, please see documentation.
+
+        """
+
         # Method to use at the time of inference
 
-        if len(x_input.shape) == 1:             # handling the case of single input
-
-            x_input = (x_input).reshape(1,-1)
+        if len(x_input.shape) == 3:             # handling the case of single
+            
+            x_input = (x_input).reshape(1,x_input.shape[0], x_input.shape[1], x_input.shape[2])
             
         x_input = torch.from_numpy(x_input).to(self.device)
 
         net_output = self.net.predict(x_input)
 
         if self.criterion_input == '1':             # handling the case of classification problem
-
-             _, net_output = torch.max(net_output.data, 1)
+            
+            _, net_output = torch.max(net_output.data, 1)
 
         return net_output
-    
-    def get_model_summary(self):
-
-        # Method for getting the summary of the model
-        print('Model Summary:')
-        print(' ')
-        print('Criterion: ', self.criterion)
-        print('Optimizer: ', self.optimizer)
-        print('Scheduler: ', self.scheduler)
-        print('Batch size: ', self.batch_size)
-        print('Initial learning rate: ', self.lr)
-        print('Number of training epochs: ', self.numEpochs)
-        print('Device: ', self.device)
-
-        spacing()
-
-    
-    def main(self):
-
-        # Method integrating all the functions and training the model
-
-        self.net.to(self.device)
-
-        self.get_model_summary()        # printing summaray of the model
-
-        self.train_model()          # training the model
-
-        self.get_loss_graph()           # saving the loss graph
-
-        if self.criterion_input == '1':
-
-            self.get_accuracy_graph()           # saving the accuracy graph
-
-        self._save_model()              # saving model paramters
-
-    def _save_model(self):
-
-        # Method for saving the model parameters if user wants to
-
-        gate=0
-        save_model = input('Do you want to save the model weights? (y/n): ')
-        while gate  != 1:
-            if save_model.lower() =='y' or save_model.lower() =='yes':
-                path = 'model_parameters.pth'
-                torch.save(self.net.state_dict(),path)
-                gate = 1
-            elif save_model.lower() =='n' or save_model.lower() =='no':
-                gate = 1
-            else:
-                print('Please enter a valid input')
-  
