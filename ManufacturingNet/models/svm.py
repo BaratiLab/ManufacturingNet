@@ -8,12 +8,14 @@ View the documentation at https://manufacturingnet.readthedocs.io/.
 """
 
 from math import sqrt
+
 import matplotlib.pyplot as plt
-from sklearn.metrics import make_scorer, accuracy_score, roc_curve, \
-    roc_auc_score, confusion_matrix, mean_squared_error
-from sklearn.model_selection import GridSearchCV, cross_val_score, \
-    train_test_split
-from sklearn.svm import SVC, NuSVC, LinearSVC, SVR, NuSVR, LinearSVR
+from sklearn.metrics import (accuracy_score, confusion_matrix, make_scorer,
+                             mean_squared_error, roc_auc_score, roc_curve)
+from sklearn.model_selection import (GridSearchCV, cross_val_score,
+                                     train_test_split)
+from sklearn.svm import SVC, SVR, LinearSVC, LinearSVR, NuSVC, NuSVR
+
 
 class SVM:
     """Class model for support vector machine (SVM) models."""
@@ -245,7 +247,6 @@ class SVM:
                 self.confusion_matrix_SVC = confusion_matrix(self.dataset_y_test,
                                                              y_prediction)
 
-
             self.cross_val_scores_SVC = \
                 cross_val_score(self.classifier_SVC, self.attributes,
                                 self.labels, cv=self.cv)
@@ -311,7 +312,8 @@ class SVM:
             # If classification is binary, calculate roc_auc
             if probas.shape[1] == 2:
                 self.bin = True
-                self.roc_auc_nu_SVC = roc_auc_score(y_prediction, probas[::, 1])
+                self.roc_auc_nu_SVC = roc_auc_score(
+                    y_prediction, probas[::, 1])
                 self.fpr, self.tpr, _ = \
                     roc_curve(self.dataset_y_test, probas[::, 1])
             # Else, calculate confusion matrix
@@ -570,7 +572,8 @@ class SVM:
                 return
 
             # Metrics
-            y_prediction = self.regressor_linear_SVR.predict(self.dataset_X_test)
+            y_prediction = self.regressor_linear_SVR.predict(
+                self.dataset_X_test)
             self.mean_squared_error_linear_SVR = \
                 mean_squared_error(self.dataset_y_test, y_prediction)
             self.r2_score_linear_SVR = \
@@ -2579,7 +2582,8 @@ class SVM:
 
             print("{:<20} {:<20}".format("Accuracy:", self.accuracy_nu_SVC))
             if self.bin:
-                print("\n{:<20} {:<20}".format("ROC AUC:", self.roc_auc_nu_SVC))
+                print("\n{:<20} {:<20}".format(
+                    "ROC AUC:", self.roc_auc_nu_SVC))
             else:
                 print("\nConfusion Matrix:\n", self.confusion_matrix_nu_SVC)
 
@@ -2602,7 +2606,8 @@ class SVM:
             print("= LinearSVC Results =")
             print("=====================\n")
 
-            print("{:<20} {:<20}".format("Accuracy:", self.accuracy_linear_SVC))
+            print("{:<20} {:<20}".format(
+                "Accuracy:", self.accuracy_linear_SVC))
             print("\nCross Validation Scores:",
                   self.cross_val_scores_linear_SVC)
 
@@ -2639,7 +2644,8 @@ class SVM:
             print("{:<20} {:<20}".format("Mean Squared Error:",
                                          self.mean_squared_error_nu_SVR))
             print("\n{:<20} {:<20}".format("R2 Score:", self.r2_score_nu_SVR))
-            print("\n{:<20} {:<20}".format("R Score:", str(self.r_score_nu_SVR)))
+            print("\n{:<20} {:<20}".format(
+                "R Score:", str(self.r_score_nu_SVR)))
             print("\nCross Validation Scores:", self.cross_val_scores_nu_SVR)
 
             if self.gridsearch:

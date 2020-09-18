@@ -8,12 +8,14 @@ View the documentation at https://manufacturingnet.readthedocs.io/.
 """
 
 from math import sqrt
+
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn.metrics import mean_squared_error, roc_auc_score, \
-    make_scorer, accuracy_score, roc_curve, confusion_matrix
-from sklearn.model_selection import GridSearchCV, cross_val_score, \
-    train_test_split
+from sklearn.metrics import (accuracy_score, confusion_matrix, make_scorer,
+                             mean_squared_error, roc_auc_score, roc_curve)
+from sklearn.model_selection import (GridSearchCV, cross_val_score,
+                                     train_test_split)
+
 
 class RandomForest:
     """Class framework for random forest classification and regression
@@ -155,12 +157,12 @@ class RandomForest:
             if probas.shape[1] == 2:
                 self.bin = True
                 self.roc_auc = roc_auc_score(y_prediction, probas[::, 1])
-                self.fpr, self.tpr, _ = roc_curve(dataset_y_test, probas[::, 1])
+                self.fpr, self.tpr, _ = roc_curve(
+                    dataset_y_test, probas[::, 1])
             # Else, calculate confusion matrix
             else:
                 self.confusion_matrix = confusion_matrix(dataset_y_test,
                                                          y_prediction)
-
 
             self.cross_val_scores_classifier = \
                 cross_val_score(self.classifier, self.attributes, self.labels,
@@ -197,7 +199,8 @@ class RandomForest:
                 return
 
             # Metrics
-            self.r2_score = self.regressor.score(dataset_X_test, dataset_y_test)
+            self.r2_score = self.regressor.score(
+                dataset_X_test, dataset_y_test)
             if self.r2_score >= 0:
                 self.r_score = sqrt(self.r2_score)
 
@@ -642,7 +645,8 @@ class RandomForest:
                 print("\nWhich criteria should be used for measuring split",
                       "quality?")
                 if classifier:
-                    user_input = input("Enter 1 for 'gini' or 2 for 'entropy': ")
+                    user_input = input(
+                        "Enter 1 for 'gini' or 2 for 'entropy': ")
                     if user_input == "2":
                         criterion = "entropy"
                         break
