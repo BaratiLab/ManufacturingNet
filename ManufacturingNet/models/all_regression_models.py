@@ -8,11 +8,13 @@ View the documentation at https://manufacturingnet.readthedocs.io/.
 import io
 import time
 from contextlib import redirect_stderr, redirect_stdout
+
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-from sklearn.svm import SVR, NuSVR, LinearSVR
+from sklearn.svm import SVR, LinearSVR, NuSVR
 from xgboost import XGBRegressor
+
 
 class AllRegressionModels:
     """Wrapper class around all supported regression models:
@@ -101,7 +103,7 @@ class AllRegressionModels:
         if not self.verbose:
             suppress_output = io.StringIO()
             with redirect_stderr(suppress_output), \
-                 redirect_stdout(suppress_output):
+                    redirect_stdout(suppress_output):
                 self._all_regression_models_runner()
         else:
             self._all_regression_models_runner()

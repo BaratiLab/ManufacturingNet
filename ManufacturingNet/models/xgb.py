@@ -7,13 +7,15 @@ View the documentation at https://manufacturingnet.readthedocs.io/.
 """
 
 from math import sqrt
+
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import accuracy_score, confusion_matrix, \
-    mean_squared_error, roc_auc_score, roc_curve, make_scorer
-from sklearn.model_selection import cross_val_score, train_test_split, \
-    GridSearchCV
+from sklearn.metrics import (accuracy_score, confusion_matrix, make_scorer,
+                             mean_squared_error, roc_auc_score, roc_curve)
+from sklearn.model_selection import (GridSearchCV, cross_val_score,
+                                     train_test_split)
 from xgboost import XGBClassifier, XGBRegressor
+
 
 class XGBoost:
     """Class framework for XGBoost's classification and regression
@@ -154,7 +156,8 @@ class XGBoost:
             # Metrics
             self.mean_squared_error = mean_squared_error(dataset_y_test,
                                                          y_prediction)
-            self.r2_score = self.regressor.score(dataset_X_test, dataset_y_test)
+            self.r2_score = self.regressor.score(
+                dataset_X_test, dataset_y_test)
             if self.r2_score >= 0:
                 self.r_score = sqrt(self.r2_score)
 
@@ -226,7 +229,8 @@ class XGBoost:
             if probas.shape[1] == 2:
                 self.bin = True
                 self.roc_auc = roc_auc_score(y_prediction, probas[::, 1])
-                self.fpr, self.tpr, _ = roc_curve(dataset_y_test, probas[::, 1])
+                self.fpr, self.tpr, _ = roc_curve(
+                    dataset_y_test, probas[::, 1])
             # Else, calculate confusion_matrix
             else:
                 self.confusion_matrix = \

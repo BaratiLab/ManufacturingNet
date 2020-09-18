@@ -7,10 +7,12 @@ View the documentation at https://manufacturingnet.readthedocs.io/.
 """
 
 from math import sqrt
+
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import cross_val_score, train_test_split
+
 
 class LinRegression:
     """Class framework for linear regression model."""

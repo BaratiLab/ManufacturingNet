@@ -7,6 +7,7 @@ View the documentation at https://manufacturingnet.readthedocs.io/.
 import numpy as np
 import scipy.stats
 
+
 class Featurizer:
     """Featurizer currently supports the 20 features below. Each
     supported feature is contained within its own method.
@@ -107,7 +108,8 @@ class Featurizer:
         of numbers.
         """
         try:
-            ans = np.sqrt(np.mean(a ** 2, axis)) / np.mean(np.absolute(a), axis)
+            ans = np.sqrt(np.mean(a ** 2, axis)) / \
+                np.mean(np.absolute(a), axis)
             return ans
         except Exception as e:
             print("An exception occurred. Here is the message:\n", e)
@@ -196,7 +198,6 @@ class Featurizer:
         except Exception as e:
             print("An exception occurred. Here is the message:\n", e)
 
-
     def meanabsdev(self, a, axis=0):
         """The mean absolute deviation is the average of the absolute
         deviations from a central point.
@@ -207,12 +208,12 @@ class Featurizer:
             if axis == 0:
                 ans = np.mean(np.abs(a - np.mean(a, axis)), axis)
             else:
-                ans = np.mean(np.abs(a - np.mean(a, axis).reshape(a.shape[0], 1)), axis)
+                ans = np.mean(
+                    np.abs(a - np.mean(a, axis).reshape(a.shape[0], 1)), axis)
 
             return ans
         except Exception as e:
             print("An exception occurred. Here is the message:\n", e)
-
 
     def medianabsdev(self, a, axis=0):
         """The median absolute deviation of a data set is the median of
@@ -224,7 +225,8 @@ class Featurizer:
             if axis == 0:
                 ans = np.median(np.abs(a - np.median(a, axis)), axis)
             else:
-                ans = np.median(np.abs(a - np.median(a, axis).reshape(a.shape[0], 1)), axis)
+                ans = np.median(
+                    np.abs(a - np.median(a, axis).reshape(a.shape[0], 1)), axis)
 
             return ans
         except Exception as e:

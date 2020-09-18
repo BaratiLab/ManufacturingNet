@@ -7,6 +7,7 @@ Read the documentation at https://manufacturingnet.readthedocs.io.
 
 import numpy as np
 
+
 class MeanNormalizer:
     """This class normalizes the data along the given axis. It first
     calculates the mean and standard deviation. It then subtracts the
@@ -36,6 +37,7 @@ class MeanNormalizer:
         self.scaled_data = (test_data * self.data_std) + self.data_mean
         return self.scaled_data
 
+
 class MinMaxNormalizer:
     """This class normalizes the data along the given axis. It first
     calculates the min and max values along the axis. Then, it subtracts
@@ -64,6 +66,7 @@ class MinMaxNormalizer:
             (test_data * (self.data_max - self.data_min)) + self.data_min
         return self.scaled_data
 
+
 class QuantileNormalizer:
     """Scaling using median and quantiles consists of subtracting the
     median from all observations and dividing by the interquartile
@@ -78,7 +81,8 @@ class QuantileNormalizer:
         assert q1 > 0 and q1 < 1
         assert q3 > q1 and q3 < 1
 
-        self.IQR = np.percentile(data, q3, axis) - np.percentile(data, q1, axis)
+        self.IQR = np.percentile(data, q3, axis) - \
+            np.percentile(data, q1, axis)
         self.data_median = np.median(data, axis)
         self.normalized_data = (data - self.data_median) / (self.IQR)
         self.scaled_data = None

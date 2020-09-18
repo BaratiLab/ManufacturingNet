@@ -6,13 +6,14 @@ displayed, and the user can make new predictions.
 View the documentation at https://manufacturingnet.readthedocs.io/.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import make_scorer, accuracy_score, roc_curve, \
-    roc_auc_score, confusion_matrix
-from sklearn.model_selection import cross_val_score, GridSearchCV, \
-    train_test_split
+from sklearn.metrics import (accuracy_score, confusion_matrix, make_scorer,
+                             roc_auc_score, roc_curve)
+from sklearn.model_selection import (GridSearchCV, cross_val_score,
+                                     train_test_split)
+
 
 class LogRegression:
     """Class framework for logistic regression model."""
@@ -142,7 +143,8 @@ class LogRegression:
                 self.roc_auc = \
                     roc_auc_score(self.regression.predict(dataset_X_test),
                                   probas[::, 1])
-                self.fpr, self.tpr, _ = roc_curve(dataset_y_test, probas[::, 1])
+                self.fpr, self.tpr, _ = roc_curve(
+                    dataset_y_test, probas[::, 1])
             # Else, calculate confusion matrix
             else:
                 self.confusion_matrix = \
@@ -467,7 +469,7 @@ class LogRegression:
                 user_input = input("Enter 1 for 'l1', 2 for 'l2', 3 for "
                                    + "'elasticnet', or 4 for 'none': ").lower()
                 if solver in {"newton-cg", "lbfgs", "sag"} \
-                    and user_input not in {"2", "4"}:
+                        and user_input not in {"2", "4"}:
                     print("Invalid input.")
                     print("Solvers 'newton-cg', 'sag', and 'lbfgs' support",
                           "only 'l2' or no penalty.")

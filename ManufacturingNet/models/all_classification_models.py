@@ -9,13 +9,14 @@ View the documentation at https://manufacturingnet.readthedocs.io/.
 import io
 import time
 from contextlib import redirect_stderr, redirect_stdout
+
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
-from sklearn.svm import SVC, NuSVC, LinearSVC
+from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.svm import SVC, LinearSVC, NuSVC
 from xgboost import XGBClassifier
+
 
 class AllClassificationModels:
     """Wrapper class around all supported classification models:
@@ -105,7 +106,7 @@ class AllClassificationModels:
         if not self.verbose:
             suppress_output = io.StringIO()
             with redirect_stderr(suppress_output), \
-                 redirect_stdout(suppress_output):
+                    redirect_stdout(suppress_output):
                 self._all_classification_models_runner()
         else:
             self._all_classification_models_runner()
@@ -271,7 +272,8 @@ class AllClassificationModels:
             self.XGB_classifier.fit(dataset_X_train, dataset_y_train)
             end_time = time.time()
 
-            accuracy = self.XGB_classifier.score(dataset_X_test, dataset_y_test)
+            accuracy = self.XGB_classifier.score(
+                dataset_X_test, dataset_y_test)
             cv_score = np.mean(cross_val_score(self.XGB_classifier,
                                                self.attributes, self.labels,
                                                cv=5))
