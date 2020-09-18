@@ -7,7 +7,7 @@ View the documentation at https://manufacturingnet.readthedocs.io/.
 import numpy as np
 import scipy.stats
 
-class Featurizer():
+class Featurizer:
     """Featurizer currently supports the 20 features below. Each
     supported feature is contained within its own method.
     """
