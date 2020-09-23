@@ -89,7 +89,7 @@ class BasicBlock(nn.Module):
 
         while gate != 1:
             self.pooling_qtn = input(
-                'Do you want a pooling layer after this convolution layer (y/n): ')
+                'Do you want a pooling layer after this convolution layer (y/n): ').replace(' ','')
             if (self.pooling_qtn).lower() == 'y':
                 self.pooling_input = True
 
@@ -99,7 +99,7 @@ class BasicBlock(nn.Module):
                 while gate != 1:
                     self.pool_kernel = []
                     kernel_input = ((input(
-                        'Please enter the kernel size (depth,heigth,width)\nFor example 3,3,3\nFor default size, please directly press enter without any input: ')))
+                        'Please enter the kernel size (depth,heigth,width)\nFor example 3,3,3\nFor default size, please directly press enter without any input: '))).replace(' ','')
                     if len(kernel_input) == 0:
                         print('Default Value selected')
                         self.pool_kernel = tuple([3, 3, 3])
@@ -125,7 +125,7 @@ class BasicBlock(nn.Module):
                 while gate != 1:
                     self.pool_stride = []
                     stride_input = ((input(
-                        'Please enter the stride (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: ')))
+                        'Please enter the stride (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))).replace(' ','')
                     if len(stride_input) == 0:
                         print('Default Value selected')
                         self.pool_stride = tuple([2, 2, 2])
@@ -151,7 +151,7 @@ class BasicBlock(nn.Module):
                 while gate != 1:
                     self.pool_padding = []
                     padding_input = ((input(
-                        'Please enter the value of padding (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: ')))
+                        'Please enter the value of padding (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))).replace(' ','')
                     if len(padding_input) == 0:
                         print('Default Value selected')
                         self.pool_padding = tuple([0, 0, 0])
@@ -183,19 +183,19 @@ class BasicBlock(nn.Module):
 
     def get_dropout(self):  # Get input for dropout from the user
         gate1 = 0
-        value = input("Do you want default values for dropout(press y or n): ")
+        value = input("Do you want default values for dropout(press y or n): ").replace(' ','')
         while gate1 != 1:
             if value == "Y" or value == "y" or value == 'n' or value == 'N':
                 gate1 = 1
             else:
                 print("Please enter valid input it should only be (y or n)")
                 value = input(
-                    "Do you want default values for dropout(press y or n)")
+                    "Do you want default values for dropout(press y or n)").replace(' ','')
                 gate1 = 0
 
         if value == 'N' or value == 'n':
             gate = 0
-            drop_out = (input(("Please input the dropout probability: ")))
+            drop_out = (input(("Please input the dropout probability: "))).replace(' ','')
             while gate != 1:
                 if drop_out.replace('.', '').isdigit():
                     if (float(drop_out) >= 0.0 and float(drop_out) < 1.0):
@@ -205,11 +205,11 @@ class BasicBlock(nn.Module):
                         print(
                             "Please enter the valid numeric values. The value should lie between 0 and 1")
                         drop_out = (
-                            input(("Please input the dropout probability")))
+                            input(("Please input the dropout probability"))).replace(' ','')
                         gate = 0
                 else:
                     drop_out = (
-                        input(("Please input the dropout probability: ")))
+                        input(("Please input the dropout probability: "))).replace(' ','')
         else:
             self.drop = nn.Dropout3d(p=0)
 
@@ -219,7 +219,7 @@ class BasicBlock(nn.Module):
         gate = 0
         while gate != 1:
             channel_input = (
-                input('Please enter the number of out channels: '))
+                input('Please enter the number of out channels: ')).replace(' ','')
             if channel_input.isnumeric() and int(channel_input) > 0:
                 self.out_channel = int(channel_input)
                 gate = 1
@@ -234,7 +234,7 @@ class BasicBlock(nn.Module):
         while gate != 1:
             self.kernel = []
             kernel_input = ((input(
-                'Please enter the kernel size (depth,heigth,width)\nFor example 3,3,3\nFor default size, please directly press enter without any input: ')))
+                'Please enter the kernel size (depth,heigth,width)\nFor example 3,3,3\nFor default size, please directly press enter without any input: '))).replace(' ','')
             if len(kernel_input) == 0:
                 print('Default Value selected')
                 self.kernel = tuple([3, 3, 3])
@@ -261,7 +261,7 @@ class BasicBlock(nn.Module):
         while gate != 1:
             self.stride = []
             stride_input = ((input(
-                'Please enter the stride (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: ')))
+                'Please enter the stride (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))).replace(' ','')
             if len(stride_input) == 0:
                 print('Default Value selected')
                 self.stride = tuple([1, 1, 1])
@@ -289,7 +289,7 @@ class BasicBlock(nn.Module):
         while gate != 1:
             self.padding = []
             padding_input = ((input(
-                'Please enter the value of padding (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: ')))
+                'Please enter the value of padding (depth,heigth,width)\nFor example 1,1,1\nFor default size, please directly press enter without any input: '))).replace(' ','')
             if len(padding_input) == 0:
                 print('Default Value selected')
                 self.padding = tuple([0, 0, 0])
@@ -360,7 +360,7 @@ class Network(nn.Module):
 
         while gate != 1:
             self.default_input = input(
-                'Do you want default values for convolution layers (y/n): ')
+                'Do you want default values for convolution layers (y/n): ').replace(' ','')
             if (self.default_input).lower() == 'y':
                 self.default_input = True
                 gate = 1
@@ -379,7 +379,7 @@ class Network(nn.Module):
         print('\n')
         gate = 0
         while gate != 1:
-            conv_input = (input('Please enter the number of conv_layers: '))
+            conv_input = (input('Please enter the number of conv_layers: ')).replace(' ','')
             if conv_input.isnumeric() and int(conv_input) > 0:
                 self.num_conv_layers = int(conv_input)
                 gate = 1
@@ -444,7 +444,7 @@ class CNN3D():
         gate = 0
         while gate != 1:
             self.default = input(
-                'Do you want default values for all the training parameters (y/n)? ')
+                'Do you want default values for all the training parameters (y/n)? ').replace(' ','')
             if self.default == 'y' or self.default == 'Y' or self.default == 'n' or self.default == 'N':
                 if self.default.lower() == 'y':
                     self.default_gate = True
@@ -462,7 +462,7 @@ class CNN3D():
         gate = 0
         while gate != 1:
             self.num_classes = (input(
-                'Please enter the number of classes for classification \n Enter 1 if you are dealing with a regression problem: '))
+                'Please enter the number of classes for classification \n Enter 1 if you are dealing with a regression problem: ')).replace(' ','')
             if (self.num_classes).isnumeric() and int(self.num_classes) >= 1:
                 self.num_classes = int(self.num_classes)
                 gate = 1
@@ -477,7 +477,7 @@ class CNN3D():
         # Method for getting batch size input
         gate = 0
         while gate != 1:
-            self.batch_size = (input('Please enter the batch size: '))
+            self.batch_size = (input('Please enter the batch size: ')).replace(' ','')
             if (self.batch_size).isnumeric() and int(self.batch_size) > 0:
                 self.batch_size = int(self.batch_size)
                 gate = 1
@@ -495,7 +495,7 @@ class CNN3D():
                 self.valset_size = '0.2'
             else:
                 self.valset_size = (input(
-                    'Please enter the train set size float input (size > 0 and size < 1) \n For default size, please directly press enter without any input: '))
+                    'Please enter the train set size float input (size > 0 and size < 1) \n For default size, please directly press enter without any input: ')).replace(' ','')
             if self.valset_size == '':              # handling default case for valsize
                 print('Default value selected : 0.2')
                 self.valset_size = '0.2'
@@ -528,7 +528,7 @@ class CNN3D():
         gate = 0
         while gate != 1:
             self.criterion_input = (input(
-                'Please enter the appropriate loss function for the problem: \n Criterion_list - [1: CrossEntropyLoss, 2: L1Loss, 3: SmoothL1Loss, 4: MSELoss]: '))
+                'Please enter the appropriate loss function for the problem: \n Criterion_list - [1: CrossEntropyLoss, 2: L1Loss, 3: SmoothL1Loss, 4: MSELoss]: ')).replace(' ','')
 
             if self.criterion_input.isnumeric() and int(self.criterion_input) < 5 and int(self.criterion_input) > 0:
                 gate = 1
@@ -570,7 +570,7 @@ class CNN3D():
                 self.optimizer_input = '1'
             else:
                 self.optimizer_input = (input(
-                    'Please enter the optimizer index for the problem \n Optimizer_list - [1: Adam, 2: SGD] \n For default optimizer, please directly press enter without any input: '))
+                    'Please enter the optimizer index for the problem \n Optimizer_list - [1: Adam, 2: SGD] \n For default optimizer, please directly press enter without any input: ')).replace(' ','')
             if self.optimizer_input == '':              # handling default case for optimizer
                 print('Default optimizer selected : Adam')
                 self.optimizer_input = '1'
@@ -588,7 +588,7 @@ class CNN3D():
                 self.user_lr = '0.001'
             else:
                 self.user_lr = input(
-                    'Please enter a required value float input for learning rate (learning rate > 0) \n For default learning rate, please directly press enter without any input: ')
+                    'Please enter a required value float input for learning rate (learning rate > 0) \n For default learning rate, please directly press enter without any input: ').replace(' ','')
             if self.user_lr == '':               # handling default case for learning rate
                 print('Default value for learning rate selected : 0.001')
                 self.user_lr = '0.001'
@@ -622,7 +622,7 @@ class CNN3D():
                 self.scheduler_input = '1'
             else:
                 self.scheduler_input = input(
-                    'Please enter the scheduler index for the problem: Scheduler_list - [1: None, 2:StepLR, 3:MultiStepLR] \n For default option of no scheduler, please directly press enter without any input: ')
+                    'Please enter the scheduler index for the problem: Scheduler_list - [1: None, 2:StepLR, 3:MultiStepLR] \n For default option of no scheduler, please directly press enter without any input: ').replace(' ','')
             if self.scheduler_input == '':
                 print('By default no scheduler selected')
                 self.scheduler_input = '1'
@@ -641,7 +641,7 @@ class CNN3D():
             gate = 0
             while gate != 1:
                 self.step = (
-                    input('Please enter a step value int input (step > 0): '))
+                    input('Please enter a step value int input (step > 0): ')).replace(' ','')
                 if self.step.isnumeric() and int(self.step) > 0:
                     self.step = int(self.step)
                     gate = 1
@@ -652,7 +652,7 @@ class CNN3D():
             gate = 0
             while gate != 1:
                 self.gamma = (input(
-                    'Please enter a Multiplying factor value float input (Multiplying factor > 0): '))
+                    'Please enter a Multiplying factor value float input (Multiplying factor > 0): ')).replace(' ','')
                 if self.gamma.replace('.', '').isdigit():
                     if float(self.gamma) > 0:
                         self.gamma = float(self.gamma)
@@ -669,7 +669,7 @@ class CNN3D():
             gate = 0
             while gate != 1:
                 self.milestones_input = (
-                    input('Please enter values of milestone epochs int input (Example: 2, 6, 10): '))
+                    input('Please enter values of milestone epochs int input (Example: 2, 6, 10): ')).replace(' ','')
                 self.milestones_input = self.milestones_input.split(',')
                 for i in range(len(self.milestones_input)):
                     if self.milestones_input[i].isnumeric() and int(self.milestones_input[i]) > 0:
@@ -688,7 +688,7 @@ class CNN3D():
             gate = 0
             while gate != 1:
                 self.gamma = (input(
-                    'Please enter a Multiplying factor value float input (Multiplying factor > 0): '))
+                    'Please enter a Multiplying factor value float input (Multiplying factor > 0): ')).replace(' ','')
                 if self.gamma.replace('.', '').isdigit():
                     if float(self.gamma) > 0:
                         self.gamma = float(self.gamma)
@@ -709,7 +709,7 @@ class CNN3D():
         gate = 0
         while gate != 1:
             self.numEpochs = (input(
-                'Please enter the number of epochs int input to train the model (number of epochs > 0): '))
+                'Please enter the number of epochs int input to train the model (number of epochs > 0): ')).replace(' ','')
             if self.numEpochs.isnumeric() and int(self.numEpochs) > 0:
                 self.numEpochs = int(self.numEpochs)
                 gate = 1
@@ -922,7 +922,7 @@ class CNN3D():
         # Method for saving the model parameters if user wants to
 
         gate = 0
-        save_model = input('Do you want to save the model weights? (y/n): ')
+        save_model = input('Do you want to save the model weights? (y/n): ').replace(' ','')
         while gate != 1:
             if save_model.lower() == 'y' or save_model.lower() == 'yes':
                 path = 'model_parameters.pth'
