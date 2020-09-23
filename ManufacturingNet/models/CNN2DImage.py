@@ -644,7 +644,7 @@ class CNN2DImageModel():
         gate = 0
         while gate != 1:
             save_model = input(
-                'Do you want to save the model weights? (y/n): ')
+                'Do you want to save the model weights? (y/n): ').replace(' ','')
             if save_model.lower() == 'y' or save_model.lower() == 'yes':
                 path = 'model_parameters.pth'
                 torch.save(self.net.state_dict(), path)
