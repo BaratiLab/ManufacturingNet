@@ -114,7 +114,7 @@ class VGG():
                                         \n[1:VGG11,2:VGG13,3:VGG16,4:VGG19]\n'))
             if (1 <= self.model_select <= 4):
                 model = self.pretrained_dict[self.model_select](
-                    pretrained=True)
+                    pretrained=self.pretrained)
                 gate = 1
             else:
                 print('Please enter valid input')
