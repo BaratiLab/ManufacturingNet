@@ -90,7 +90,7 @@ class AlexNet:
         while gate != 1:
             print("Please enter the number of classes.")
             print("For classification, enter 2 or more.")
-            self.num_classes_input = input("For regression, enter 1: ")
+            self.num_classes_input = input("For regression, enter 1: ").replace(' ','')
 
             if self.num_classes_input.isnumeric() and int(self.num_classes_input) > 0:
                 self.num_classes = int(self.num_classes_input)
@@ -106,7 +106,7 @@ class AlexNet:
 
         while gate != 1:
             pretrained_input = input(
-                "Do you want the pretrained model (y/n)? ").lower()
+                "Do you want the pretrained model (y/n)? ").lower().replace(' ','')
 
             if pretrained_input == "y":
                 self.pretrained = True
@@ -130,7 +130,7 @@ class AlexNet:
         gate = 0
 
         while gate != 1:
-            self.batch_size = input("Please enter the batch size: ")
+            self.batch_size = input("Please enter the batch size: ").replace(' ','').replace(' ','')
             if self.batch_size.isnumeric() and int(self.batch_size) > 0:
                 gate = 1
             else:
@@ -144,7 +144,7 @@ class AlexNet:
         while gate != 1:
             print("Please enter the validation set size (0,1).")
             self.valset_size = input(
-                "For default size, enter without any input: ")
+                "For default size, enter without any input: ").replace(' ','')
 
             if self.valset_size == "":
                 print("Default value selected")
@@ -177,7 +177,7 @@ class AlexNet:
         while gate != 1:
             print("Please enter the appropriate loss function for the problem:")
             self.criterion_input = input(
-                "[1: CrossEntropyLoss, 2: L1Loss, 3: SmoothL1Loss, 4: MSELoss]: ")
+                "[1: CrossEntropyLoss, 2: L1Loss, 3: SmoothL1Loss, 4: MSELoss]: ").replace(' ','')
 
             if self.criterion_input.isnumeric() and int(self.criterion_input) < 5 and int(self.criterion_input) > 0:
                 gate = 1
@@ -212,7 +212,7 @@ class AlexNet:
             print("Please enter the optimizer for the problem:")
             print("[1: Adam, 2: SGD]")
             self.optimizer_input = input(
-                "For default optimizer, press enter without any input: ")
+                "For default optimizer, press enter without any input: ").replace(' ','')
 
             if self.optimizer_input == "":
                 print("Default optimizer selected")
@@ -230,7 +230,7 @@ class AlexNet:
         while gate != 1:
             print("Please enter a positive value for the learning rate.")
             self.user_lr = input(
-                "For default learning rate, press enter without any input: ")
+                "For default learning rate, press enter without any input: ").replace(' ','')
 
             if self.user_lr == "":
                 print("Default value selected")
@@ -257,7 +257,7 @@ class AlexNet:
             print("Please enter the scheduler for the problem:")
             print("[1: None, 2:StepLR, 3:MultiStepLR]")
             self.scheduler_input = input(
-                "For default option of no scheduler, press enter without any input: ")
+                "For default option of no scheduler, press enter without any input: ").replace(' ','')
 
             if self.scheduler_input == "":
                 print("By default no scheduler selected")
@@ -271,22 +271,22 @@ class AlexNet:
             self.scheduler = None
 
         elif self.scheduler_input == "2":
-            self.step = int(input("Please enter a step value: "))
+            self.step = int(input("Please enter a step value: ").replace(' ',''))
             print()
             self.gamma = float(
-                input("Please enter a gamma value (multiplying factor): "))
+                input("Please enter a gamma value (multiplying factor): ").replace(' ',''))
             self.scheduler = scheduler.StepLR(
                 self.optimizer, step_size=self.step, gamma=self.gamma)
 
         elif self.scheduler_input == "3":
             self.milestones_input = (
-                input("Please enter values of milestone epochs: "))
+                input("Please enter values of milestone epochs: ").replace(' ',''))
             self.milestones_input = self.milestones_input.split(",")
             self.milestones = [int(x)
                                for x in self.milestones_input if int(x) > 0]
             print()
             self.gamma = float(
-                input("Please enter a gamma value (Multiplying factor): "))
+                input("Please enter a gamma value (Multiplying factor): ").replace(' ',''))
             self.scheduler = scheduler.MultiStepLR(
                 self.optimizer, milestones=self.milestones, gamma=self.gamma)
 
@@ -298,7 +298,7 @@ class AlexNet:
 
         while gate != 1:
             self.numEpochs = (
-                input("Please enter the number of epochs to train the model: "))
+                input("Please enter the number of epochs to train the model: ").replace(' ',''))
             if self.numEpochs.isnumeric() and int(self.numEpochs) > 0:
                 self.numEpochs = int(self.numEpochs)
                 gate = 1
@@ -343,7 +343,7 @@ class AlexNet:
         spacing()
 
     def _save_model(self):
-        save_model = input("Do you want to save the model weights (y/n)? ")
+        save_model = input("Do you want to save the model weights (y/n)? ").replace(' ','')
         gate = 0
         while gate != 1:
             if save_model.lower() == "y" or save_model.lower() == "yes":

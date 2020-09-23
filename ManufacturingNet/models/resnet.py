@@ -83,7 +83,7 @@ class ResNet():
         gate = 0
         while gate != 1:
             self.num_classes_input = (input(
-                'Please enter the number of classes \nFor classification (2 or more) \nFor Regression enter 1: '))
+                'Please enter the number of classes \nFor classification (2 or more) \nFor Regression enter 1: ').replace(' ',''))
             if self.num_classes_input.isnumeric() and int(self.num_classes_input) > 0:
                 self.num_classes = int(self.num_classes_input)
                 gate = 1
@@ -99,7 +99,7 @@ class ResNet():
 
         gate = 0
         while gate != 1:
-            pretrained_input = input('Do you want pretrained model? (y/n): ')
+            pretrained_input = input('Do you want pretrained model? (y/n): ').replace(' ','')
             if pretrained_input.lower() == 'y':
                 self.pretrained = True
                 gate = 1
@@ -112,7 +112,7 @@ class ResNet():
         gate = 0
         while gate != 1:
             self.model_select = int(input('Please enter any number between 1 to 5 to select the model:\
-                                        \n[1:ResNet18,2:ResNet34,3:ResNet50,4:ResNet101,5:ResNext50]'))
+                                        \n[1:ResNet18,2:ResNet34,3:ResNet50,4:ResNet101,5:ResNext50]').replace(' ',''))
             if (1 <= self.model_select <= 5):
                 model = self.pretrained_dict[self.model_select](
                     pretrained=self.pretrained)
@@ -138,7 +138,7 @@ class ResNet():
         # Method for getting batch size input
         gate = 0
         while gate != 1:
-            self.batch_size = int(input('Please enter the batch size: '))
+            self.batch_size = int(input('Please enter the batch size: ').replace(' ',''))
             if int(self.batch_size) > 0:
                 gate = 1
             else:
@@ -151,7 +151,7 @@ class ResNet():
         gate = 0
         while gate != 1:
             self.valset_size = (input(
-                'Please enter the validation set size (size > 0 and size < 1) \n For default size, please directly press enter without any input: '))
+                'Please enter the validation set size (size > 0 and size < 1) \n For default size, please directly press enter without any input: ').replace(' ',''))
             if self.valset_size == '':              # handling default case for valsize
                 print('Default value selected')
                 self.valset_size = '0.2'
@@ -181,7 +181,7 @@ class ResNet():
         gate = 0
         while gate != 1:
             self.criterion_input = (input(
-                'Please enter the appropriate loss function for the problem: \n Criterion_list - [1: CrossEntropyLoss, 2: L1Loss, 3: SmoothL1Loss, 4: MSELoss]: '))
+                'Please enter the appropriate loss function for the problem: \n Criterion_list - [1: CrossEntropyLoss, 2: L1Loss, 3: SmoothL1Loss, 4: MSELoss]: ').replace(' ',''))
 
             if self.criterion_input.isnumeric() and int(self.criterion_input) < 5 and int(self.criterion_input) > 0:
                 gate = 1
@@ -219,7 +219,7 @@ class ResNet():
         gate = 0
         while gate != 1:
             self.optimizer_input = (input(
-                'Please enter the optimizer for the problem \n Optimizer_list - [1: Adam, 2: SGD] \n For default optimizer, please directly press enter without any input: '))
+                'Please enter the optimizer for the problem \n Optimizer_list - [1: Adam, 2: SGD] \n For default optimizer, please directly press enter without any input: ').replace(' ',''))
             if self.optimizer_input == '':              # handling default case for optimizer
                 print('Default optimizer selected')
                 self.optimizer_input = '1'
@@ -234,7 +234,7 @@ class ResNet():
         gate = 0
         while gate != 1:
             self.user_lr = input(
-                'Please enter a required postive value for learning rate \n For default learning rate, please directly press enter without any input: ')
+                'Please enter a required postive value for learning rate \n For default learning rate, please directly press enter without any input: ').replace(' ','')
             if self.user_lr == '':               # handling default case for learning rate
                 print('Default value selected')
                 self.user_lr = '0.001'
@@ -262,7 +262,7 @@ class ResNet():
         gate = 0
         while gate != 1:
             self.scheduler_input = input(
-                'Please enter the scheduler for the problem: Scheduler_list - [1: None, 2:StepLR, 3:MultiStepLR] \n For default option of no scheduler, please directly press enter without any input: ')
+                'Please enter the scheduler for the problem: Scheduler_list - [1: None, 2:StepLR, 3:MultiStepLR] \n For default option of no scheduler, please directly press enter without any input: ').replace(' ','')
             if self.scheduler_input == '':
                 print('By default no scheduler selected')
                 self.scheduler_input = '1'
@@ -275,22 +275,22 @@ class ResNet():
             self.scheduler = None
 
         elif self.scheduler_input == '2':
-            self.step = int(input('Please enter a step value: '))
+            self.step = int(input('Please enter a step value: ').replace(' ',''))
             print(' ')
             self.gamma = float(
-                input('Please enter a gamma value (Multiplying factor): '))
+                input('Please enter a gamma value (Multiplying factor): ').replace(' ',''))
             self.scheduler = scheduler.StepLR(
                 self.optimizer, step_size=self.step, gamma=self.gamma)
 
         elif self.scheduler_input == '3':
             self.milestones_input = (
-                input('Please enter values of milestone epochs: '))
+                input('Please enter values of milestone epochs: ').replace(' ',''))
             self.milestones_input = self.milestones_input.split(',')
             self.milestones = [int(x)
                                for x in self.milestones_input if int(x) > 0]
             print(' ')
             self.gamma = float(
-                input('Please enter a gamma value (Multiplying factor): '))
+                input('Please enter a gamma value (Multiplying factor): ').replace(' ',''))
             self.scheduler = scheduler.MultiStepLR(
                 self.optimizer, milestones=self.milestones, gamma=self.gamma)
 
@@ -305,7 +305,7 @@ class ResNet():
         gate = 0
         while gate != 1:
             self.numEpochs = (
-                input('Please enter the number of epochs to train the model: '))
+                input('Please enter the number of epochs to train the model: ').replace(' ',''))
             if self.numEpochs.isnumeric() and int(self.numEpochs) > 0:
                 self.numEpochs = int(self.numEpochs)
                 gate = 1
@@ -356,7 +356,7 @@ class ResNet():
         # Method for saving the model parameters if user wants to
 
         gate = 0
-        save_model = input('Do you want to save the model weights? (y/n): ')
+        save_model = input('Do you want to save the model weights? (y/n): ').replace(' ','')
         while gate != 1:
             if save_model.lower() == 'y' or save_model.lower() == 'yes':
                 path = 'model_parameters.pth'
