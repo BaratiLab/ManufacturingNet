@@ -106,7 +106,7 @@ class DNN(nn.Module):
         gate = 0
         while gate != 1:
             self.list_of_neurons = input(
-                'Please enter the number of neurons int input for each layer including input and output layers sequentially: \n (Example: 14(input layer), 128, 64, 32, 10(output layer): ')
+                'Please enter the number of neurons int input for each layer including input and output layers sequentially: \n (Example: 14(input layer), 128, 64, 32, 10(output layer): ').replace(' ','')
             self.list_of_neurons = self.list_of_neurons.split(',')
             for i in range(len(self.list_of_neurons)):
                 # checking numeric entries and correct values
@@ -148,7 +148,7 @@ class DNN(nn.Module):
                 self.activations = self.activations[:-1]
             else:
                 self.activations = input(
-                    'Please enter the activations for each hidden layer sequentially: \n Activation functions - \n [0: None, 1: ReLU, 2: LeakyReLU, \n 3: GELU(), 4: SELU(), 5: Sigmoid(), 6: Tanh()] \n (Example, for 3 hidden layers : 1, 1, 1) \n For default option of ReLU, please directly press enter without any input: ')
+                    'Please enter the activations for each hidden layer sequentially: \n Activation functions - \n [0: None, 1: ReLU, 2: LeakyReLU, \n 3: GELU(), 4: SELU(), 5: Sigmoid(), 6: Tanh()] \n (Example, for 3 hidden layers : 1, 1, 1) \n For default option of ReLU, please directly press enter without any input: ').replace(' ','')
             if self.activations == '':              # handling default case for ReLU activation function
                 print(
                     'Default activation function ReLU selected for all the hidden layers')
@@ -198,7 +198,7 @@ class DNN(nn.Module):
                 self.batchnorms = self.batchnorms[:-1]
             else:
                 self.batchnorms = input(
-                    'Please enter 1 if batchnorm is required else enter 0 for each layer. \n (Example, for 3 hidden layers : 1, 1, 0) \n For default option of no batchnorm to any layer, please directly press enter without any input: ')
+                    'Please enter 1 if batchnorm is required else enter 0 for each layer. \n (Example, for 3 hidden layers : 1, 1, 0) \n For default option of no batchnorm to any layer, please directly press enter without any input: ').replace(' ','')
             if self.batchnorms == '':               # handling default case for batchnorm
                 print('By default, no batchnorm applied')
                 for i in range((len(self.size_list)-2)):
@@ -246,7 +246,7 @@ class DNN(nn.Module):
                 self.dropout_values = self.dropout_values[:-1]
             else:
                 self.dropout_values = input(
-                    'Please enter the dropout values between 0 and 1 for each hidden layer. \n For default option of no dropout in any layer, please directly press enter without any input: ')
+                    'Please enter the dropout values between 0 and 1 for each hidden layer. \n For default option of no dropout in any layer, please directly press enter without any input: ').replace(' ','')
             if self.dropout_values == '':               # handling default case for dropout
                 print('By default, no dropout added')
                 for i in range((len(self.size_list)-2)):
@@ -372,7 +372,7 @@ class DNNModel():
         gate = 0
         while gate != 1:
             self.default = input(
-                'Do you want default values for all the parameters (y/n)? ')
+                'Do you want default values for all the parameters (y/n)? ').replace(' ','')
             if self.default == 'y' or self.default == 'Y' or self.default == 'n' or self.default == 'N':
                 if self.default.lower() == 'y':
                     self.default_gate = True
@@ -391,7 +391,7 @@ class DNNModel():
         gate = 0
         while gate != 1:
             self.batchsize = (
-                input('Please enter the batch size int input (greater than 0): '))
+                input('Please enter the batch size int input (greater than 0): ')).replace(' ','')
             if self.batchsize.isnumeric() and int(self.batchsize) > 0:
                 self.batchsize = int(self.batchsize)
                 gate = 1
@@ -411,7 +411,7 @@ class DNNModel():
                 self.valset_size = '0.2'
             else:
                 self.valset_size = (input(
-                    'Please enter the train set size float input (size > 0 and size < 1) \n For default size, please directly press enter without any input: '))
+                    'Please enter the train set size float input (size > 0 and size < 1) \n For default size, please directly press enter without any input: ')).replace(' ','')
             if self.valset_size == '':              # handling default case for valsize
                 print('Default value selected : 0.2')
                 self.valset_size = '0.2'
@@ -431,7 +431,7 @@ class DNNModel():
         gate = 0
         while gate != 1:
             self.criterion_input = (input(
-                'Please enter the appropriate loss function index for the problem: \n Criterion_list - [1: CrossEntropyLoss, 2: L1Loss, 3: SmoothL1Loss, 4: MSELoss]: '))
+                'Please enter the appropriate loss function index for the problem: \n Criterion_list - [1: CrossEntropyLoss, 2: L1Loss, 3: SmoothL1Loss, 4: MSELoss]: ')).replace(' ','')
 
             if self.criterion_input.isnumeric() and int(self.criterion_input) < 5 and int(self.criterion_input) > 0:
                 gate = 1
@@ -453,7 +453,7 @@ class DNNModel():
                 self.optimizer_input = '1'
             else:
                 self.optimizer_input = (input(
-                    'Please enter the optimizer index for the problem \n Optimizer_list - [1: Adam, 2: SGD] \n For default optimizer, please directly press enter without any input: '))
+                    'Please enter the optimizer index for the problem \n Optimizer_list - [1: Adam, 2: SGD] \n For default optimizer, please directly press enter without any input: ')).replace(' ','')
             if self.optimizer_input == '':              # handling default case for optimizer
                 print('Default optimizer selected : Adam')
                 self.optimizer_input = '1'
@@ -471,7 +471,7 @@ class DNNModel():
                 self.user_lr = '0.001'
             else:
                 self.user_lr = input(
-                    'Please enter a required value float input for learning rate (learning rate > 0) \n For default learning rate, please directly press enter without any input: ')
+                    'Please enter a required value float input for learning rate (learning rate > 0) \n For default learning rate, please directly press enter without any input: ').replace(' ','')
             if self.user_lr == '':               # handling default case for learning rate
                 print('Default value for learning rate selected : 0.001')
                 self.user_lr = '0.001'
@@ -500,7 +500,7 @@ class DNNModel():
                 self.scheduler_input = '1'
             else:
                 self.scheduler_input = input(
-                    'Please enter the scheduler index for the problem: Scheduler_list - [1: None, 2:StepLR, 3:MultiStepLR] \n For default option of no scheduler, please directly press enter without any input: ')
+                    'Please enter the scheduler index for the problem: Scheduler_list - [1: None, 2:StepLR, 3:MultiStepLR] \n For default option of no scheduler, please directly press enter without any input: ').replace(' ','')
             if self.scheduler_input == '':
                 print('By default no scheduler selected')
                 self.scheduler_input = '1'
@@ -519,7 +519,7 @@ class DNNModel():
             gate = 0
             while gate != 1:
                 self.step = (
-                    input('Please enter a step value int input (step > 0): '))
+                    input('Please enter a step value int input (step > 0): ')).replace(' ','')
                 if self.step.isnumeric() and int(self.step) > 0:
                     self.step = int(self.step)
                     gate = 1
@@ -530,7 +530,7 @@ class DNNModel():
             gate = 0
             while gate != 1:
                 self.gamma = (input(
-                    'Please enter a Multiplying factor value float input (Multiplying factor > 0): '))
+                    'Please enter a Multiplying factor value float input (Multiplying factor > 0): ')).replace(' ','')
                 if self.gamma.replace('.', '').isdigit():
                     if float(self.gamma) > 0:
                         self.gamma = float(self.gamma)
@@ -547,7 +547,7 @@ class DNNModel():
             gate = 0
             while gate != 1:
                 self.milestones_input = (
-                    input('Please enter values of milestone epochs int input (Example: 2, 6, 10): '))
+                    input('Please enter values of milestone epochs int input (Example: 2, 6, 10): ')).replace(' ','')
                 self.milestones_input = self.milestones_input.split(',')
                 for i in range(len(self.milestones_input)):
                     if self.milestones_input[i].isnumeric() and int(self.milestones_input[i]) > 0:
@@ -566,7 +566,7 @@ class DNNModel():
             gate = 0
             while gate != 1:
                 self.gamma = (input(
-                    'Please enter a Multiplying factor value float input (Multiplying factor > 0): '))
+                    'Please enter a Multiplying factor value float input (Multiplying factor > 0): ')).replace(' ','')
                 if self.gamma.replace('.', '').isdigit():
                     if float(self.gamma) > 0:
                         self.gamma = float(self.gamma)
@@ -593,7 +593,7 @@ class DNNModel():
         gate = 0
         while gate != 1:
             self.numEpochs = (input(
-                'Please enter the number of epochs int input to train the model (number of epochs > 0): '))
+                'Please enter the number of epochs int input to train the model (number of epochs > 0): ')).replace(' ','')
             if self.numEpochs.isnumeric() and int(self.numEpochs) > 0:
                 self.numEpochs = int(self.numEpochs)
                 gate = 1
@@ -662,7 +662,7 @@ class DNNModel():
         gate = 0
         while gate != 1:
             save_model = input(
-                'Do you want to save the model weights? (y/n): ')
+                'Do you want to save the model weights? (y/n): ').replace(' ','')
             if save_model.lower() == 'y' or save_model.lower() == 'yes':
                 path = 'model_parameters.pth'
                 torch.save(self.net.state_dict(), path)
