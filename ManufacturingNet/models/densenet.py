@@ -115,7 +115,7 @@ class DenseNet():
 
             if (1 <= self.model_select <= 4):
                 model = self.pretrained_dict[self.model_select](
-                    pretrained=True)
+                    pretrained=self.pretrained)
                 gate = 1
             else:
                 print('Please enter valid input')

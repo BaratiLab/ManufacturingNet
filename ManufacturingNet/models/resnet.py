@@ -115,7 +115,7 @@ class ResNet():
                                         \n[1:ResNet18,2:ResNet34,3:ResNet50,4:ResNet101,5:ResNext50]'))
             if (1 <= self.model_select <= 5):
                 model = self.pretrained_dict[self.model_select](
-                    pretrained=True)
+                    pretrained=self.pretrained)
                 gate = 1
             else:
                 print('Please enter valid input')
