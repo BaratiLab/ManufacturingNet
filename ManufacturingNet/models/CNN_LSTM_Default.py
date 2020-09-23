@@ -170,8 +170,8 @@ class CNN2D(nn.Module):
         gate = 0
 
         while gate != 1:
-            self.img_x = input("Please enter the image width: ")
-            self.img_y = input("Please enter the image height: ")
+            self.img_x = input("Please enter the image width: ").replace(' ','')
+            self.img_y = input("Please enter the image height: ").replace(' ','')
             if (self.img_x.isnumeric() and int(self.img_x) > 0) and (self.img_y.isnumeric() and int(self.img_y) > 0):
                 gate = 1
             else:
@@ -183,7 +183,7 @@ class CNN2D(nn.Module):
         gate = 0
 
         while gate != 1:
-            self.n_conv = input("Please enter the number of convolutions: ")
+            self.n_conv = input("Please enter the number of convolutions: ").replace(' ','')
             if self.n_conv.isnumeric() and int(self.n_conv) > 0:
                 gate = 1
             else:
@@ -198,7 +198,7 @@ class CNN2D(nn.Module):
         self.channels = []
 
         while gate != 1:
-            channel_inp = input("enter the number of input channels: ")
+            channel_inp = input("enter the number of input channels: ").replace(' ','')
             if (channel_inp.isnumeric() and int(channel_inp) > 0):
                 self.channels.append(int(channel_inp))
                 gate = 1
@@ -211,7 +211,7 @@ class CNN2D(nn.Module):
             for i in range(n_conv):
                 channel = \
                     input(
-                        "enter the number of output channels for convolution {}: ".format(i + 1))
+                        "enter the number of output channels for convolution {}: ".format(i + 1)).replace(' ','')
                 if (channel.isnumeric() and int(channel) > 0):
                     self.channels.append(int(channel))
                     if i == n_conv - 1:
@@ -229,7 +229,7 @@ class CNN2D(nn.Module):
         gate = 0
 
         while gate != 1:
-            value = input("Use default values for kernel size (y/n)? ").lower()
+            value = input("Use default values for kernel size (y/n)? ").lower().replace(' ','')
 
             if value in {"y", "n"}:
                 gate = 1
@@ -243,7 +243,7 @@ class CNN2D(nn.Module):
             for i in range(n_conv):
                 if value == "n":
                     k_size = input(
-                        "Enter the kernel size for convolutional layer {}\nFor Example: 3,3: ".format(i + 1))
+                        "Enter the kernel size for convolutional layer {}\nFor Example: 3,3: ".format(i + 1)).replace(' ','')
                     k_split = k_size.split(",")
 
                     if k_split[0].isnumeric() and int(k_split[0]) > 0 and k_split[1].isnumeric() and int(k_split[0]) > 0:
@@ -270,7 +270,7 @@ class CNN2D(nn.Module):
 
         while gate != 1:
             value = \
-                input("Use default values for padding and stride (y/n)? ").lower()
+                input("Use default values for padding and stride (y/n)? ").lower().replace(' ','')
             if value in {"y", "n"}:
                 gate = 1
             else:
@@ -281,7 +281,7 @@ class CNN2D(nn.Module):
             for i in range(n_conv):
                 if value == "n":
                     pad_size = input(
-                        "Enter padding for the image for convolutional layer {}\nFor Example 2,2: ".format(i + 1))
+                        "Enter padding for the image for convolutional layer {}\nFor Example 2,2: ".format(i + 1)).replace(' ','')
                     pad_split = pad_size.split(",")
 
                     if pad_split[0].isnumeric() and int(pad_split[0]) >= 0 and pad_split[1].isnumeric() and int(pad_split[0]) >= 0:
@@ -306,7 +306,7 @@ class CNN2D(nn.Module):
             for i in range(n_conv):
                 if value == "n":
                     stride_size = input(
-                        "Enter stride for the convolutions for convolutional layer {}\nFor Example 2,2: ".format(i + 1))
+                        "Enter stride for the convolutions for convolutional layer {}\nFor Example 2,2: ".format(i + 1)).replace(' ','')
                     stride_split = stride_size.split(",")
 
                     if stride_split[0].isnumeric() and int(stride_split[0]) >= 0 and stride_split[1].isnumeric() and int(stride_split[0]) >= 0:
@@ -332,7 +332,7 @@ class CNN2D(nn.Module):
 
         while gate != 1:
             value = \
-                input("Use default values for batch normalization (y/n)? ").lower()
+                input("Use default values for batch normalization (y/n)? ").lower().replace(' ','')
             if value in {"y", "n"}:
                 gate = 1
             else:
@@ -345,7 +345,7 @@ class CNN2D(nn.Module):
             for i in range(n_conv):
                 if value == "n":
                     batch_boolean = input(
-                        "Please enter 0 (no) or 1 (yes) for using batch normalization in convolutional layer {}: ".format(i+1))
+                        "Please enter 0 (no) or 1 (yes) for using batch normalization in convolutional layer {}: ".format(i+1)).replace(' ','')
 
                     if batch_boolean.isnumeric() and int(batch_boolean) in {0, 1}:
                         self.batch_norm.append(int(batch_boolean))
@@ -365,7 +365,7 @@ class CNN2D(nn.Module):
     def get_dropout(self):
         gate = 0
         while gate != 1:
-            value = input("Use default values for dropout (y/n)? ")
+            value = input("Use default values for dropout (y/n)? ").replace(' ','')
             if value in {"y", "n"}:
                 gate = 1
             else:
@@ -374,7 +374,7 @@ class CNN2D(nn.Module):
         gate = 0
         if value == "n":
             while gate != 1:
-                drop_out = input("Please input the dropout probability: ")
+                drop_out = input("Please input the dropout probability: ").replace(' ','')
                 if drop_out.replace(".", "").isdigit() and float(drop_out) >= 0 and float(drop_out) < 1:
                     self.drop = drop_out
                     gate = 1
@@ -389,7 +389,7 @@ class CNN2D(nn.Module):
     def get_pooling(self, n_conv):
         gate = 0
         while gate != 1:
-            value = value = input("Use default pooling values (y/n)? ").lower()
+            value = value = input("Use default pooling values (y/n)? ").lower().replace(' ','')
             if value in {"y", "n"}:
                 gate = 1
             else:
@@ -403,7 +403,7 @@ class CNN2D(nn.Module):
             for i in range(n_conv):
                 if value == "n":
                     pool_boolean = input(
-                        "Please enter 0 (no) or 1 (yes) for using pooling in convolutional layer {}: ".format(i + 1))
+                        "Please enter 0 (no) or 1 (yes) for using pooling in convolutional layer {}: ".format(i + 1)).replace(' ','')
                     if pool_boolean.isnumeric() and int(pool_boolean) in {0, 1}:
                         self.pool_bool.append(int(pool_boolean))
                         if i == n_conv - 1:
@@ -430,7 +430,7 @@ class CNN2D(nn.Module):
                         gate = 1
                     else:
                         pooling_size = input(
-                            "Please enter pool size for convolutional layer {}\nFor example 2,2: ".format(i + 1))
+                            "Please enter pool size for convolutional layer {}\nFor example 2,2: ".format(i + 1)).replace(' ','')
                         pooling_size_split = pooling_size.split(",")
                         if pooling_size_split[0].isnumeric() and int(pooling_size_split[0]) > 0 and pooling_size_split[1].isnumeric() and int(pooling_size_split[1]) > 0:
                             self.pool_size.append(
@@ -457,7 +457,7 @@ class CNN2D(nn.Module):
                         gate = 1
                     else:
                         pooling_stride = input(
-                            "Please enter pool stride for convolutional layer {}\nFor example 2,2: ".format(i + 1))
+                            "Please enter pool stride for convolutional layer {}\nFor example 2,2: ".format(i + 1)).replace(' ','')
                         pooling_stride_split = pooling_stride.split(",")
                         if pooling_stride_split[0].isnumeric() and int(pooling_stride_split[0]) > 0 and pooling_stride_split[1].isnumeric() and int(pooling_stride_split[1]) > 0:
                             self.pool_stride.append(
@@ -586,7 +586,7 @@ class LSTM(nn.Module):
                 print(
                     "Please enter an integer greater than 0 for the network's hidden size.")
                 self.hidden_size = input(
-                    "For default size, press enter without any input: ")
+                    "For default size, press enter without any input: ").replace(' ','')
 
             if self.hidden_size == "":
                 print("Default value for hidden size selected: 128")
@@ -610,7 +610,7 @@ class LSTM(nn.Module):
                 print(
                     "Please enter a positive integer for the network's number of layers.")
                 self.nlayers = input(
-                    "For default option, press enter without any input: ")
+                    "For default option, press enter without any input: ").replace(' ','')
 
             if self.nlayers == "":
                 print("Default value selected for number of layers: 3")
@@ -634,7 +634,7 @@ class LSTM(nn.Module):
                 print("Please enter 1 to create a bidirectional LSTM network.")
                 print("Else, enter 0.")
                 self.bidirection = input(
-                    "For default option, press enter without any input: ")
+                    "For default option, press enter without any input: ").replace(' ','')
 
             if self.bidirection == "":
                 print("By default, unidirectional LSTM network selected")
@@ -655,7 +655,7 @@ class LSTM(nn.Module):
         while gate != 1:
             print("Please enter the output size for the network.")
             self.output_size = input(
-                "Enter 1 for regression or the number of classes for classification: ")
+                "Enter 1 for regression or the number of classes for classification: ").replace(' ','')
 
             if self.output_size.isnumeric() and int(self.output_size) > 0:
                 self.output_size = int(self.output_size)
@@ -776,7 +776,7 @@ class CNNLSTMModel():
         while gate != 1:
             self.default = \
                 input(
-                    "Use default values for all the training parameters (y/n)? ").lower()
+                    "Use default values for all the training parameters (y/n)? ").lower().replace(' ','')
             if self.default in {"y", "n"}:
                 if self.default == "y":
                     self.default_gate = True
@@ -792,7 +792,7 @@ class CNNLSTMModel():
         gate = 0
         while gate != 1:
             self.batchsize = input(
-                "Please enter a batch size greater than 0: ")
+                "Please enter a batch size greater than 0: ").replace(' ','')
             if self.batchsize.isnumeric() and int(self.batchsize) > 0:
                 self.batchsize = int(self.batchsize)
                 gate = 1
@@ -810,7 +810,7 @@ class CNNLSTMModel():
             else:
                 print("Please enter the training set size as a float (0,1).")
                 self.valset_size = input(
-                    "For default size, press enter without any input: ")
+                    "For default size, press enter without any input: ").replace(' ','')
 
             if self.valset_size == "":
                 print("Default value selected : 0.2")
@@ -830,7 +830,7 @@ class CNNLSTMModel():
         while gate != 1:
             print("Please choose a loss function.")
             self.criterion_input = input(
-                "[1: CrossEntropyLoss, 2: L1Loss, 3: SmoothL1Loss, 4: MSELoss]: ")
+                "[1: CrossEntropyLoss, 2: L1Loss, 3: SmoothL1Loss, 4: MSELoss]: ").replace(' ','')
 
             if self.criterion_input.isnumeric() and int(self.criterion_input) < 5 and int(self.criterion_input) > 0:
                 gate = 1
@@ -850,7 +850,7 @@ class CNNLSTMModel():
                 print(
                     "Please choose an optimizer from the list: [1: Adam, 2: SGD]")
                 self.optimizer_input = input(
-                    "For default optimizer, press enter without any input: ")
+                    "For default optimizer, press enter without any input: ").replace(' ','')
 
             if self.optimizer_input == "":
                 print("Default optimizer selected: Adam")
@@ -871,7 +871,7 @@ class CNNLSTMModel():
             else:
                 print("Please enter a positive learning rate.")
                 self.user_lr = input(
-                    "For default learning rate, press enter without any input: ")
+                    "For default learning rate, press enter without any input: ").replace(' ','')
 
             if self.user_lr == "":
                 print("Default value for learning rate selected : 0.001")
@@ -899,7 +899,7 @@ class CNNLSTMModel():
                 print(
                     "Please choose a scheduler from the list: [1: None, 2:StepLR, 3:MultiStepLR]")
                 self.scheduler_input = input(
-                    "For default option of no scheduler, press enter without any input: ")
+                    "For default option of no scheduler, press enter without any input: ").replace(' ','')
 
             if self.scheduler_input == "":
                 print("By default no scheduler selected")
@@ -918,7 +918,7 @@ class CNNLSTMModel():
             gate = 0
             while gate != 1:
                 self.step = (
-                    input("Please enter a step value int input (step > 0): "))
+                    input("Please enter a step value int input (step > 0): ")).replace(' ','')
                 if self.step.isnumeric() and int(self.step) > 0:
                     self.step = int(self.step)
                     gate = 1
@@ -930,7 +930,7 @@ class CNNLSTMModel():
             gate = 0
             while gate != 1:
                 self.gamma = input(
-                    "Please enter a positive float for the multiplying factor: ")
+                    "Please enter a positive float for the multiplying factor: ").replace(' ','')
                 if self.gamma.replace(".", "").isdigit():
                     if float(self.gamma) > 0:
                         self.gamma = float(self.gamma)
@@ -943,9 +943,8 @@ class CNNLSTMModel():
         elif self.scheduler_input == "3":
             gate = 0
             while gate != 1:
-                self.milestones_input = \
-                    input(
-                        "Please enter integers for milestone epochs (Example: 2, 6, 10): ")
+                self.milestones_input = input("Please enter integers for milestone epochs (Example: 2, 6, 10): ").replace(' ','')
+
                 self.milestones_input = self.milestones_input.split(",")
 
                 for i in range(len(self.milestones_input)):
@@ -964,7 +963,7 @@ class CNNLSTMModel():
             gate = 0
             while gate != 1:
                 self.gamma = input(
-                    "Please enter a positive float for the multiplying factor: ")
+                    "Please enter a positive float for the multiplying factor: ").replace(' ','')
                 if self.gamma.replace(".", "").isdigit():
                     if float(self.gamma) > 0:
                         self.gamma = float(self.gamma)
@@ -985,7 +984,7 @@ class CNNLSTMModel():
         gate = 0
         while gate != 1:
             self.numEpochs = input(
-                "Please enter a positive integer for the number of epochs: ")
+                "Please enter a positive integer for the number of epochs: ").replace(' ','')
             if self.numEpochs.isnumeric() and int(self.numEpochs) > 0:
                 self.numEpochs = int(self.numEpochs)
                 gate = 1
@@ -1043,7 +1042,7 @@ class CNNLSTMModel():
     def _save_model(self):
         gate = 0
         while gate != 1:
-            save_model = input("Save the model weights (y/n)? ").lower()
+            save_model = input("Save the model weights (y/n)? ").lower().replace(' ','')
             if save_model.lower() == "y":
                 path = "model_parameters.pth"
                 torch.save(self.net.state_dict(), path)
