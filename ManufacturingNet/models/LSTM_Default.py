@@ -105,7 +105,7 @@ class LSTM(nn.Module):
         gate = 0
         while gate != 1:
             self.input_size = (input(
-                'Please enter the input size in int for the LSTM network (input size > 0): '))
+                'Please enter the input size in int for the LSTM network (input size > 0): ')).replace(' ','')
             if self.input_size.isnumeric() and int(self.input_size) > 0:
                 self.input_size = int(self.input_size)
                 gate = 1
@@ -125,7 +125,7 @@ class LSTM(nn.Module):
                 self.hidden_size = '128'
             else:
                 self.hidden_size = (input(
-                    'Please enter the hidden size in int for the LSTM network (hidden size > 0)\n For default size, please directly press enter without any input: '))
+                    'Please enter the hidden size in int for the LSTM network (hidden size > 0)\n For default size, please directly press enter without any input: ')).replace(' ','')
             if self.hidden_size == '':              # handling default case for hidden size
                 print('Default value for hidden size selected: 128')
                 self.hidden_size = '128'
@@ -148,7 +148,7 @@ class LSTM(nn.Module):
                 self.nlayers = '3'
             else:
                 self.nlayers = (input(
-                    'Please enter the number of layer for the LSTM network in int (number of layer > 0)\n For default option, please directly press enter without any input: '))
+                    'Please enter the number of layer for the LSTM network in int (number of layer > 0)\n For default option, please directly press enter without any input: ')).replace(' ','')
             if self.nlayers == '':              # handling default case for number of LSTM layer
                 print('Default value selected for number of layers: 3')
                 self.nlayers = '3'
@@ -171,7 +171,7 @@ class LSTM(nn.Module):
                 self.bidirection = '0'
             else:
                 self.bidirection = input(
-                    'Please enter 1 to have a bidirectional LSTM network else enter 0 \n For default option, please directly press enter without any input: ')
+                    'Please enter 1 to have a bidirectional LSTM network else enter 0 \n For default option, please directly press enter without any input: ').replace(' ','')
             if self.bidirection == '':
                 print('By default, unidirectional LSTM network selected')
                 self.bidirection = '0'
@@ -192,7 +192,7 @@ class LSTM(nn.Module):
         gate = 0
         while gate != 1:
             self.output_size = (input(
-                'Please enter the output size for the LSTM network. \n For regression please enter 1 else enter the number of classes for classification problem: '))
+                'Please enter the output size for the LSTM network. \n For regression please enter 1 else enter the number of classes for classification problem: ')).replace(' ','')
             if self.output_size.isnumeric() and int(self.output_size) > 0:
                 self.output_size = int(self.output_size)
                 gate = 1
@@ -293,7 +293,7 @@ class LSTMModel():
         gate = 0
         while gate != 1:
             self.default = input(
-                'Do you want default values for all the parameters (y/n)? ')
+                'Do you want default values for all the parameters (y/n)? ').replace(' ','')
             if self.default == 'y' or self.default == 'Y' or self.default == 'n' or self.default == 'N':
                 if self.default.lower() == 'y':
                     self.default_gate = True
@@ -312,7 +312,7 @@ class LSTMModel():
         gate = 0
         while gate != 1:
             self.batchsize = (
-                input('Please enter the batch size int input (greater than 0): '))
+                input('Please enter the batch size int input (greater than 0): ')).replace(' ','')
             if self.batchsize.isnumeric() and int(self.batchsize) > 0:
                 self.batchsize = int(self.batchsize)
                 gate = 1
@@ -331,7 +331,7 @@ class LSTMModel():
                 self.valset_size = '0.2'
             else:
                 self.valset_size = (input(
-                    'Please enter the train set size float input (size > 0 and size < 1) \n For default size, please directly press enter without any input: '))
+                    'Please enter the train set size float input (size > 0 and size < 1) \n For default size, please directly press enter without any input: ')).replace(' ','')
             if self.valset_size == '':              # handling default case for valsize
                 print('Default value selected : 0.2')
                 self.valset_size = '0.2'
@@ -351,7 +351,7 @@ class LSTMModel():
         gate = 0
         while gate != 1:
             self.criterion_input = (input(
-                'Please enter the appropriate loss function index for the problem: \n Criterion_list - [1: CrossEntropyLoss, 2: L1Loss, 3: SmoothL1Loss, 4: MSELoss]: '))
+                'Please enter the appropriate loss function index for the problem: \n Criterion_list - [1: CrossEntropyLoss, 2: L1Loss, 3: SmoothL1Loss, 4: MSELoss]: ')).replace(' ','')
 
             if self.criterion_input.isnumeric() and int(self.criterion_input) < 5 and int(self.criterion_input) > 0:
                 gate = 1
@@ -373,7 +373,7 @@ class LSTMModel():
                 self.optimizer_input = '1'
             else:
                 self.optimizer_input = (input(
-                    'Please enter the optimizer index for the problem \n Optimizer_list - [1: Adam, 2: SGD] \n For default optimizer, please directly press enter without any input: '))
+                    'Please enter the optimizer index for the problem \n Optimizer_list - [1: Adam, 2: SGD] \n For default optimizer, please directly press enter without any input: ')).replace(' ','')
             if self.optimizer_input == '':              # handling default case for optimizer
                 print('Default optimizer selected : Adam')
                 self.optimizer_input = '1'
@@ -391,7 +391,7 @@ class LSTMModel():
                 self.user_lr = '0.001'
             else:
                 self.user_lr = input(
-                    'Please enter a required value float input for learning rate (learning rate > 0) \n For default learning rate, please directly press enter without any input: ')
+                    'Please enter a required value float input for learning rate (learning rate > 0) \n For default learning rate, please directly press enter without any input: ').replace(' ','')
             if self.user_lr == '':               # handling default case for learning rate
                 print('Default value for learning rate selected : 0.001')
                 self.user_lr = '0.001'
@@ -419,7 +419,7 @@ class LSTMModel():
                 self.scheduler_input = '1'
             else:
                 self.scheduler_input = input(
-                    'Please enter the scheduler index for the problem: Scheduler_list - [1: None, 2:StepLR, 3:MultiStepLR] \n For default option of no scheduler, please directly press enter without any input: ')
+                    'Please enter the scheduler index for the problem: Scheduler_list - [1: None, 2:StepLR, 3:MultiStepLR] \n For default option of no scheduler, please directly press enter without any input: ').replace(' ','')
             if self.scheduler_input == '':
                 print('By default no scheduler selected')
                 self.scheduler_input = '1'
@@ -438,7 +438,7 @@ class LSTMModel():
             gate = 0
             while gate != 1:
                 self.step = (
-                    input('Please enter a step value int input (step > 0): '))
+                    input('Please enter a step value int input (step > 0): ')).replace(' ','')
                 if self.step.isnumeric() and int(self.step) > 0:
                     self.step = int(self.step)
                     gate = 1
@@ -449,7 +449,7 @@ class LSTMModel():
             gate = 0
             while gate != 1:
                 self.gamma = (input(
-                    'Please enter a Multiplying factor value float input (Multiplying factor > 0): '))
+                    'Please enter a Multiplying factor value float input (Multiplying factor > 0): ')).replace(' ','')
                 if self.gamma.replace('.', '').isdigit():
                     if float(self.gamma) > 0:
                         self.gamma = float(self.gamma)
@@ -466,7 +466,7 @@ class LSTMModel():
             gate = 0
             while gate != 1:
                 self.milestones_input = (
-                    input('Please enter values of milestone epochs int input (Example: 2, 6, 10): '))
+                    input('Please enter values of milestone epochs int input (Example: 2, 6, 10): ')).replace(' ','')
                 self.milestones_input = self.milestones_input.split(',')
                 for i in range(len(self.milestones_input)):
                     if self.milestones_input[i].isnumeric() and int(self.milestones_input[i]) > 0:
@@ -485,7 +485,7 @@ class LSTMModel():
             gate = 0
             while gate != 1:
                 self.gamma = (input(
-                    'Please enter a Multiplying factor value float input (Multiplying factor > 0): '))
+                    'Please enter a Multiplying factor value float input (Multiplying factor > 0): ')).replace(' ','')
                 if self.gamma.replace('.', '').isdigit():
                     if float(self.gamma) > 0:
                         self.gamma = float(self.gamma)
@@ -512,7 +512,7 @@ class LSTMModel():
         gate = 0
         while gate != 1:
             self.numEpochs = (input(
-                'Please enter the number of epochs int input to train the model (number of epochs > 0): '))
+                'Please enter the number of epochs int input to train the model (number of epochs > 0): ')).replace(' ','')
             if self.numEpochs.isnumeric() and int(self.numEpochs) > 0:
                 self.numEpochs = int(self.numEpochs)
                 gate = 1
@@ -581,7 +581,7 @@ class LSTMModel():
         gate = 0
         while gate != 1:
             save_model = input(
-                'Do you want to save the model weights? (y/n): ')
+                'Do you want to save the model weights? (y/n): ').replace(' ','')
             if save_model.lower() == 'y' or save_model.lower() == 'yes':
                 path = 'model_parameters.pth'
                 torch.save(self.net.state_dict(), path)
