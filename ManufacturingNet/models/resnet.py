@@ -16,6 +16,7 @@ import torch.optim as optim
 import torch.optim.lr_scheduler as scheduler
 import torch.utils.data as data_utils
 import torchvision
+import torch.utils.data as data
 from torch.utils import data as data_utils
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
