@@ -720,7 +720,7 @@ class CNN_LSTM(nn.Module):
         return output
 
 
-class CNNLSTMModel():
+class CNNLSTM():
     """CNNLSTMModel will be called by the user. This class calls all
     other necessary classes to build a complete pipeline for training
     the model.
