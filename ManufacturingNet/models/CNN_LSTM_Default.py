@@ -194,7 +194,7 @@ class CNN2D(nn.Module):
 
     def get_channels(self, n_conv):
         gate = 0
-        gate = 0
+        gate1 = 0
         self.channels = []
 
         while gate != 1:
@@ -207,7 +207,7 @@ class CNN2D(nn.Module):
                 print("The value must be an integer greater than zero.")
                 gate = 0
 
-        while gate != 1:
+        while gate1 != 1:
             for i in range(n_conv):
                 channel = \
                     input(
@@ -215,9 +215,9 @@ class CNN2D(nn.Module):
                 if (channel.isnumeric() and int(channel) > 0):
                     self.channels.append(int(channel))
                     if i == n_conv - 1:
-                        gate = 1
+                        gate1 = 1
                 else:
-                    gate = 0
+                    gate1 = 0
                     print("Please enter valid number of channels.")
                     print("The value must be an integer greater than zero.")
                     self.channels = []
