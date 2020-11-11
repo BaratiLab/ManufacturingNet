@@ -313,7 +313,7 @@ class DNN(nn.Module):
 
 class DNN():
     """
-    Documentation Link:
+    Documentation Link:https://manufacturingnet.readthedocs.io/en/latest/
 
     """
 
