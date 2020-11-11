@@ -580,7 +580,7 @@ class CNN2D(nn.Module):
         return self.ConvNet(x)
 
 
-class CNNModel(object):
+class CNN2DSignal(object):
     """
     Documentation Link:
     """
