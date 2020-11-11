@@ -721,7 +721,7 @@ class CNN_LSTM(nn.Module):
 
 
 class CNNLSTM():
-    """CNNLSTMModel will be called by the user. This class calls all
+    """CNNLSTM will be called by the user. This class calls all
     other necessary classes to build a complete pipeline for training
     the model.
 
