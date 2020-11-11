@@ -580,9 +580,9 @@ class CNN2D(nn.Module):
         return self.ConvNet(x)
 
 
-class CNNModel(object):
+class CNN2DSignal(object):
     """
-    Documentation Link:
+    Documentation Link:https://manufacturingnet.readthedocs.io/en/latest/
     """
 
     def __init__(self, X, Y, shuffle=True):

@@ -311,9 +311,9 @@ class DNN(nn.Module):
 # The following class will be called by a user. The class calls other necessary classes to build a complete pipeline required for training
 
 
-class DNNModel():
+class DNN():
     """
-    Documentation Link:
+    Documentation Link:https://manufacturingnet.readthedocs.io/en/latest/
 
     """
 

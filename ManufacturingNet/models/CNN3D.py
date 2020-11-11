@@ -399,6 +399,9 @@ class Network(nn.Module):
 
 
 class CNN3D():
+    """
+    Documentation link: https://manufacturingnet.readthedocs.io/en/latest/
+    """
 
     def __init__(self, X, Y, shuffle=True):
 
