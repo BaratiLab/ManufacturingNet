@@ -164,8 +164,12 @@ class XGBoost:
             self.cross_val_scores_regressor = \
                 cross_val_score(self.regressor, self.attributes, self.labels,
                                 cv=self.cv)
-            self.feature_importances_regressor = \
-                self.regressor.feature_importances_
+            try:
+                self.feature_importances_regressor = \
+                    self.regressor.feature_importances_
+            except Exception:
+                self.feature_importances_regressor = \
+                    "Not supported for selected booster"
 
             # Output results
             self._output_regressor_results()
@@ -239,8 +243,12 @@ class XGBoost:
             self.cross_val_scores_classifier = \
                 cross_val_score(self.classifier, self.attributes, self.labels,
                                 cv=self.cv)
-            self.feature_importances_classifier = \
-                self.classifier.feature_importances_
+            try:
+                self.feature_importances_classifier = \
+                    self.classifier.feature_importances_
+            except Exception:
+                self.feature_importances_classifier = \
+                    "Not supported for selected booster"
 
             # Output results
             self._output_classifier_results()
