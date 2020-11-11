@@ -182,7 +182,7 @@ class Featurizer:
         contain extreme values.
         """
         try:
-            ans = self.scipy.stats.kurtosis(a, axis)
+            ans = scipy.stats.kurtosis(a, axis)
             return ans
         except Exception as e:
             print("An exception occurred. Here is the message:\n", e)
