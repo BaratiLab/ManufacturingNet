@@ -71,7 +71,6 @@ class Network(nn.Module):
             else:
                 print('Please enter valid input')
 
-        print(self.X[0].shape[0])
         model.conv1 = nn.Conv2d(self.channel, 64, kernel_size=(
             7, 7), stride=(2, 2), padding=(3, 3), bias=False)
         if self.model_select in [1, 2]:
