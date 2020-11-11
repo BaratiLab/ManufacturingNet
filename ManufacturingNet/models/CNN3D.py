@@ -29,7 +29,8 @@ class MyDataset(data.Dataset):
         return len(self.Y)
 
     def __getitem__(self, index):
-        X = torch.from_numpy(self.X[index]).double().unsqueeze(
+        X=np.squeeze(self.X[index],axis=1)
+        X = torch.from_numpy(X).double().unsqueeze(
             0)  # (in_channel,depth,height,width)
         Y = torch.from_numpy(np.array(self.Y[index])).double()
         return X, Y
