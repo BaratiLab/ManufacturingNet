@@ -140,14 +140,14 @@ def CWRUBearingData():
     remove_zip(destination)
     
 ##### 3D Spatter Data #####
-def SpatterData():
+# def SpatterData():
     
 
-    data_id = '17XyK0S7dO9RKhg4rqfveDPPOprZVE_f0'
-    destination = 'SpatterData.zip'
+#     data_id = '17XyK0S7dO9RKhg4rqfveDPPOprZVE_f0'
+#     destination = 'SpatterData.zip'
 
-    download_file_from_google_drive(data_id, destination)
-    extract_files(destination)
-    remove_zip(destination)
+#     download_file_from_google_drive(data_id, destination)
+#     extract_files(destination)
+#     remove_zip(destination)
 
     
