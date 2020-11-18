@@ -124,9 +124,9 @@ class CNN2D(nn.Module):
         super(CNN2D, self).__init__()
         self.block = block
 
-        print('1/15 - Get Image Size')
+        print('1/15 - Get 2D folded signal Size')
         self.img_x, self.img_y = self.get_image_size()
-        print("Image: ", (self.img_y), (self.img_y))
+        print("Image: ", (self.img_x), (self.img_y))
         print("="*25)
 
         print('2/15 - Number of Convolutions')
@@ -193,8 +193,8 @@ class CNN2D(nn.Module):
     def get_image_size(self):  # Get image size as the input from user
         gate = 0
         while gate != 1:
-            self.img_x = (input("Please enter the image width: ")).replace(' ','')
-            self.img_y = (input("Please enter the image height: ")).replace(' ','')
+            self.img_x = (input("Please enter the size of the first dimension of the folded 2D signal: ")).replace(' ','')
+            self.img_y = (input("Please enter the size of the second dimension of the folded 2D signal: ")).replace(' ','')
             if (self.img_x.isnumeric() and int(self.img_x) > 0) and (self.img_y.isnumeric() and int(self.img_y) > 0):
                 gate = 1
             else:
@@ -547,14 +547,19 @@ class CNN2D(nn.Module):
                         layers.append(block(in_channels=self.channels[i], out_channels=self.channels[i+1], kernel_size=self.kernel_size[i], stride=self.stride[i],
                                             pool_size=self.pooling_size[i], pool_stride=self.pooling_stride[i], padding=self.padding[i], batch_norm=True, last=True, pooling=True))
 
-        conv_shape = conv2D_output_size(
-            (self.img_x, self.img_y), self.padding[0], self.kernel_size[0], self.stride[0])
-        shape = [conv_shape]
+
         # print(pool_list)
         if pool_list[0] == 1:
+            conv_shape = conv2D_output_size(
+            (self.img_x, self.img_y), self.padding[0], self.kernel_size[0], self.stride[0])
             conv_shape_pool = conv2D_pool_size(
-                shape[0], self.pooling_size[0], self.pooling_stride[0])
-            shape.append(conv_shape_pool)
+                conv_shape, self.pooling_size[0], self.pooling_stride[0])
+            shape = [conv_shape_pool]
+        else:
+            conv_shape = conv2D_output_size(
+            (self.img_x, self.img_y), self.padding[0], self.kernel_size[0], self.stride[0])
+            shape = [conv_shape]
+
         for i in range(1, n_conv):
             if pool_list[i] == 1:
                 conv_shape_rep = conv2D_output_size(
@@ -1077,7 +1082,6 @@ class CNN2DSignal(object):
         For passing multiple inputs, make sure to keep number of examples to be the first dimension of the input.
         For example, 10 data points need to be checked and each point has (3, 50, 50) resized or original input size, the shape of the array must be (10, 3, 50, 50).
         For more information, please see documentation.
-
         """
 
         # Method to use at the time of inference
