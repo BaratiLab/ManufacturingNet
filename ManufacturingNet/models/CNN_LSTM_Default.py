@@ -121,7 +121,7 @@ class CNN2D(nn.Module):
 
         print("1/18 - Get Image Size")
         self.img_x, self.img_y = self.get_image_size()
-        print("Image:", (self.img_y), (self.img_y))
+        print("Image:", (self.img_x), (self.img_y))
         print("=" * 25)
 
         print("2/18 - Number of Convolutions")
