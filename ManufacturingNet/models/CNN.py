@@ -551,7 +551,7 @@ class CNN2D(nn.Module):
             (self.img_x, self.img_y), self.padding[0], self.kernel_size[0], self.stride[0])
         shape = [conv_shape]
         # print(pool_list)
-        if len(pool_list) == 1 and pool_list[0] == 1:
+        if len(pool_list) == 1 or pool_list[0] == 1:
             conv_shape_pool = conv2D_pool_size(
                 shape[0], self.pooling_size[0], self.pooling_stride[0])
             shape.append(conv_shape_pool)
