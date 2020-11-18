@@ -29,8 +29,7 @@ class MyDataset(data.Dataset):
         return len(self.Y)
 
     def __getitem__(self, index):
-        X = torch.from_numpy(self.X[index]).double().unsqueeze(
-            0)  # (in_channel,depth,height,width)
+        X = torch.from_numpy(self.X[index]).double()  # (in_channel,depth,height,width)
         Y = torch.from_numpy(np.array(self.Y[index])).double()
         return X, Y
 
@@ -409,6 +408,7 @@ class CNN3D():
         self.X = X
         # dev_data
         self.Y = Y
+
         self.shuffle = shuffle
 
         self.get_default_paramters()
@@ -418,8 +418,7 @@ class CNN3D():
         print('Question [2/9]: Design Architecture: ')
         print('\n')
 
-        self.net = (Network(self.X[0].shape, self.num_classes)).double()
-
+        self.net = (Network(self.X[0].shape[1:], self.num_classes,self.X[0].shape[0])).double()
         # getting a batch size for training and validation
         self._get_batchsize_input()
         self._get_valsize_input()
