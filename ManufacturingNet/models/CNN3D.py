@@ -29,7 +29,7 @@ class MyDataset(data.Dataset):
         return len(self.Y)
 
     def __getitem__(self, index):
-        X = torch.from_numpy(self.X).double()  # (in_channel,depth,height,width)
+        X = torch.from_numpy(self.X[index]).double()  # (in_channel,depth,height,width)
         Y = torch.from_numpy(np.array(self.Y[index])).double()
         return X, Y
 
