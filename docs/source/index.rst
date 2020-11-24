@@ -1,28 +1,32 @@
-.. Manufacturing Net documentation master file, created by
-   sphinx-quickstart on Sun Jul 19 16:10:14 2020.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+********************************************
+Welcome to ManufacturingNet's documentation!
+********************************************
 
-Welcome to Manufacturing Net's documentation!
-=============================================
+About the Project
+=================
 
-About the project:
-^^^^^^^^^^^^^^^^^^
-ManufacturingNet has been developed by the Mechanical and AI lab at CMU. The project aims to develop a sustainable ecosystem of open source code that can be useful for tackling engineering problems using modern day artificial intelligence tools. 
+ManufacturingNet provides a sustainable, open-source ecosystem of modern artificial intelligence (AI) tools for tackling
+diverse engineering challenges.
 
-Current capabilities of the project include:
+Written in Python3 and designed for ease of use, ManufacturingNet's machine learning library simplifies AI for
+manufacturing professionals.
 
+ManufacturingNet is developed and maintained by the Mechanical and AI Lab (MAIL) at Carnegie
+Mellon University.
 
+Interested in our work? Check out our `website <https://www.manufacturingnet.io>`_, and grab our code from
+`GitHub <https://www.github.com/BaratiLab/ManufacturingNet>`_.
 
+Table of Contents
+=================
 
-.. toctree::
-   :maxdepth: 2
+   .. toctree::
+      :maxdepth: 1
 
-   :caption: Contents:
-
-Table of contents
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+      Getting Started <tutorial>
+      Datasets <datasets>
+      Featurizers <featurizers>
+      Preprocessing <preprocessing>
+      Shallow Learning Methods <shallow_learning_methods>
+      Deep Learning Methods <deep_learning_methods>
+      License <license>

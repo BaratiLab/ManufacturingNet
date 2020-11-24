@@ -44,7 +44,7 @@ def remove_zip(name):
 ##### Paderborn University Bearing Data #####
 def PaderbornBearingData():
     
-    data_id = '1iB9uAnSndzDmzfQyxSa3SQKEW72Jz2p5'
+    data_id = '15v1fwFxfrntTE1FVdNvZXzMF5xufMa3Z'
     destination = 'PaderbornBearingData.zip'
 
     download_file_from_google_drive(data_id, destination)
@@ -55,7 +55,7 @@ def PaderbornBearingData():
 def MotorTempData():
     
 
-    data_id = '1vjLsAVHxDeNiLYcmuv-Kn5eFZRx_-NZn'
+    data_id = '11Q5emmsc1dMMiMGe8niho5x4-3I5Oc_K'
     destination = 'MotorTempData.zip'
 
     download_file_from_google_drive(data_id, destination)
@@ -66,7 +66,7 @@ def MotorTempData():
 def ChatterData():
     
 
-    data_id = '1kcVvp9xuOuOvP1672FiESdGr2FP-mLfr'
+    data_id = '1z_2ceidvHmE5p7XCD4PaGn4ezvcZMxdD'
     destination = 'ChatterData.zip'
 
     download_file_from_google_drive(data_id, destination)
@@ -99,7 +99,7 @@ def MercedesData():
 def LithographyData():
     
 
-    data_id = '1zQZ_kyr4X8UzZebGq2lGk_BvOSlGBOBG'
+    data_id = '1XY4fbNtzKrXXPtfiPGpwunWvyIDH_V57'
     destination = 'LithographyData.zip'
 
     download_file_from_google_drive(data_id, destination)
@@ -110,7 +110,7 @@ def LithographyData():
 def GearboxData():
     
 
-    data_id = '1NFlUVKORPVz5SxcPlRkmS5cJLH4ZFVEd'
+    data_id = '1aTFu-M8V5CxbDY4e-nRBLNuPmbsbAbgk'
     destination = 'GearboxData.zip'
 
     download_file_from_google_drive(data_id, destination)
@@ -132,7 +132,7 @@ def CastingData():
 def CWRUBearingData():
     
 
-    data_id = '11sBWHyprqU9pY3wtBstqgpV6MHZgIM4M'
+    data_id = '1nUjYdpJkEmjJTzG0j8EBZ9vQul0sedqk'
     destination = 'CWRUBearingData.zip'
 
     download_file_from_google_drive(data_id, destination)
@@ -140,14 +140,14 @@ def CWRUBearingData():
     remove_zip(destination)
     
 ##### 3D Spatter Data #####
-def SpatterData():
+# def SpatterData():
     
 
-    data_id = '17XyK0S7dO9RKhg4rqfveDPPOprZVE_f0'
-    destination = 'SpatterData.zip'
+#     data_id = '17XyK0S7dO9RKhg4rqfveDPPOprZVE_f0'
+#     destination = 'SpatterData.zip'
 
-    download_file_from_google_drive(data_id, destination)
-    extract_files(destination)
-    remove_zip(destination)
+#     download_file_from_google_drive(data_id, destination)
+#     extract_files(destination)
+#     remove_zip(destination)
 
     

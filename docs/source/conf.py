@@ -14,6 +14,7 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import sphinx_bootstrap_theme
 
 # -- Project information -----------------------------------------------------
 
@@ -32,7 +33,7 @@ release = '0.0.1'
 # ones.
 extensions = [
 ]
-
+master_doc = 'index'
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -54,9 +55,26 @@ exclude_patterns = []
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'bootstrap'
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+
+# Custom bootstrap styling
+html_theme_options = {
+    'navbar_title': "ManufacturingNet",
+    'navbar_site_name': "Docs",
+    'navbar_links': [
+        ("Website", "http://manufacturingnet.io/", 1),
+        ("GitHub", "https://www.github.com/BaratiLab/ManufacturingNet", 1)
+    ],
+    'navbar_sidebarrel': False,
+    'navbar_pagenav': False,
+    'bootswatch_theme': "sandstone"
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+def setup(app):
+    app.add_css_file("custom-style.css")

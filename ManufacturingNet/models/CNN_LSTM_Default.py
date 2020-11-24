@@ -121,7 +121,7 @@ class CNN2D(nn.Module):
 
         print("1/18 - Get Image Size")
         self.img_x, self.img_y = self.get_image_size()
-        print("Image:", (self.img_y), (self.img_y))
+        print("Image:", (self.img_x), (self.img_y))
         print("=" * 25)
 
         print("2/18 - Number of Convolutions")
@@ -511,15 +511,18 @@ class CNN2D(nn.Module):
                         layers.append(block(in_channels=self.channels[i], out_channels=self.channels[i+1], kernel_size=self.kernel_size[i], stride=self.stride[i],
                                             pool_size=self.pooling_size[i], pool_stride=self.pooling_stride[i], padding=self.padding[i], batch_norm=True, last=True, pooling=True))
 
-        conv_shape = conv2D_output_size(
-            (self.img_x, self.img_y), self.padding[0], self.kernel_size[0], self.stride[0])
-        shape = [conv_shape]
 
-        if len(pool_list) == 1 and pool_list[0] == 1:
+        if pool_list[0] == 1:
+            conv_shape = conv2D_output_size(
+              (self.img_x, self.img_y), self.padding[0], self.kernel_size[0], self.stride[0])
             conv_shape_pool = conv2D_pool_size(
                 shape[0], self.pooling_size[0], self.pooling_stride[0])
-            shape.append(conv_shape_pool)
-
+            shape = [conv_shape_pool] 
+        else:
+            conv_shape = conv2D_output_size(
+              (self.img_x, self.img_y), self.padding[0], self.kernel_size[0], self.stride[0])
+            shape = [conv_shape]
+                        
         for i in range(1, n_conv):
             if pool_list[i] == 1:
                 conv_shape_rep = conv2D_output_size(
@@ -724,7 +727,6 @@ class CNNLSTM():
     """CNNLSTM will be called by the user. This class calls all
     other necessary classes to build a complete pipeline for training
     the model.
-
     View the documentation at https://manufacturingnet.readthedocs.io/
     """
 
@@ -1217,7 +1219,6 @@ class CNNLSTM():
         For example, 10 data points need to be checked and each point
         has (3, 50, 50) resized or original input size, the shape of the
         array must be (10, 3, 50, 50).
-
         View the documentation at https://manufacturingnet.readthedocs.io/
         """
         if len(x_input.shape) == 3:
@@ -1230,4 +1231,4 @@ class CNNLSTM():
         if self.criterion_input == "1":
             _, net_output = torch.max(net_output.data, 1)
 
-        return net_output
+        return net_outp
