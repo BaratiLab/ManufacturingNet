@@ -29,7 +29,7 @@ class MyDataset(data.Dataset):
         return len(self.Y)
 
     def __getitem__(self, index):
-        X = torch.from_numpy(self.X[index]).double()  # (in_channel,depth,height,width)
+        X = torch.from_numpy(self.X[index,:,:,:,:]).double()  # (in_channel,depth,height,width)
         Y = torch.from_numpy(np.array(self.Y[index])).double()
         return X, Y
 
@@ -76,7 +76,7 @@ class BasicBlock(nn.Module):
             self.get_pooling_layer()
             if self.pooling_input:
                 self.input_size = conv3D_output_size(
-                    self.input_size, (3, 3, 3), (2, 2, 2), (0, 0, 0))
+                    self.input_size, self.pool_kernel, self.pool_stride, self.pool_padding)
 
         self.get_dropout()
 
@@ -156,7 +156,6 @@ class BasicBlock(nn.Module):
                         gate = 1
                     p_split = padding_input.split(",")
                     if len(p_split) == 3:
-
                         for i in p_split:
                             if i.isnumeric() and int(i) >= 0:
                                 self.pool_padding.append(int(i))
@@ -337,12 +336,14 @@ class Network(nn.Module):
                 self.in_channel, self.img_size, self.default_input)
             self.conv_layers.append(conv_layer)
             self.img_size = conv_layer.input_size
-            print('The image shape after convolution is: ', self.img_size)
-            print('\n')
             self.in_channel = conv_layer.out_channel
+            print('The image shape after convolution is: ', (self.in_channel,self.img_size[0],self.img_size[1],self.img_size[2]))
+            print('\n')
+            
 
         final_layers = list(filter(None, self.conv_layers))
         self.net = nn.Sequential(*final_layers)
+
 
         # fully connected layer, output k classes
         self.fc1 = nn.Linear(
@@ -388,7 +389,7 @@ class Network(nn.Module):
     def forward(self, x):
 
         x = self.net(x)
-        x = x.view(x.size(0), -1)
+        x = x.view(x.shape[0], -1)
 
         x = self.fc1(x)
         x = self.fc2(x)
