@@ -4,4 +4,4 @@ from .datasets import MercedesData, ThreeDPrintingData, MotorTempData, Lithograp
 from .datasets import GearboxData
 #from .datasets import SpatterData
 
-__all__=['PaderbornBearingData','CWRUBearingData','CastingData','ChatterData','MercedesData', 'ThreeDPrintingData', 'MotorTempData', 'LithographyData','GearboxData','SpatterData']
+__all__=['PaderbornBearingData','CWRUBearingData','CastingData','ChatterData','MercedesData', 'ThreeDPrintingData', 'MotorTempData', 'LithographyData','GearboxData']#,'SpatterData']
