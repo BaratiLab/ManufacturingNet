@@ -53,7 +53,7 @@ After installing the above requirements, open the terminal/PowerShell and run th
 
 .. code::
 
-    pip install -i https://test.pypi.org/simple/ ManufacturingNet
+    pip install ManufacturingNet
 
 Usage
 =====

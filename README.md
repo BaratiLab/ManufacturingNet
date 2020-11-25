@@ -52,7 +52,7 @@ pip install ModuleName
 After you've installed the above requirements, open the terminal/PowerShell and run the following command:
 
 ```bash
-pip install -i https://test.pypi.org/simple/ ManufacturingNet
+pip install ManufacturingNet
 ```
 
 ## Usage
