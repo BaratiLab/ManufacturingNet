@@ -15,7 +15,7 @@ classifiers=[
     'Intended Audience :: Education']
 
 setup(name=package_name,\
-    version='0.2.3',\
+    version='0.0.1',\
         description='AI and Machine Learning for manufacturing related datasets',
         long_description=LONG_DESCRIPTION,
         author='Ruchti Doshi',
