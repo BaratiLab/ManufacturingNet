@@ -1,6 +1,7 @@
 import requests
 from zipfile import ZipFile
 import os
+import bs4
 
 def download_file_from_google_drive(id, destination):
     URL = "https://docs.google.com/uc?export=download"
@@ -8,6 +9,9 @@ def download_file_from_google_drive(id, destination):
     session = requests.Session()
 
     response = session.get(URL, params = { 'id' : id }, stream = True)
+    if response.text.find('Virus scan warning') != -1:
+        soup = bs4.BeautifulSoup(response.text, 'html.parser')
+        response = session.get(soup.find(id='downloadForm').get('action'), stream = True)
     token = get_confirm_token(response)
 
     if token:
