@@ -68,11 +68,11 @@ class Dataset(data.Dataset):
 
 
 # The following function builds a deep neural network by asking inputs from the user
-class DNN(nn.Module):
+class Network(nn.Module):
 
     def __init__(self, if_default, negative_slope=0.01):
 
-        super(DNN, self).__init__()
+        super(Network, self).__init__()
 
         self.default_gate = if_default
 
@@ -330,7 +330,7 @@ class DNN():
         self.get_default_paramters()            # getting default parameters argument
 
         # building a network architecture
-        self.net = (DNN(self.default_gate)).double()
+        self.net = (Network(self.default_gate)).double()
 
         print('='*25)
         print('5/10 - Batch size input')
