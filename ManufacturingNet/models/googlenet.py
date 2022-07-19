@@ -58,7 +58,7 @@ class Network(nn.Module):
                 print('Please enter valid input')
 
         model = googlenet(pretrained=self.pretrained)
-        model.conv1 = BasicConv2d(
+        model.conv1 = nn.Conv2d(
             self.channel, 64, kernel_size=7, stride=2, padding=3)
         model.fc = nn.Linear(1024, self.num_class)
 
