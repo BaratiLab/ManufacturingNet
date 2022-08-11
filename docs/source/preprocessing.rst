@@ -30,7 +30,7 @@ Example Usage
     from ManufacturingNet.preprocessing import MeanNormalizer
     import numpy as np
     
-    data = np.load('cwru_feature.npy', allow_pickle = True)[:-10]
+    data = np.load("cwru_feature.npy", allow_pickle=True)[:-10]
     test_data=data[-10:]
     
     M=MeanNormalizer(data,axis=0)
@@ -68,7 +68,7 @@ Example Usage
     from ManufacturingNet.preprocessing import MinMaxNormalizer
     import numpy as np
     
-    data = np.load('cwru_feature.npy', allow_pickle = True)[:-10]
+    data = np.load("cwru_feature.npy", allow_pickle=True)[:-10]
     test_data=data[-10:]
     
     M=MinMaxNormalizer(data,axis=0)
@@ -108,7 +108,7 @@ Example Usage
     from ManufacturingNet.preprocessing import QuantileNormalizer
     import numpy as np
     
-    data = np.load('cwru_feature.npy', allow_pickle = True)[:-10]
+    data = np.load("cwru_feature.npy", allow_pickle=True)[:-10]
     test_data=data[-10:]
     
     M=QuantileNormalizer(data,axis=0)

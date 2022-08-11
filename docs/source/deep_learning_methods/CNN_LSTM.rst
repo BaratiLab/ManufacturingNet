@@ -75,7 +75,7 @@ Example Usage
     from ManufacturingNet.models import CNNLSTM
     import numpy as np
 
-    attributes = np.load('lithography_x.npy', allow_pickle = True)
-    labels = np.load("lithography_y.npy", allow_pickle = True)
+    attributes = np.load("lithography_x.npy", allow_pickle=True)
+    labels = np.load("lithography_y.npy", allow_pickle=True)
     
     model = CNNLSTM(attributes, labels)

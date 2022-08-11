@@ -66,7 +66,7 @@ Example Usage
     from ManufacturingNet.models import DNN
     import numpy as np
 
-    attributes = np.load('cwru_feature.npy', allow_pickle = True)
-    labels = np.load("cwru_labels.npy", allow_pickle = True)
+    attributes = np.load("cwru_feature.npy", allow_pickle=True)
+    labels = np.load("cwru_labels.npy", allow_pickle=True)
     
     model = DNN(attributes, labels)

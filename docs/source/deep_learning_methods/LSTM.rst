@@ -66,7 +66,7 @@ Example Usage
     from ManufacturingNet.models import LSTM
     import numpy as np
 
-    attributes = np.load('lstm_train_x.npy', allow_pickle = True)
-    labels = np.load("lstm_train_y.npy", allow_pickle = True)
+    attributes = np.load("lstm_train_x.npy", allow_pickle=True)
+    labels = np.load("lstm_train_y.npy", allow_pickle=True)
     
     model = LSTM(attributes, labels)
