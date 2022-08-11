@@ -31,6 +31,18 @@ def spacing():
     print('='*25)
 
 
+class BasicConv2d(nn.Module):
+
+    def __init__(self, in_channels, out_channels, **kwargs):
+        super(BasicConv2d, self).__init__()
+        self.conv = nn.Conv2d(in_channels, out_channels, bias=False, **kwargs)
+        self.bn = nn.BatchNorm2d(out_channels, eps=0.001)
+
+    def forward(self, x):
+        x = self.conv(x)
+        x = self.bn(x)
+        return F.relu(x, inplace=True)
+
 class Network(nn.Module):
     def __init__(self, img_size, num_class):
         super(Network, self).__init__()
@@ -58,11 +70,12 @@ class Network(nn.Module):
                 print('Please enter valid input')
 
         model = googlenet(pretrained=self.pretrained)
-        model.conv1 = nn.Conv2d(
+        model.conv1 = BasicConv2d(
             self.channel, 64, kernel_size=7, stride=2, padding=3)
         model.fc = nn.Linear(1024, self.num_class)
 
         self.net = model.double()
+        self.net.pretrained = self.pretrained
 
         spacing()
         
@@ -486,6 +499,8 @@ class GoogleNet():
                 data = data.double().to(self.device)
                 target = target.to(self.device)
                 outputs = self.net(data)
+                if not self.net.pretrained:
+                    outputs = outputs.logits
 
                 # calculating the batch accuracy only if the loss function is Cross entropy
                 if self.criterion_input == '1':
