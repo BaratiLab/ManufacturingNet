@@ -38,10 +38,10 @@ Example Usage
 .. code-block:: python
     :linenos:
 
-    from ManufacturingNet.Featurization import Featurizer
+    from ManufacturingNet.featurization import Featurizer
     import numpy as np
     
-    data = np.load("CWRU_raw_data.npy, allow_pickle=True")
+    data = np.load("CWRU_raw_data.npy", allow_pickle=True)
     
     f = Featurizer()
     
