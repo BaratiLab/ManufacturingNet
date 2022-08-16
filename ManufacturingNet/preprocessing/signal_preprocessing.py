@@ -17,13 +17,17 @@ class MeanNormalizer():
     
     
     """
-    def __init__(self, a, axis = 0):
+    def __init__(self, a, axis=0):
         
         self.data = a
         self.axis = axis
         self.reshape_dim = self.data.shape[abs(self.axis-1)]
-        self.data_mean = np.mean(self.data, self.axis).reshape(self.reshape_dim,1)
-        self.data_std = np.std(self.data, self.axis).reshape(self.reshape_dim,1)
+        if self.axis == 0:
+            self.data_mean = np.mean(self.data, self.axis).reshape(self.reshape_dim)
+            self.data_std = np.std(self.data, self.axis).reshape(self.reshape_dim)
+        elif self.axis == 1:
+            self.data_mean = np.mean(self.data, self.axis).reshape(self.reshape_dim, 1)
+            self.data_std = np.std(self.data, self.axis).reshape(self.reshape_dim, 1)
         self.normalized_data = (self.data - self.data_mean)/(self.data_std) 
         self.scaled_data = None 
         
@@ -61,15 +65,19 @@ class MinMaxNormalizer():
     
     
     """
-    def __init__(self, a, axis = 0):
+    def __init__(self, a, axis=0):
         
         self.data = a
         self.axis = axis
         self.reshape_dim = self.data.shape[abs(self.axis-1)]
-        self.data_min = np.min(self.data, self.axis).reshape(self.reshape_dim,1)
-        self.data_max = np.max(self.data, self.axis).reshape(self.reshape_dim,1)
+        if self.axis == 0:
+            self.data_min = np.min(self.data, self.axis).reshape(self.reshape_dim)
+            self.data_max = np.max(self.data, self.axis).reshape(self.reshape_dim)
+        elif self.axis == 1:
+            self.data_min = np.min(self.data, self.axis).reshape(self.reshape_dim, 1)
+            self.data_max = np.max(self.data, self.axis).reshape(self.reshape_dim, 1)
         self.scaled_data = None 
-        self.normalized_data = (self.data - self.data_min)/(self.data_max -self.data_min) 
+        self.normalized_data = (self.data - self.data_min)/(self.data_max - self.data_min) 
 
     def get_normalized_data(self):
 
@@ -101,7 +109,7 @@ class QuantileNormalizer():
     
     
     """
-    def __init__(self, a, axis = 0, q1 = 0.25, q2 = 0.75):
+    def __init__(self, a, axis=0, q1 = 0.25, q2 = 0.75):
         
         assert q1 > 0 and q1 < 1
         assert q2 > q1 and q2 < 1
@@ -109,8 +117,12 @@ class QuantileNormalizer():
         self.data = a
         self.axis = axis
         self.reshape_dim = self.data.shape[abs(self.axis-1)]
-        self.IQR = np.percentile(self.data, q2, self.axis).reshape(self.reshape_dim,1) - np.percentile(self.data, q1, self.axis).reshape(self.reshape_dim,1)
-        self.data_median = np.median(self.data, self.axis).reshape(self.reshape_dim,1)
+        if self.axis == 0:
+            self.IQR = np.percentile(self.data, q2, self.axis).reshape(self.reshape_dim) - np.percentile(self.data, q1, self.axis).reshape(self.reshape_dim)
+            self.data_median = np.median(self.data, self.axis).reshape(self.reshape_dim)
+        elif self.axis == 1:
+            self.IQR = np.percentile(self.data, q2, self.axis).reshape(self.reshape_dim,1) - np.percentile(self.data, q1, self.axis).reshape(self.reshape_dim,1)
+            self.data_median = np.median(self.data, self.axis).reshape(self.reshape_dim,1)
         self.scaled_data = None 
         self.normalized_data = (self.data - self.data_median)/(self.IQR) 
 
