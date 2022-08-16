@@ -75,7 +75,13 @@ To import the feature extraction functionality, use this code:
 
 .. code-block:: python
 
-    from ManufacturingNet.featurization_and_preprocessing import Featurizer
+    from ManufacturingNet.featurization import Featurizer
+
+To import the data preprocessing functionality, use this code:
+
+.. code-block:: python
+
+    from ManufacturingNet.preprocessing import MeanNormalizer, MinMaxNormalizer, QuantileNormalizer
 
 For more information about using ManufacturingNet, view the documentation page for the desired functionality:
 
