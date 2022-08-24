@@ -232,11 +232,11 @@ class Network(nn.Module):
     def get_default_input(self):
         print('3/8 - Default value:')
 
-        self.default_input = input(
-            'Do you want default values for convolution layers (y/n): ').replace(' ','')
         gate = 0
 
         while gate != 1:
+            self.default_input = input(
+            'Do you want default values for convolution layers (y/n): ').replace(' ','')
             if (self.default_input).lower() == 'y':
                 self.default_input = True
                 gate = 1
