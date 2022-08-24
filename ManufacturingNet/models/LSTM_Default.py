@@ -68,11 +68,11 @@ class Dataset(data.Dataset):
 
 
 # The following class builds an LSTM network
-class LSTM(nn.Module):
+class Network(nn.Module):
 
     def __init__(self, if_default):
 
-        super(LSTM, self).__init__()
+        super(Network, self).__init__()
 
         self.default_gate = if_default
 
@@ -251,7 +251,7 @@ class LSTM():
         self.get_default_paramters()            # getting default parameters argument
 
         # building a network architecture
-        self.net = (LSTM(self.default_gate)).double()
+        self.net = (Network(self.default_gate)).double()
 
         print('='*25)
         print('6/11 - Batch size input')
