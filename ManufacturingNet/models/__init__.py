@@ -6,7 +6,7 @@ from .random_forest import RandomForest
 from .all_regression_models import AllRegressionModels
 from .all_classification_models import AllClassificationModels
 from .DNN import DNN
-from .CNN import CNN2DSignal
+from .CNN2DSignal import CNN2DSignal
 from .CNN3D import CNN3D
 from .CNN_LSTM_Default import CNNLSTM
 from .CNN2DImage import CNN2DImage
