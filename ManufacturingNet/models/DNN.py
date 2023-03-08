@@ -68,11 +68,11 @@ class Dataset(data.Dataset):
 
 
 # The following class builds a deep neural network by asking inputs from the user
-class DNN(nn.Module):
+class DNNBase(nn.Module):
 
     def __init__(self, if_default, negative_slope=0.01):
 
-        super(DNN, self).__init__()
+        super(DNNBase, self).__init__()
 
         self.default_gate = if_default
 
@@ -110,9 +110,15 @@ class DNN(nn.Module):
 
         gate = 0
         while gate != 1:
-            self.list_of_neurons = input(
-                'Please enter the number of neurons int input for each layer including input and output layers sequentially: \n (Example: 14(input layer), 128, 64, 32, 10(output layer): ').replace(' ','')
+            self.list_of_neurons = input(('''Please enter the number of neurons int 
+                                             input for each layer including input
+                                             and output layers sequentially: 
+                                             (Example: 14(input layer), 128, 64, 32, 10(output layer)
+                                             You should replace input layer dimension with dimension
+                                             of your input's (Xs) feature''').replace('\n',' '))
             self.list_of_neurons = self.list_of_neurons.split(',')
+            # remove empty spaces from string
+            self.list_of_neurons = [x.strip() for x in self.list_of_neurons]
             for i in range(len(self.list_of_neurons)):
                 # checking numeric entries and correct values
                 if self.list_of_neurons[i].isnumeric() and int(self.list_of_neurons[i]) > 0:
@@ -315,7 +321,7 @@ class DNN(nn.Module):
 
 # The following class will be called by a user. The class calls other necessary classes to build a complete pipeline required for training
 
-class DNNUser():
+class DNN():
     """
     Documentation Link:https://manufacturingnet.readthedocs.io/en/latest/
 
@@ -328,7 +334,7 @@ class DNNUser():
                                2: torch.nn.L1Loss(), 
                                3: torch.nn.SmoothL1Loss(), 
                                4: torch.nn.MSELoss()}
-
+        print(f"Your Input Data Shape: {X.shape}")
         self.x_data = X
         self.y_data = Y
         self.shuffle = shuffle
@@ -336,7 +342,7 @@ class DNNUser():
         self.get_default_paramters()            # getting default parameters argument
 
         # building a network architecture
-        self.net = DNN(self.default_gate).double()
+        self.net = DNNBase(self.default_gate).double()
 
         print('='*25)
         print('5/10 - Batch size input')
@@ -638,15 +644,15 @@ class DNNUser():
         # creating the validation dataset
         self.val_dataset = Dataset(xv, yv)
 
-        self.train_loader = torch.utils.data.DataLoader(self.train_dataset, batch_size=self.model_data.get_batchsize(
-        ), shuffle=True)           # creating the training dataset dataloadet
+        self.train_loader = torch.utils.data.DataLoader(self.train_dataset, 
+                                                        batch_size=self.model_data.get_batchsize(), 
+                                                        shuffle=True)           # creating the training dataset dataloadet
 
         # creating the validation dataset dataloader
-        self.dev_loader = torch.utils.data.DataLoader(
-            self.val_dataset, batch_size=self.model_data.get_batchsize())
+        self.dev_loader = torch.utils.data.DataLoader(self.val_dataset, 
+                                                      batch_size=self.model_data.get_batchsize())
 
         self.train_model()          # training the model
-
         self.get_loss_graph()           # saving the loss graph
 
         if self.criterion_input == '1':
