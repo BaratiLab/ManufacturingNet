@@ -516,7 +516,7 @@ class CNN2D(nn.Module):
             conv_shape = conv2D_output_size(
               (self.img_x, self.img_y), self.padding[0], self.kernel_size[0], self.stride[0])
             conv_shape_pool = conv2D_pool_size(
-                shape[0], self.pooling_size[0], self.pooling_stride[0])
+                conv_shape, self.pooling_size[0], self.pooling_stride[0])
             shape = [conv_shape_pool] 
         else:
             conv_shape = conv2D_output_size(
@@ -1231,4 +1231,4 @@ class CNNLSTM():
         if self.criterion_input == "1":
             _, net_output = torch.max(net_output.data, 1)
 
-        return net_outp
+        return net_output
