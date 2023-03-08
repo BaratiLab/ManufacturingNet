@@ -68,11 +68,11 @@ class Dataset(data.Dataset):
 
 
 # The following class builds an LSTM network
-class LSTM(nn.Module):
+class LSTMBase(nn.Module):
 
     def __init__(self, if_default):
 
-        super(LSTM, self).__init__()
+        super(LSTMBase, self).__init__()
 
         self.default_gate = if_default
 
@@ -241,8 +241,10 @@ class LSTM():
     def __init__(self, X, Y, shuffle=True):
 
         # Lists used in the functions below
-        self.criterion_list = {1: nn.CrossEntropyLoss(), 2: torch.nn.L1Loss(
-        ), 3: torch.nn.SmoothL1Loss(), 4: torch.nn.MSELoss()}
+        self.criterion_list = {1: nn.CrossEntropyLoss(), 
+                               2: torch.nn.L1Loss(), 
+                               3: torch.nn.SmoothL1Loss(), 
+                               4: torch.nn.MSELoss()}
 
         self.x_data = X
         self.y_data = Y
@@ -251,7 +253,7 @@ class LSTM():
         self.get_default_paramters()            # getting default parameters argument
 
         # building a network architecture
-        self.net = (LSTM(self.default_gate)).double()
+        self.net = (LSTMBase(self.default_gate)).double()
 
         print('='*25)
         print('6/11 - Batch size input')
