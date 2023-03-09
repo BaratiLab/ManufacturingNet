@@ -10,7 +10,8 @@ import numpy as np
 
 class MeanNormalizer():
     """
-    This class performs normalizaation of the data along the given axis. It calculates the mean and standard deviation along the axis.
+    This class performs normalizaation of the data along the given axis. 
+    It calculates the mean and standard deviation along the axis.
     It subtracts the mean and divides by the standard deviation.
 
     This transformation sets the mean of data to 0 and the standard deviation to 1
@@ -22,8 +23,8 @@ class MeanNormalizer():
         self.data = a
         self.axis = axis
         self.reshape_dim = self.data.shape[abs(self.axis-1)]
-        self.data_mean = np.mean(self.data, self.axis).reshape(self.reshape_dim,1)
-        self.data_std = np.std(self.data, self.axis).reshape(self.reshape_dim,1)
+        self.data_mean = np.mean(self.data, self.axis, keepdims=True)#.reshape(self.reshape_dim,1)
+        self.data_std = np.std(self.data, self.axis, keepdims=True)#.reshape(self.reshape_dim,1)
         self.normalized_data = (self.data - self.data_mean)/(self.data_std) 
         self.scaled_data = None 
         
@@ -66,8 +67,8 @@ class MinMaxNormalizer():
         self.data = a
         self.axis = axis
         self.reshape_dim = self.data.shape[abs(self.axis-1)]
-        self.data_min = np.min(self.data, self.axis).reshape(self.reshape_dim,1)
-        self.data_max = np.max(self.data, self.axis).reshape(self.reshape_dim,1)
+        self.data_min = np.min(self.data, self.axis, keepdims=True) #.reshape(self.reshape_dim,1)
+        self.data_max = np.max(self.data, self.axis, keepdims=True) #.reshape(self.reshape_dim,1)
         self.scaled_data = None 
         self.normalized_data = (self.data - self.data_min)/(self.data_max -self.data_min) 
 
@@ -109,8 +110,9 @@ class QuantileNormalizer():
         self.data = a
         self.axis = axis
         self.reshape_dim = self.data.shape[abs(self.axis-1)]
-        self.IQR = np.percentile(self.data, q2, self.axis).reshape(self.reshape_dim,1) - np.percentile(self.data, q1, self.axis).reshape(self.reshape_dim,1)
-        self.data_median = np.median(self.data, self.axis).reshape(self.reshape_dim,1)
+        self.IQR = np.percentile(self.data, q2, self.axis, keepdims=True) - \
+                   np.percentile(self.data, q1, self.axis, keepdims=True)
+        self.data_median = np.median(self.data, self.axis, keepdims=True) #.reshape(self.reshape_dim,1)
         self.scaled_data = None 
         self.normalized_data = (self.data - self.data_median)/(self.IQR) 
 
