@@ -52,7 +52,7 @@ def PaderbornBearingData():
     data_id = '15v1fwFxfrntTE1FVdNvZXzMF5xufMa3Z'
     destination = 'PaderbornBearingData.zip'
 
-    download_file_from_google_drive(data_id, destination)
+    download_file_from_google_drive_with_gdown(data_id, destination)
     extract_files(destination)
     remove_zip(destination)
 
@@ -63,7 +63,7 @@ def MotorTempData():
     data_id = '11Q5emmsc1dMMiMGe8niho5x4-3I5Oc_K'
     destination = 'MotorTempData.zip'
 
-    download_file_from_google_drive(data_id, destination)
+    download_file_from_google_drive_with_gdown(data_id, destination)
     extract_files(destination)
     remove_zip(destination)
     
@@ -85,7 +85,7 @@ def ThreeDPrintingData():
     data_id = '1VhZcOgNOEw_Sciuww25XZdIuaqO90Nkj'
     destination = 'ThreeDPrintingData.zip'
 
-    download_file_from_google_drive(data_id, destination)
+    download_file_from_google_drive_with_gdown(data_id, destination)
     extract_files(destination)
     remove_zip(destination)
 
@@ -96,7 +96,7 @@ def MercedesData():
     data_id = '1D7eQDV4h6lEXnNE1Cbk1kRU62Dn9xMnb'
     destination = 'MercedesData.zip'
 
-    download_file_from_google_drive(data_id, destination)
+    download_file_from_google_drive_with_gdown(data_id, destination)
     extract_files(destination)
     remove_zip(destination)
 
@@ -107,7 +107,7 @@ def LithographyData():
     data_id = '1XY4fbNtzKrXXPtfiPGpwunWvyIDH_V57'
     destination = 'LithographyData.zip'
 
-    download_file_from_google_drive(data_id, destination)
+    download_file_from_google_drive_with_gdown(data_id, destination)
     extract_files(destination)
     remove_zip(destination)
     
@@ -118,7 +118,7 @@ def GearboxData():
     data_id = '1aTFu-M8V5CxbDY4e-nRBLNuPmbsbAbgk'
     destination = 'GearboxData.zip'
 
-    download_file_from_google_drive(data_id, destination)
+    download_file_from_google_drive_with_gdown(data_id, destination)
     extract_files(destination)
     remove_zip(destination)
     
@@ -136,11 +136,10 @@ def CastingData():
 ##### CWRU Bearing Data #####
 def CWRUBearingData():
     
-
     data_id = '1nUjYdpJkEmjJTzG0j8EBZ9vQul0sedqk'
     destination = 'CWRUBearingData.zip'
 
-    download_file_from_google_drive(data_id, destination)
+    download_file_from_google_drive_with_gdown(data_id, destination)
     extract_files(destination)
     remove_zip(destination)
     

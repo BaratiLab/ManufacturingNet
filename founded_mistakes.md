@@ -15,3 +15,5 @@ Correct:
 ###### 6. For CNN_LSTM_tutorial, shape[0] variable accessed before assignment, in line 519 of CNN_LSTM_Default.py, changed that to conv_shape, from shape[0].
 ###### 7. For LSTM_tutorial, replaced the class name LSTM with LSTMBase
 ###### 8. For signal_processing.py: changed reshape to keepdims=True
+###### 9. For CNN3D_tutorial, CNN_LSTM_tutorial replace Lithography files with Lithography in np.load
+###### 10. changed all dowload to download_with_gdown
