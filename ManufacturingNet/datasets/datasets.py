@@ -1,6 +1,11 @@
 import requests
 from zipfile import ZipFile
 import os
+import gdown
+
+def download_file_from_google_drive_with_gdown(id, destination):
+    url = 'https://drive.google.com/uc?id=' + id
+    gdown.download(url, destination, quiet=False)
 
 def download_file_from_google_drive(id, destination):
     URL = "https://docs.google.com/uc?export=download"
@@ -69,7 +74,7 @@ def ChatterData():
     data_id = '1z_2ceidvHmE5p7XCD4PaGn4ezvcZMxdD'
     destination = 'ChatterData.zip'
 
-    download_file_from_google_drive(data_id, destination)
+    download_file_from_google_drive_with_gdown(data_id, destination)
     extract_files(destination)
     remove_zip(destination)
 
@@ -124,7 +129,7 @@ def CastingData():
     data_id = '1qNnLCcq1HlzS0WmOCRlJfNC9ZF26j_6f'
     destination = 'CastingData.zip'
 
-    download_file_from_google_drive(data_id, destination)
+    download_file_from_google_drive_with_gdown(data_id, destination)
     extract_files(destination)
     remove_zip(destination)
     
