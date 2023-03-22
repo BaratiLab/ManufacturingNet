@@ -1231,8 +1231,4 @@ class CNNLSTM():
         if self.criterion_input == "1":
             _, net_output = torch.max(net_output.data, 1)
 
-<<<<<<< HEAD
-        return net_outp
-=======
         return net_output
->>>>>>> minimum3
