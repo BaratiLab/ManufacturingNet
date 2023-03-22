@@ -17,7 +17,25 @@ from .densenet import DenseNet
 from .alexnet import AlexNet
 from .googlenet import GoogleNet
 from .mobilenet import MobileNet
+# from .DNN import DNNUser
 
 
 #__add__=['LinRegression','LogticRegression','MLP','SVM','XGBoost','RandomForest','AllRegressionModels','AllClassificationModels']
-__add__=['LinRegression','LogRegression','SVM','XGBoost','RandomForest','AllRegressionModels','AllClassificationModels','DNN','CNN2DSignal', 'CNN3D', 'CNNLSTM', 'CNN2DImage', 'LSTM', 'ResNet','VGG','DenseNet','AlexNet','MobileNet','GoogleNet']
+__add__ = ['LinRegression',
+           'LogRegression',
+           'SVM','XGBoost',
+           'RandomForest',
+           'AllRegressionModels',
+           'AllClassificationModels',
+           'DNN',
+           'CNN2DSignal', 
+           'CNN3D', 
+           'CNNLSTM', 
+           'CNN2DImage', 
+           'LSTM', 
+           'ResNet',
+           'VGG',
+           'DenseNet',
+           'AlexNet',
+           'MobileNet',
+           'GoogleNet']

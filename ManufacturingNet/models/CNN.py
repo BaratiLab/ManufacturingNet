@@ -12,6 +12,7 @@ import torch.optim as optim
 import torch.optim.lr_scheduler as scheduler
 import torch.utils.data as data
 from torch.autograd import Variable
+from tqdm import tqdm
 
 
 # The following class is used to create necessary inputs for dataset class and dataloader class used during training process
@@ -225,8 +226,7 @@ class CNN2D(nn.Module):
                 self.channels.append(int(channel_inp))
                 gate1 = 1
             else:
-                print(
-                    "Please enter valid number of channels.  The value must be an integer and greater than zero")
+                print("Please enter valid number of channels.  The value must be an integer and greater than zero")
                 gate1 = 0
 
         while gate != 1:
@@ -267,7 +267,14 @@ class CNN2D(nn.Module):
                     k_size = (
                         ((input("Enter the kernel size for convolutional layer {} \n For Example: 3,3: ".format(i+1))))).replace(' ','')
                     k_split = k_size.split(",")
-                    if k_split[0].isnumeric() and int(k_split[0]) > 0 and k_split[1].isnumeric() and int(k_split[0]) > 0:
+                    # print(len(k_split), "is the length of k_split") # for debugging 
+                    if len(k_split) != 2:
+                        gate2 = 0
+                        print(
+                            "Please enter valid kernel size.  The value must be in the form of 3,3")
+                        # self.kernel_list = []
+                        break
+                    if k_split[0].isnumeric() and int(k_split[0]) > 0 and k_split[1].isnumeric() and int(k_split[1]) > 0:
                         self.kernel_list.append(
                             (int(k_split[0]), int(k_split[1])))
                         if i == n_conv-1:
@@ -278,7 +285,6 @@ class CNN2D(nn.Module):
                             "Please enter valid numeric values.  The value must be an integer and greater than zero")
                         self.kernel_list = []
                         break
-
                 else:
                     self.kernel_list.append((3, 3))
                     if i == n_conv-1:
@@ -307,7 +313,7 @@ class CNN2D(nn.Module):
                     pad_size = input(
                         "Enter padding for the image for convolutional layer {}  \n For Example 2,2: ".format(i+1)).replace(' ','')
                     pad_split = pad_size.split(",")
-                    if pad_split[0].isnumeric() and int(pad_split[0]) >= 0 and pad_split[1].isnumeric() and int(pad_split[0]) >= 0:
+                    if pad_split[0].isnumeric() and int(pad_split[0]) >= 0 and pad_split[1].isnumeric() and int(pad_split[1]) >= 0:
                         self.padding.append(
                             (int(pad_split[0]), int(pad_split[1])))
                         if i == n_conv-1:
@@ -330,7 +336,7 @@ class CNN2D(nn.Module):
                     stride_size = input(
                         "Enter stride for the convolutions for convolutional layer {} \n For Example 2,2: ".format(i+1)).replace(' ','')
                     stride_split = stride_size.split(",")
-                    if stride_split[0].isnumeric() and int(stride_split[0]) >= 0 and stride_split[1].isnumeric() and int(stride_split[0]) >= 0:
+                    if stride_split[0].isnumeric() and int(stride_split[0]) >= 0 and stride_split[1].isnumeric() and int(stride_split[1]) >= 0:
                         self.stride.append(
                             (int(stride_split[0]), int(stride_split[1])))
                         if i == n_conv-1:
@@ -593,8 +599,10 @@ class CNN2DSignal(object):
     def __init__(self, X, Y, shuffle=True):
 
         # Lists used in the functions below
-        self.criterion_list = {1: nn.CrossEntropyLoss(), 2: torch.nn.L1Loss(
-        ), 3: torch.nn.SmoothL1Loss(), 4: torch.nn.MSELoss()}
+        self.criterion_list = {1: nn.CrossEntropyLoss(), 
+                               2: torch.nn.L1Loss(), 
+                               3: torch.nn.SmoothL1Loss(), 
+                               4: torch.nn.MSELoss()}
 
         self.x_data = X
         self.y_data = Y
@@ -614,7 +622,8 @@ class CNN2DSignal(object):
         self._get_valsize_input()                # getting a train-validation split
         # splitting the data into training and validation sets
         self.model_data = ModelDataset(
-            self.x_data, self.y_data, batchsize=self.batchsize, valset_size=self.valset_size, shuffle=self.shuffle)
+            self.x_data, self.y_data, batchsize=self.batchsize, 
+            valset_size=self.valset_size, shuffle=self.shuffle)
         print("Validation set ratio: ", self.valset_size)
         print('='*25)
 
@@ -720,8 +729,8 @@ class CNN2DSignal(object):
             else:
                 print('Please enter a valid input')
 
-        self.optimizer_list = {1: optim.Adam(self.net.parameters(
-        ), lr=self.lr), 2: optim.SGD(self.net.parameters(), lr=self.lr)}
+        self.optimizer_list = {1: optim.Adam(self.net.parameters(), lr=self.lr), 
+                               2: optim.SGD(self.net.parameters(), lr=self.lr)}
         self.optimizer = self.optimizer_list[int(self.optimizer_input)]
 
     def _get_scheduler(self):
@@ -826,7 +835,7 @@ class CNN2DSignal(object):
     def main(self):
 
         # Method integrating all the functions and training the model
-
+        print(self.net)
         self.net.to(self.device)
         print('='*25)
 
@@ -851,8 +860,9 @@ class CNN2DSignal(object):
         # creating the validation dataset
         self.val_dataset = Dataset(xv, yv)
 
-        self.train_loader = torch.utils.data.DataLoader(self.train_dataset, batch_size=self.model_data.get_batchsize(
-        ), shuffle=True)           # creating the training dataset dataloadet
+        self.train_loader = torch.utils.data.DataLoader(self.train_dataset, 
+                                                        batch_size=self.model_data.get_batchsize(), 
+                                                        shuffle=True)           # creating the training dataset dataloadet
 
         # creating the validation dataset dataloader
         self.dev_loader = torch.utils.data.DataLoader(
@@ -922,7 +932,7 @@ class CNN2DSignal(object):
 
         print('Training the model...')
 
-        for epoch in range(self.numEpochs):
+        for epoch in tqdm(range(self.numEpochs), total=self.numEpochs, unit='epoch'):
 
             start_time = time.time()
             self.net.train()
