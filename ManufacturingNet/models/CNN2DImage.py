@@ -776,7 +776,7 @@ class CNN2DImage:
 
         print("Training the model...")
 
-        for epoch in tqdm(range(self.numEpochs), total=numEpochs):
+        for epoch in tqdm(range(self.numEpochs), total=self.numEpochs):
 
             start_time = time.time()
             self.net.train()
