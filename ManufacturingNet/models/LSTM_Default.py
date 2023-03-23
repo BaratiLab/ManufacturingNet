@@ -13,6 +13,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.optim.lr_scheduler as scheduler
 import torch.utils.data as data
+from tqdm import tqdm
 
 
 # The following class is used to create necessary inputs for dataset class and dataloader class used during training process
@@ -337,7 +338,7 @@ class LSTM():
                 self.valset_size = '0.2'
             else:
                 self.valset_size = (input(
-                    'Please enter the train set size float input (size > 0 and size < 1) \n For default size, please directly press enter without any input: ')).replace(' ','')
+                    'Please enter the val set size float input (size > 0 and size < 1) \n For default size, please directly press enter without any input: ')).replace(' ','')
             if self.valset_size == '':              # handling default case for valsize
                 print('Default value selected : 0.2')
                 self.valset_size = '0.2'
@@ -634,8 +635,8 @@ class LSTM():
             self.net.train()
             print('Epoch_Number: ', epoch)
             running_loss = 0.0
-
-            for batch_idx, (data, target) in enumerate(self.train_loader):
+            loop = tqdm(self.train_loader, total=len(self.train_loader))
+            for batch_idx, (data, target) in enumerate(loop):
 
                 self.optimizer.zero_grad()
                 data = data.to(self.device)
@@ -656,6 +657,7 @@ class LSTM():
                     loss = self.criterion(outputs, target)
 
                 running_loss += loss.item()
+                loop.set_description(f"loss: {running_loss / (batch_idx + 1)}")
                 loss.backward()
                 self.optimizer.step()
 
@@ -698,8 +700,8 @@ class LSTM():
         acc = 0
         self.actual = []
         self.predict = []
-
-        for batch_idx, (data, target) in enumerate(self.dev_loader):
+        loop = tqdm(self.dev_loader, total=len(self.dev_loader))
+        for batch_idx, (data, target) in enumerate(loop):
 
             data = data.to(self.device)
             target = target.to(self.device)
@@ -717,6 +719,7 @@ class LSTM():
                 loss = self.criterion(outputs, target)
                 self.predict.append(outputs.detach().cpu().numpy())
             running_loss += loss.item()
+            loop.set_description(f"loss: {running_loss / (batch_idx + 1)}")
             self.actual.append(target.detach().cpu().numpy())
 
         running_loss /= len(self.dev_loader)
@@ -769,13 +772,20 @@ class LSTM():
 
         # Method for getting the r2 score for regression problem
         print('r2 score: ')
-        result = r2_score(np.concatenate(np.array(self.predict)),
-                          np.concatenate(np.array(self.actual)))
+        np_predict = np.zeros((0,))
+        np_actual = np.zeros((0,))
+        for i in range(len(self.predict)):
+            np_predict = np.concatenate((np_predict, 
+                                         np.asarray(self.predict[i]).reshape(-1)),
+                                         axis=0)
+            np_actual = np.concatenate((np_actual,
+                                        self.actual[i].reshape(-1)),
+                                        axis=0)
+        result = r2_score(np_predict, np_actual)
         print(result)
 
         plt.figure(figsize=(8, 8))
-        plt.scatter(np.concatenate(np.array(self.actual)), np.concatenate(
-            np.array(self.predict)), label='r2 score', s=1)
+        plt.scatter(np_actual, np_predict, label='r2 score', s=1)
         plt.legend()
         plt.title('Model r2 score: ' + str(result))
         plt.xlabel('labels')
@@ -807,3 +817,12 @@ class LSTM():
             _, net_output = torch.max(net_output.data, 1)
 
         return net_output
+
+if __name__ == "__main__":
+    import ManufacturingNet
+    import numpy as np
+    x = np.load('../../tutorials/Motor_temperature/input data.npy', allow_pickle = True)
+    y = np.load('../../tutorials/Motor_temperature/labels.npy', allow_pickle = True)
+    x = x[0:50000]
+    y = y[0:50000].reshape(-1, 1)
+    model = LSTM(x, y)

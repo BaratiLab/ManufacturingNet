@@ -855,13 +855,20 @@ class DNN():
 
         # Method for getting the r2 score for regression problem
         print('r2 score: ')
-        result = r2_score(np.concatenate(np.array(self.predict)),
-                          np.concatenate(np.array(self.actual)))
+        np_predict = np.zeros((0,))
+        np_actual = np.zeros((0,))
+        for i in range(len(self.predict)):
+            np_predict = np.concatenate((np_predict, 
+                                         np.asarray(self.predict[i]).reshape(-1)),
+                                         axis=0)
+            np_actual = np.concatenate((np_actual,
+                                        self.actual[i].reshape(-1)),
+                                        axis=0)
+        result = r2_score(np_predict, np_actual)
         print(result)
 
         plt.figure(figsize=(8, 8))
-        plt.scatter(np.concatenate(np.array(self.actual)), np.concatenate(
-            np.array(self.predict)), label='r2 score', s=1)
+        plt.scatter(np_actual, np_predict, label='r2 score', s=1)
         plt.legend()
         plt.title('Model r2 score: ' + str(result))
         plt.xlabel('labels')

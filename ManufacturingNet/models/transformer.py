@@ -1,5 +1,5 @@
 import time
-
+from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import confusion_matrix, r2_score
@@ -17,7 +17,7 @@ class TransformerBase(nn.Module):
     def __init__(self, 
                  is_default):
         super(TransformerBase, self).__init__()
-        self.is_default = is_default
+        self.default_gate = is_default
         print(' ')
         print('1/11 - LSTM input size')
         self._get_input_size()
@@ -192,8 +192,8 @@ class Dataset(data.Dataset):
         return len(self.Y)
 
     def __getitem__(self, index):
-        x_item = torch.from_numpy(self.X[index]).double()
-        y_item = torch.from_numpy(np.array(self.Y[index])).double()
+        x_item = torch.from_numpy(self.X[index]).float()
+        y_item = torch.from_numpy(np.array(self.Y[index])).float()
         return x_item, y_item
 
 
@@ -218,7 +218,7 @@ class Transformer():
         self.get_default_paramters()            # getting default parameters argument
 
         # building a network architecture
-        self.net = (TransformerBase(self.default_gate)).double()
+        self.net = (TransformerBase(is_default=self.default_gate)).float()
 
         print('='*25)
         print('6/11 - Batch size input')
@@ -298,7 +298,7 @@ class Transformer():
                 self.valset_size = '0.2'
             else:
                 self.valset_size = (input(
-                    'Please enter the train set size float input (size > 0 and size < 1) \n For default size, please directly press enter without any input: ')).replace(' ','')
+                    'Please enter the Val set size float input (size > 0 and size < 1) \n For default size, please directly press enter without any input: ')).replace(' ','')
             if self.valset_size == '':              # handling default case for valsize
                 print('Default value selected : 0.2')
                 self.valset_size = '0.2'
@@ -516,8 +516,9 @@ class Transformer():
         # creating the validation dataset
         self.val_dataset = Dataset(xv, yv)
 
-        self.train_loader = torch.utils.data.DataLoader(self.train_dataset, batch_size=self.model_data.get_batchsize(
-        ), shuffle=True)           # creating the training dataset dataloadet
+        self.train_loader = torch.utils.data.DataLoader(self.train_dataset, 
+                                                        batch_size=self.model_data.get_batchsize(), 
+                                                        shuffle=True)           # creating the training dataset dataloader
 
         # creating the validation dataset dataloader
         self.dev_loader = torch.utils.data.DataLoader(
@@ -532,7 +533,6 @@ class Transformer():
             self.get_accuracy_graph()           # saving the accuracy graph
             self.get_confusion_matrix()         # printing confusion matrix
         else:
-
             self.get_r2_score()             # saving r2 score graph
 
         self._save_model()              # saving model paramters
@@ -564,7 +564,7 @@ class Transformer():
         # Method for getting the summary of the model
         print('Model Summary:')
         print(' ')
-        print('Bidirectional: ', self.net.bidirection_input)
+        # print('Bidirectional: ', self.net.bidirection_input)
         print('Number of layer: ', self.net.nlayers)
         print('Criterion: ', self.criterion)
         print('Optimizer: ', self.optimizer)
@@ -595,8 +595,8 @@ class Transformer():
             self.net.train()
             print('Epoch_Number: ', epoch)
             running_loss = 0.0
-
-            for batch_idx, (data, target) in enumerate(self.train_loader):
+            loop = tqdm(self.train_loader, total=len(self.train_loader))
+            for batch_idx, (data, target) in enumerate(loop):
 
                 self.optimizer.zero_grad()
                 data = data.to(self.device)
@@ -613,10 +613,11 @@ class Transformer():
                     correct_predictions += (predicted == target).sum().item()
 
                 else:
-
+                    if len(outputs.shape) != 1:
+                        outputs = outputs.reshape(-1)
                     loss = self.criterion(outputs, target)
-
                 running_loss += loss.item()
+                loop.set_postfix({"loss": running_loss / (batch_idx + 1)})
                 loss.backward()
                 self.optimizer.step()
 
@@ -659,8 +660,8 @@ class Transformer():
         acc = 0
         self.actual = []
         self.predict = []
-
-        for batch_idx, (data, target) in enumerate(self.dev_loader):
+        loop = tqdm(self.dev_loader, total=len(self.dev_loader))
+        for batch_idx, (data, target) in enumerate(loop):
 
             data = data.to(self.device)
             target = target.to(self.device)
@@ -676,8 +677,11 @@ class Transformer():
 
             else:
                 loss = self.criterion(outputs, target)
+                if len(outputs.shape) != 1:
+                    outputs = outputs.reshape(-1)
                 self.predict.append(outputs.detach().cpu().numpy())
             running_loss += loss.item()
+            loop.set_postfix({"loss": running_loss / (batch_idx + 1)})
             self.actual.append(target.detach().cpu().numpy())
 
         running_loss /= len(self.dev_loader)
@@ -730,13 +734,20 @@ class Transformer():
 
         # Method for getting the r2 score for regression problem
         print('r2 score: ')
-        result = r2_score(np.concatenate(np.array(self.predict)),
-                          np.concatenate(np.array(self.actual)))
+        np_predict = np.zeros((0,))
+        np_actual = np.zeros((0,))
+        for i in range(len(self.predict)):
+            np_predict = np.concatenate((np_predict, 
+                                         np.asarray(self.predict[i]).reshape(-1)),
+                                         axis=0)
+            np_actual = np.concatenate((np_actual,
+                                        self.actual[i].reshape(-1)),
+                                        axis=0)
+        result = r2_score(np_predict, np_actual)
         print(result)
 
         plt.figure(figsize=(8, 8))
-        plt.scatter(np.concatenate(np.array(self.actual)), np.concatenate(
-            np.array(self.predict)), label='r2 score', s=1)
+        plt.scatter(np_actual, np_predict, label='r2 score', s=1)
         plt.legend()
         plt.title('Model r2 score: ' + str(result))
         plt.xlabel('labels')
@@ -771,6 +782,8 @@ class Transformer():
 
     
 if __name__ == '__main__':
-    x = np.load('./tutorials/Motor_temperature/input data.npy', allow_pickle = True)
-    y = np.load('./tutorials/Motor_temperature/labels.npy', allow_pickle = True)
+    x = np.load('../../tutorials/Motor_temperature/input data.npy', allow_pickle = True)
+    y = np.load('../../tutorials/Motor_temperature/labels.npy', allow_pickle = True)
+    x = x[:50000]
+    y = y[:50000]
     Transformer(x, y)

@@ -17,6 +17,8 @@ from .densenet import DenseNet
 from .alexnet import AlexNet
 from .googlenet import GoogleNet
 from .mobilenet import MobileNet
+from .transformer import Transformer
+from .vit import VITImageClassifier
 # from .DNN import DNNUser
 
 
