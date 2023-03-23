@@ -50,8 +50,8 @@ class VITImageClassifier:
         self.num_classes = self.get_num_classes()  # getting the number of classes
 
         print("1/8 - Image size")
-        self.get_image_size()  # getting the image size (resized or original)
-
+        # self.get_image_size()  # getting the image size (resized or original)
+        self.img_size = [224, 224, 3]
         # building a network architecture
         self.net = timm.create_model("vit_base_patch16_224", 
                                      pretrained=True, 
@@ -117,7 +117,7 @@ class VITImageClassifier:
 
         train_num_folder = 0
         train_num_files = 0
-
+        print(self.train_address)
         for _, dirnames, filenames in os.walk(self.train_address):
             train_num_folder += len(dirnames)
             train_num_files += len(filenames)
@@ -425,7 +425,7 @@ class VITImageClassifier:
 
         # creating the validation dataset dataloader
         self.dev_loader = torch.utils.data.DataLoader(
-            self.val_dataset, batch_size=self.batchsize
+            self.val_dataset, batch_size=int(self.batchsize//2)
         )
 
         self.train_model()  # training the model
@@ -495,11 +495,11 @@ class VITImageClassifier:
             self.net.train()
             print("Epoch_Number: ", epoch)
             running_loss = 0.0
-
-            for batch_idx, (data, target) in enumerate(self.train_loader):
+            loop = tqdm(self.train_loader, total=len(self.train_loader))
+            for batch_idx, (data, target) in enumerate(loop):
 
                 self.optimizer.zero_grad()
-                data = data.double().to(self.device)
+                data = data.float().to(self.device)
                 target = target.to(self.device)
                 outputs = self.net(data)
 
@@ -516,6 +516,7 @@ class VITImageClassifier:
                     loss = self.criterion(outputs, target)
 
                 running_loss += loss.item()
+                loop.set_postfix({"loss": running_loss / (batch_idx+1)})
                 loss.backward()
                 self.optimizer.step()
 
@@ -549,19 +550,21 @@ class VITImageClassifier:
                 self.dev_accuracy.append(dev_acc)
 
     def validate_model(self):
-
+        torch.cuda.empty_cache()
         with torch.no_grad():
             self.net.eval()
         running_loss = 0.0
+        running_count = 0.0
         total_predictions = 0.0
         correct_predictions = 0.0
         acc = 0
         self.actual = []
         self.predict = []
 
-        for batch_idx, (data, target) in enumerate(self.dev_loader):
+        loop = tqdm(self.dev_loader, total=len(self.dev_loader))
+        for batch_idx, (data, target) in enumerate(loop):
 
-            data = data.double().to(self.device)
+            data = data.float().to(self.device)
             target = target.to(self.device)
             outputs = self.net(data)
 
@@ -577,6 +580,8 @@ class VITImageClassifier:
                 loss = self.criterion(outputs, target)
                 self.predict.append(outputs.detach().cpu().numpy())
             running_loss += loss.item()
+            running_count += target.size(0)
+            loop.set_postfix({"loss": running_loss / (batch_idx+1)})
             self.actual.append(target.detach().cpu().numpy())
 
         running_loss /= len(self.dev_loader)
@@ -659,3 +664,9 @@ class VITImageClassifier:
         mapped_labels = self.train_dataset.class_to_idx
 
         return mapped_labels
+    
+
+if __name__ == '__main__':
+    train_address = "../../tutorials/casting_data/train"
+    test_address = "../../tutorials/casting_data/test"
+    model = VITImageClassifier(train_address, test_address)
