@@ -11,6 +11,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import torch.optim.lr_scheduler as scheduler
 import torch.utils.data as data
+import math
 
 
 class TransformerBase(nn.Module):
@@ -19,19 +20,20 @@ class TransformerBase(nn.Module):
         super(TransformerBase, self).__init__()
         self.default_gate = is_default
         print(' ')
-        print('1/11 - LSTM input size')
+        print('1/11 - Transformer input size')
         self._get_input_size()
-
+        self.input_size *= 2
+        self.pos_embedding = self.position_encoding(seq_len=60)
         print('='*25)
-        print('2/11 - LSTM hidden size')
+        print('2/11 - Transformer hidden size')
         self._get_hidden_size()
 
         print('='*25)
-        print('3/11 - LSTM number of layers')
+        print('3/11 - Transformer number of layers')
         self._get_num_layers()
 
         print('='*25)
-        print('4/11 - LSTM output size')
+        print('4/11 - Transformer output size')
         self. _get_output_size()
 
         self._build_network_architecture()
@@ -40,12 +42,12 @@ class TransformerBase(nn.Module):
 
     def _get_input_size(self):
 
-        # Method for getting an input size parameter for the LSTM network
+        # Method for getting an input size parameter for the Transformer network
 
         gate = 0
         while gate != 1:
             self.input_size = (input(
-                'Please enter the input size in int for the LSTM network (input size > 0): ')).replace(' ','')
+                'Please enter the input size in int for the Transformer network (input size > 0): ')).replace(' ','')
             if self.input_size.isnumeric() and int(self.input_size) > 0:
                 self.input_size = int(self.input_size)
                 gate = 1
@@ -56,7 +58,7 @@ class TransformerBase(nn.Module):
 
     def _get_hidden_size(self):
 
-        # Method for getting an hidden size parameter for the LSTM network
+        # Method for getting an hidden size parameter for the Transformer network
 
         gate = 0
         while gate != 1:
@@ -65,7 +67,7 @@ class TransformerBase(nn.Module):
                 self.hidden_size = '128'
             else:
                 self.hidden_size = (input(
-                    'Please enter the hidden size in int for the LSTM network (hidden size > 0)\n For default size, please directly press enter without any input: ')).replace(' ','')
+                    'Please enter the hidden size in int for the Transformer network (hidden size > 0)\n For default size, please directly press enter without any input: ')).replace(' ','')
             if self.hidden_size == '':              # handling default case for hidden size
                 print('Default value for hidden size selected: 128')
                 self.hidden_size = '128'
@@ -79,7 +81,7 @@ class TransformerBase(nn.Module):
 
     def _get_num_layers(self):
 
-        # Method for getting a number of LSTM layer parameter for the LSTM network
+        # Method for getting a number of Transformer layer parameter for the Transformer network
 
         gate = 0
         while gate != 1:
@@ -88,8 +90,8 @@ class TransformerBase(nn.Module):
                 self.nlayers = '3'
             else:
                 self.nlayers = (input(
-                    'Please enter the number of layer for the LSTM network in int (number of layer > 0)\n For default option, please directly press enter without any input: ')).replace(' ','')
-            if self.nlayers == '':              # handling default case for number of LSTM layer
+                    'Please enter the number of layer for the Transformer network in int (number of layer > 0)\n For default option, please directly press enter without any input: ')).replace(' ','')
+            if self.nlayers == '':              # handling default case for number of Transformer layer
                 print('Default value selected for number of layers: 3')
                 self.nlayers = '3'
             if self.nlayers.isnumeric() and int(self.nlayers) > 0:
@@ -106,7 +108,7 @@ class TransformerBase(nn.Module):
         gate = 0
         while gate != 1:
             self.output_size = (input(
-                'Please enter the output size for the LSTM network. \n For regression please enter 1 else enter the number of classes for classification problem: ')).replace(' ','')
+                'Please enter the output size for the Transformer network. \n For regression please enter 1 else enter the number of classes for classification problem: ')).replace(' ','')
             if self.output_size.isnumeric() and int(self.output_size) > 0:
                 self.output_size = int(self.output_size)
                 gate = 1
@@ -120,11 +122,10 @@ class TransformerBase(nn.Module):
         # Method for building a network using all the information provided by a user in above functions
     
         self.layer_instance = nn.TransformerEncoderLayer(self.input_size,
-                                                        nhead=1,
-                                                        dim_feedforward=512,
-                                                        )
+                                                         nhead=4,
+                                                         dim_feedforward=512)
         self.feature_extractor = nn.TransformerEncoder(self.layer_instance,
-                                                        num_layers=self.nlayers)
+                                                       num_layers=self.nlayers)
         self.ffn = nn.Linear(self.input_size, self.hidden_size)
 
         self.linear_input = self.hidden_size
@@ -136,6 +137,7 @@ class TransformerBase(nn.Module):
                                  self.output_size)
 
     def forward(self, x):
+        x = x + self.pos_embedding
         out = self.feature_extractor(x)
         out = self.ffn(out)
         # out = out[:, -1, :]
@@ -144,10 +146,24 @@ class TransformerBase(nn.Module):
         out = self.linear3(out)
         return out
     
-# Importing all the necessary files and functions
-
-
-
+    def position_encoding(self, seq_len):
+        # Method for adding positional encoding to the input data
+        # x: input data
+        # return: positional encoding added to the input data
+        d = self.input_size
+        p = seq_len
+        embedding = torch.zeros(p, 0)
+        mid_point = math.ceil(d / 2)
+        for dim in range(mid_point):
+            pos = torch.arange(p)
+            cos_component = torch.cos(pos.reshape(-1, 1) / math.pow(1000, 2*dim))
+            sin_component = torch.sin(pos.reshape(-1, 1) / math.pow(1000, 2*dim))
+            embedding = torch.cat((embedding,
+                                   cos_component.reshape(-1, 1),
+                                   sin_component.reshape(-1, 1)), dim=1)
+        if embedding.shape[1] != d:
+            embedding = embedding[:, :-1]
+        return embedding
 
 # The following class is used to create necessary inputs for dataset class and dataloader class used during training process
 class ModelDataset():
