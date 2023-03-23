@@ -49,9 +49,9 @@ class VITImageClassifier:
 
         self.num_classes = self.get_num_classes()  # getting the number of classes
 
-        print("1/8 - Image size")
-        self.get_image_size()  # getting the image size (resized or original)
-
+        print("1/8 - Image size (224,224,3) is used, as vit uses fixed size.")
+        # self.get_image_size()  # getting the image size (resized or original)
+        self.img_size = [224, 224, 3]
         # building a network architecture
         self.net = timm.create_model("vit_base_patch16_224", 
                                      pretrained=True, 

@@ -15,7 +15,7 @@ classifiers=[
     'Intended Audience :: Education']
 
 setup(name=package_name,\
-      version='0.0.3',\
+      version='0.0.5',\
       description='AI and Machine Learning for manufacturing related datasets',
       long_description=LONG_DESCRIPTION,
       author='Amir Barati Farimani',
@@ -24,5 +24,8 @@ setup(name=package_name,\
       classifiers=classifiers,
       keywords=' ',
       python_requires='>=3.5, <4',
+      install_requires=['sklearn', 'matplotlib', 
+                        'xgboost', 'scikit-learn', 
+                        'timm', 'Pillow'],
       packages=find_packages(),
       zip_safe=False)
