@@ -1,5 +1,3 @@
-# Importing all the necessary files and functions
-
 import time
 
 import matplotlib.pyplot as plt
@@ -15,67 +13,11 @@ import torch.optim.lr_scheduler as scheduler
 import torch.utils.data as data
 
 
-# The following class is used to create necessary inputs for dataset class and dataloader class used during training process
-class ModelDataset():
-
-    def __init__(self, X, Y, batchsize, valset_size, shuffle):
-
-        self.x = X                      # Inputs
-        self.y = Y                      # Labels
-        self.batchsize = batchsize
-        self.valset_size = valset_size
-        self.shuffle = shuffle
-        self.x_train, self.x_val, self.y_train, self.y_val = train_test_split(
-            self.x, self.y, test_size=self.valset_size, shuffle=self.shuffle)
-
-    def get_trainset(self):
-
-        # Method for getting training set inputs and labels
-
-        return self.x_train, self.y_train
-
-    def get_valset(self):
-
-        # Method for getting validation set inputs and labels
-
-        return self.x_val, self.y_val
-
-    def get_batchsize(self):
-
-        # Method for getting batch size for training and validatioin
-
-        return self.batchsize
-
-
-# The following class is used for creating a dataset class using torch functionality. Its a standard pytorch class
-class Dataset(data.Dataset):
-
-    def __init__(self, X, Y):
-
-        self.X = X
-        self.Y = Y
-
-    def __len__(self):
-
-        return len(self.Y)
-
-    def __getitem__(self, index):
-
-        x_item = torch.from_numpy(self.X[index]).double()
-        y_item = torch.from_numpy(np.array(self.Y[index])).double()
-
-        return x_item, y_item
-
-
-# The following class builds an LSTM network
-class LSTMBase(nn.Module):
-
-    def __init__(self, if_default):
-
-        super(LSTMBase, self).__init__()
-
-        self.default_gate = if_default
-
+class TransformerBase(nn.Module):
+    def __init__(self, 
+                 is_default):
+        super(TransformerBase, self).__init__()
+        self.is_default = is_default
         print(' ')
         print('1/11 - LSTM input size')
         self._get_input_size()
@@ -89,14 +31,12 @@ class LSTMBase(nn.Module):
         self._get_num_layers()
 
         print('='*25)
-        print('4/11 - LSTM bidirectional')
-        self. _get_bidirectional()
-
-        print('='*25)
-        print('5/11 - LSTM output size')
+        print('4/11 - LSTM output size')
         self. _get_output_size()
 
         self._build_network_architecture()
+        # self.is_attention = is_attention
+    
 
     def _get_input_size(self):
 
@@ -160,32 +100,6 @@ class LSTMBase(nn.Module):
                 print(' ')
         print(' ')
 
-    def _get_bidirectional(self):
-
-        # Method for getting bidirectional input for the LSTM network
-
-        gate = 0
-        while gate != 1:
-            if self.default_gate == True:
-                print('By default, unidirectional LSTM network selected')
-                self.bidirection = '0'
-            else:
-                self.bidirection = input(
-                    'Please enter 1 to have a bidirectional LSTM network else enter 0 \n For default option, please directly press enter without any input: ').replace(' ','')
-            if self.bidirection == '':
-                print('By default, unidirectional LSTM network selected')
-                self.bidirection = '0'
-            if self.bidirection.isnumeric() and int(self.bidirection) > -1 and int(self.bidirection) < 2:
-                if self.bidirection == '1':
-                    self.bidirection_input = True
-                else:
-                    self.bidirection_input = False
-                gate = 1
-            else:
-                print('Please enter a valid input')
-                print(' ')
-        print(' ')
-
     def _get_output_size(self):
 
         # Method for getting output size of the network
@@ -201,42 +115,89 @@ class LSTMBase(nn.Module):
                 print(' ')
         print(' ')
 
-    def _build_network_architecture(self):
 
+    def _build_network_architecture(self):
         # Method for building a network using all the information provided by a user in above functions
-        self.lstm = nn.LSTM(self.input_size, 
-                            self.hidden_size,
-                            bidirectional=self.bidirection_input,
-                            num_layers=self.nlayers, 
-                            batch_first=True)
-        if self.bidirection_input:
-            self.linear_input = self.hidden_size*2
-        else:
-            self.linear_input = self.hidden_size
+    
+        self.layer_instance = nn.TransformerEncoderLayer(self.input_size,
+                                                        nhead=1,
+                                                        dim_feedforward=512,
+                                                        )
+        self.feature_extractor = nn.TransformerEncoder(self.layer_instance,
+                                                        num_layers=self.nlayers)
+        self.ffn = nn.Linear(self.input_size, self.hidden_size)
+
+        self.linear_input = self.hidden_size
         self.linear1 = nn.Linear(self.linear_input, 
                                  int(self.linear_input/2))
         self.linear2 = nn.Linear(int(self.linear_input/2), 
                                  int(self.linear_input/4))
-        self.linear3 = nn.Linear(int(self.linear_input/4), self.output_size)
+        self.linear3 = nn.Linear(int(self.linear_input/4), 
+                                 self.output_size)
 
     def forward(self, x):
-        out, _ = self.lstm(x)
-        out = self.linear1(out[:, -1, :])
-        out = self.linear2(out)
-        out = self.linear3(out)
-
-        return out
-
-    def predict(self, x):
-        out, _ = self.lstm(x)
+        out = self.feature_extractor(x)
+        out = self.ffn(out)
+        # out = out[:, -1, :]
         out = self.linear1(out[:, -1, :])
         out = self.linear2(out)
         out = self.linear3(out)
         return out
+    
+# Importing all the necessary files and functions
 
 
-# The following class will be called by a user. The class calls other necessary classes to build a complete pipeline required for training
-class LSTM():
+
+
+# The following class is used to create necessary inputs for dataset class and dataloader class used during training process
+class ModelDataset():
+
+    def __init__(self, X, Y, batchsize, valset_size, shuffle):
+
+        self.x = X                      # Inputs
+        self.y = Y                      # Labels
+        self.batchsize = batchsize
+        self.valset_size = valset_size
+        self.shuffle = shuffle
+        self.x_train, self.x_val, self.y_train, self.y_val = train_test_split(
+            self.x, self.y, test_size=self.valset_size, shuffle=self.shuffle)
+
+    def get_trainset(self):
+
+        # Method for getting training set inputs and labels
+
+        return self.x_train, self.y_train
+
+    def get_valset(self):
+
+        # Method for getting validation set inputs and labels
+
+        return self.x_val, self.y_val
+
+    def get_batchsize(self):
+
+        # Method for getting batch size for training and validatioin
+
+        return self.batchsize
+
+
+# The following class is used for creating a dataset class using torch functionality. Its a standard pytorch class
+class Dataset(data.Dataset):
+
+    def __init__(self, X, Y):
+        self.X = X
+        self.Y = Y
+
+    def __len__(self):
+        return len(self.Y)
+
+    def __getitem__(self, index):
+        x_item = torch.from_numpy(self.X[index]).double()
+        y_item = torch.from_numpy(np.array(self.Y[index])).double()
+        return x_item, y_item
+
+
+class Transformer():
     """
     Documentation Link:https://manufacturingnet.readthedocs.io/en/latest/
 
@@ -257,7 +218,7 @@ class LSTM():
         self.get_default_paramters()            # getting default parameters argument
 
         # building a network architecture
-        self.net = (LSTMBase(self.default_gate)).double()
+        self.net = (TransformerBase(self.default_gate)).double()
 
         print('='*25)
         print('6/11 - Batch size input')
@@ -807,3 +768,9 @@ class LSTM():
             _, net_output = torch.max(net_output.data, 1)
 
         return net_output
+
+    
+if __name__ == '__main__':
+    x = np.load('./tutorials/Motor_temperature/input data.npy', allow_pickle = True)
+    y = np.load('./tutorials/Motor_temperature/labels.npy', allow_pickle = True)
+    Transformer(x, y)
