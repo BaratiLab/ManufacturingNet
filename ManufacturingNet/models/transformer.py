@@ -16,14 +16,20 @@ import math
 
 class TransformerBase(nn.Module):
     def __init__(self, 
-                 is_default):
+                 is_default,
+                 seq_len):
         super(TransformerBase, self).__init__()
         self.default_gate = is_default
+        if torch.cuda.is_available():
+            self.device = torch.device('cuda')
+        else:
+            self.device = torch.device('cpu')
         print(' ')
         print('1/11 - Transformer input size')
         self._get_input_size()
-        self.input_size *= 2
-        self.pos_embedding = self.position_encoding(seq_len=60)
+        self._get_num_heads()
+        # self.input_size *= 2
+        self.pos_embedding = self.position_encoding(seq_len=seq_len)
         print('='*25)
         print('2/11 - Transformer hidden size')
         self._get_hidden_size()
@@ -50,6 +56,23 @@ class TransformerBase(nn.Module):
                 'Please enter the input size in int for the Transformer network (input size > 0): ')).replace(' ','')
             if self.input_size.isnumeric() and int(self.input_size) > 0:
                 self.input_size = int(self.input_size)
+                gate = 1
+            else:
+                print('Please enter a valid input')
+                print(' ')
+        print(' ')
+
+
+    def _get_num_heads(self):
+
+        # Method for getting an input size parameter for the Transformer network
+
+        gate = 0
+        while gate != 1:
+            self.num_heads = (input(
+                'Please enter the number of heads in int for the Transformer network (input size > 0): ')).replace(' ','')
+            if self.num_heads.isnumeric() and int(self.num_heads) > 0:
+                self.num_heads = int(self.num_heads)
                 gate = 1
             else:
                 print('Please enter a valid input')
@@ -117,15 +140,15 @@ class TransformerBase(nn.Module):
                 print(' ')
         print(' ')
 
-
     def _build_network_architecture(self):
         # Method for building a network using all the information provided by a user in above functions
-    
-        self.layer_instance = nn.TransformerEncoderLayer(self.input_size,
-                                                         nhead=4,
+
+        self.layer_instance = nn.TransformerEncoderLayer(self.input_size*self.num_heads,
+                                                         nhead=self.num_heads,
                                                          dim_feedforward=512)
         self.feature_extractor = nn.TransformerEncoder(self.layer_instance,
                                                        num_layers=self.nlayers)
+        self.multihead_linear = nn.Linear(self.input_size*self.num_heads, self.input_size)
         self.ffn = nn.Linear(self.input_size, self.hidden_size)
 
         self.linear_input = self.hidden_size
@@ -137,8 +160,12 @@ class TransformerBase(nn.Module):
                                  self.output_size)
 
     def forward(self, x):
+        # print(x.shape, self.pos_embedding.shape)
         x = x + self.pos_embedding
+        x = x.repeat(1, 1, self.num_heads)
         out = self.feature_extractor(x)
+        out = self.multihead_linear(out)
+        # out = out.reshape(out.shape[0], out.shape[1], -1, )
         out = self.ffn(out)
         # out = out[:, -1, :]
         out = self.linear1(out[:, -1, :])
@@ -163,6 +190,8 @@ class TransformerBase(nn.Module):
                                    sin_component.reshape(-1, 1)), dim=1)
         if embedding.shape[1] != d:
             embedding = embedding[:, :-1]
+        embedding = torch.unsqueeze(embedding, dim=0)
+        embedding = embedding.to(self.device)
         return embedding
 
 # The following class is used to create necessary inputs for dataset class and dataloader class used during training process
@@ -229,12 +258,13 @@ class Transformer():
 
         self.x_data = X
         self.y_data = Y
+        self.seq_len = X.shape[1]
         self.shuffle = shuffle
 
         self.get_default_paramters()            # getting default parameters argument
 
         # building a network architecture
-        self.net = (TransformerBase(is_default=self.default_gate)).float()
+        self.net = (TransformerBase(is_default=self.default_gate, seq_len=self.seq_len)).float()
 
         print('='*25)
         print('6/11 - Batch size input')
@@ -629,8 +659,9 @@ class Transformer():
                     correct_predictions += (predicted == target).sum().item()
 
                 else:
-                    if len(outputs.shape) != 1:
-                        outputs = outputs.reshape(-1)
+                    # print(outputs.shape, target.shape)
+                    # if len(outputs.shape) != 1:
+                    outputs = outputs.reshape(-1)
                     loss = self.criterion(outputs, target)
                 running_loss += loss.item()
                 loop.set_postfix({"loss": running_loss / (batch_idx + 1)})
@@ -692,9 +723,9 @@ class Transformer():
                 self.predict.append(predicted.detach().cpu().numpy())
 
             else:
+                outputs = outputs.reshape(-1)
                 loss = self.criterion(outputs, target)
-                if len(outputs.shape) != 1:
-                    outputs = outputs.reshape(-1)
+                # if len(outputs.shape) != 1:
                 self.predict.append(outputs.detach().cpu().numpy())
             running_loss += loss.item()
             loop.set_postfix({"loss": running_loss / (batch_idx + 1)})
@@ -798,8 +829,9 @@ class Transformer():
 
     
 if __name__ == '__main__':
-    x = np.load('../../tutorials/Motor_temperature/input data.npy', allow_pickle = True)
-    y = np.load('../../tutorials/Motor_temperature/labels.npy', allow_pickle = True)
-    x = x[:50000]
-    y = y[:50000]
-    Transformer(x, y)
+    x = np.load('../../tutorials/Mercedes_files/merc_features.npy', allow_pickle = True)
+    y = np.load('../../tutorials/Mercedes_files/merc_labels.npy', allow_pickle = True)
+    print(x.shape, y.shape)
+    # x = x[:50000]
+    # y = y[:50000]
+    # Transformer(x, y)

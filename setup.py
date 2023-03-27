@@ -15,11 +15,7 @@ classifiers=[
     'Intended Audience :: Education']
 
 setup(name=package_name,\
-<<<<<<< HEAD
-      version='0.0.4',\
-=======
       version='0.0.5',\
->>>>>>> 6bf03e1e91ee4703688dcd818b1a32d542469c86
       description='AI and Machine Learning for manufacturing related datasets',
       long_description=LONG_DESCRIPTION,
       author='Amir Barati Farimani',

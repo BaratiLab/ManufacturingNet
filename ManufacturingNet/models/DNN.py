@@ -110,12 +110,10 @@ class DNNBase(nn.Module):
 
         gate = 0
         while gate != 1:
-            self.list_of_neurons = input(('''Please enter the number of neurons int 
-                                             input for each layer including input
-                                             and output layers sequentially: 
-                                             (Example: 14(input layer), 128, 64, 32, 10(output layer)
-                                             You should replace input layer dimension with dimension
-                                             of your input's (Xs) feature''').replace('\n',' '))
+            input_string = "Please enter the number of neurons int input for each layer including input and output layers sequentially:" +\
+                           "(Example: 14(input layer), 128, 64, 32, 10(output layer)"+\
+                            "You should replace input layer dimension with dimension of your input's (Xs) feature: "
+            self.list_of_neurons = input(input_string)
             self.list_of_neurons = self.list_of_neurons.split(',')
             # remove empty spaces from string
             self.list_of_neurons = [x.strip() for x in self.list_of_neurons]
@@ -900,3 +898,15 @@ class DNN():
             _, net_output = torch.max(net_output.data, 1)
 
         return net_output
+
+
+if __name__ == "__main__":
+    x = np.load("../../tutorials/Mercedes_files/merc_features.npy")
+    y = np.load("../../tutorials/Mercedes_files/merc_labels.npy")
+    mean = np.mean(x, axis=0, keepdims=True)
+    std = np.std(x, axis=0, keepdims=True)
+    x = (x - mean) / (std+0.0001)
+    print(x[0])
+    print(y[0:5])
+    print(x.shape, y.shape)
+    DNN(x, y)

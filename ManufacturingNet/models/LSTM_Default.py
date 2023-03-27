@@ -653,7 +653,8 @@ class LSTM():
                     correct_predictions += (predicted == target).sum().item()
 
                 else:
-
+                    if(len(outputs) != 1):
+                        outputs = outputs.reshape(-1)
                     loss = self.criterion(outputs, target)
 
                 running_loss += loss.item()
@@ -716,6 +717,8 @@ class LSTM():
                 self.predict.append(predicted.detach().cpu().numpy())
 
             else:
+                if(len(outputs) != 1):
+                    outputs = outputs.reshape(-1)
                 loss = self.criterion(outputs, target)
                 self.predict.append(outputs.detach().cpu().numpy())
             running_loss += loss.item()
@@ -821,8 +824,20 @@ class LSTM():
 if __name__ == "__main__":
     import ManufacturingNet
     import numpy as np
-    x = np.load('../../tutorials/Motor_temperature/input data.npy', allow_pickle = True)
-    y = np.load('../../tutorials/Motor_temperature/labels.npy', allow_pickle = True)
-    x = x[0:50000]
-    y = y[0:50000].reshape(-1, 1)
+    # x = np.load('../../tutorials/Motor_temperature/input data.npy', allow_pickle = True)
+    # y = np.load('../../tutorials/Motor_temperature/labels.npy', allow_pickle = True)
+    # x = x[0:50000]
+    # y = y[0:50000].reshape(-1, 1)
+
+    x = np.load("../../tutorials/Mercedes_files/merc_features.npy")
+    y = np.load("../../tutorials/Mercedes_files/merc_labels.npy")
+    mean = np.mean(x, axis=0, keepdims=True)
+    std = np.std(x, axis=0, keepdims=True)
+    x = (x - mean) / (std+0.0001)
+    print(mean.shape, std.shape)
+    # print(x[0])
+    # print(y[0:5])
+    print(x.shape, y.shape)
+    x = x.reshape(x.shape[0], 1, -1)
+    y = y.reshape(-1)
     model = LSTM(x, y)

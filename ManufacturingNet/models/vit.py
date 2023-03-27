@@ -1,3 +1,4 @@
+
 import timm
 import datetime
 import os
@@ -667,6 +668,8 @@ class VITImageClassifier:
     
 
 if __name__ == '__main__':
+    # X =  np.load('./Turning_chatter/raw_signal_data.npy', allow_pickle = True)
+    # Y = np.load('./Turning_chatter/signal_data_labels.npy', allow_pickle = True)
     train_address = "../../tutorials/casting_data/train"
     test_address = "../../tutorials/casting_data/test"
     model = VITImageClassifier(train_address, test_address)
