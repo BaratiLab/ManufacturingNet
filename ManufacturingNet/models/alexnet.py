@@ -605,8 +605,16 @@ class AlexNet():
         # Method for getting the confusion matrix for classification problem
         print('Confusion Matix: ')
 
-        result = confusion_matrix(np.concatenate(
-            np.array(self.predict)), np.concatenate(np.array(self.actual)))
+        np_predict = np.zeros((0,))
+        np_actual = np.zeros((0,))
+        for i in range(len(self.predict)):
+            np_predict = np.concatenate((np_predict, 
+                                         np.asarray(self.predict[i]).reshape(-1)),
+                                         axis=0)
+            np_actual = np.concatenate((np_actual,
+                                        self.actual[i].reshape(-1)),
+                                        axis=0)
+        result = confusion_matrix(np_predict, np_actual)
         print(result)
 
     def get_prediction(self, x_input):
