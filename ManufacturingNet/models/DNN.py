@@ -821,10 +821,12 @@ class DNN():
         plt.figure(figsize=(8, 8))
         plt.plot(self.training_loss, label='Training Loss')
         plt.plot(self.dev_loss, label='Validation Loss')
-        plt.legend()
-        plt.title('Model Loss')
-        plt.xlabel('Epochs')
-        plt.ylabel('loss')
+        plt.legend(fontsize=24)
+        plt.title('Model Loss', fontsize=24)
+        plt.xlabel('Epochs', fontsize=24)
+        plt.ylabel('Loss', fontsize=24)
+        plt.xticks([0, 50, 100, 150, 200], fontsize=24)
+        plt.yticks([0.5, 1, 1.5, 2], fontsize=24)
         plt.savefig('loss.png')
 
     def get_accuracy_graph(self):
@@ -834,10 +836,12 @@ class DNN():
         plt.figure(figsize=(8, 8))
         plt.plot(self.training_acc, label='Training Accuracy')
         plt.plot(self.dev_accuracy, label='Validation Accuracy')
-        plt.legend()
-        plt.title('Model accuracy')
-        plt.xlabel('Epochs')
-        plt.ylabel('acc')
+        plt.legend(fontsize=24)
+        plt.title('Model accuracy', fontsize=24)
+        plt.xlabel('Epochs', fontsize=24)
+        plt.ylabel('Accuracy', fontsize=24)
+        plt.xticks([0, 50, 100, 150, 200], fontsize=24)
+        plt.yticks([30, 50, 70, 90], fontsize=24)
         plt.savefig('accuracy.png')
 
     def get_confusion_matrix(self):
